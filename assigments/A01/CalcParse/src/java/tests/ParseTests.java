@@ -44,7 +44,7 @@ public class ParseTests extends AbstractTestSuite {
 	}
 
     @Test
-    public void error4() {
-        testSyntaxError("error4.calc");
+    public void noExpressionError() {
+        testSyntaxError("errorNoExpression.calc");
     }
 }
