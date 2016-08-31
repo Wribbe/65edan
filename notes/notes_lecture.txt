@@ -1,0 +1,178 @@
+L01:
+
+  What are the major compiler phases?
+  ---
+  Analysis and Synthesis.
+
+  What is the difference between the analysis and synthesis phases?
+  ---
+  ??
+
+  Why do we use intermediate code?
+  ---
+  So that code compilers can be split into front- and back-end components.
+
+  What is the advantage of separating the front and back ends?
+  ---
+  You can mix and match instead of getting F*B - compilers.
+  Some optimization is best performed on intermediate code.
+  A different front-end might be better for debugging then the actual one that
+  will be used in production.
+
+  What is a lexeme?
+  ---
+  A string that corresponds to a token is called a lexeme.
+
+  What is a token?
+  ---
+  Token i a symbolic name that sometimes has an attribute.
+
+  What is a parse tree?
+  ---
+  A tree structure that spans all the tokens in a parsed statement.
+
+  What is a abstract syntax tree?
+  ---
+  An AST tree only spans the essential structure and tokens in a parsed
+  statement. Used inside of the compiler. Often representant by a typed
+  object-oriented model.
+
+  What is a intermediate code?
+  ---
+  Type of simple assembly-code that is platform and language independent.
+
+  What is the difference between assembly code, object code and executable
+  code?
+  ---
+
+  What is bytecode?
+  ---
+  A form of platform independent language that is read by a VM implemented for
+  the specific target platform.
+
+  What is an interpreter?
+  ---
+  It is the software that executes the high/low level program.
+
+  What is a virtual machine?
+  ---
+  A type of interpreter that executes platform independent (byte)code.
+
+  What is a JIT compiler?
+  ---
+  Stands for Just In Time compilation. Combines ahead of time compilation with
+  interpretation. Suitable for dynamic programming languages.
+
+  What kinds of errors can be caught by a compiler?
+  ---
+  Lexical errors, Syntactic errors, Static-Semantic errors.
+
+  What is a lexical error?
+  ---
+  Text that cannot be interpreted as a token.
+
+  What is a syntactic error?
+  ---
+  Tokens are presented in the wrong order.
+
+  What is a static-semantic error?
+  ---
+  The usage of name/types/etc. is not correct.
+
+  What kinds of errors can be caught by a run-time system?
+  ---
+  null pointer exceptions, division by zero, stack overflow, etc.
+
+  Differences between a safe and unsafe language?
+  ---
+  A safe system catches and reports all runtime errors. Unsafe system might
+  perform undefined behaviour.
+
+L02:
+
+  What is a alphabet?
+  ---
+  A finite and non-empty set of symbols.
+
+  What is a string?
+  ---
+  A string is a finite sequence of symbols.
+
+  What is a formal language?
+  ---
+  A formal language consists of a set of possibly infinite strings.
+
+  When is regular expressions used?
+  ---
+  Regular expressions are used to parse tokens.
+
+  When is context-free grammar used?
+  ---
+  Context-free grammar is used when building syntax trees.
+
+  What is attribute grammars?
+  ---
+  Attribute grammars consist of context-free grammar with additional rules to
+  constrict it further.
+
+  When is attribute grammars used?
+  ---
+  ???
+
+  What is a regular expression?
+  ---
+  They are equivalent to finite automata (finite-state machines).
+
+  What defines a deterministic finite automata?
+  ---
+  Each transition is uniquely determined by the input.
+
+  What is meant by an ambiguous lexical definition?
+  ---
+  If a string and it's substrings match several defined rules it's ambiguous.
+
+  Example of typical ambiguities and how they can be resolved?
+  ---
+  "<" matching for '<='. Resolve with longest match and rule order priority.
+
+  What is lexical action?
+  ---
+  The thing that happens when a match is found. Example, execution of Java
+  code.
+
+  What is NFA?
+  ---
+  Non-deterministic Finite Automata.
+
+  What is DFA?
+  ---
+  Deterministic Finite Automata.
+
+  What is the difference between NFA and DFA?
+  ---
+  A DFA has disjoint character sets for all outgoing edges, in NFA they can
+  overlap. A DFA can't have epsilon/"" edges, a NFA can have empty edges.
+
+  Construct an NFA given lexical definition.
+  ---
+  ???
+
+  How to construct a DFA from an NFA?
+  ---
+  ???
+
+  How to implement DFA in Java?
+  ---
+  Table driven implementation or switch based.
+
+  How is rule priority handled in implementation of DFA?
+  ---
+  ???
+
+  What are lexical states?
+  ---
+  Different sets of token definitions.
+
+  Why are lexical states useful?
+  ---
+  Can switch out the DFA to another set to handle ex. multiline comments.
