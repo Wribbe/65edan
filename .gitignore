@@ -1,2 +1,5 @@
-#Omit material folder.
+# Omit material folder.
 material
+
+# Omit class files.
+*.class
