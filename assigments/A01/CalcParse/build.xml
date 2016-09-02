@@ -16,7 +16,7 @@
 
 	<target name="build" depends="gen">
 		<mkdir dir="${bin.dir}" />
-		<javac srcdir="." destdir="${bin.dir}" includeantruntime="false" classpath="${cp.lib}" debug="true">
+		<javac srcdir="." destdir="${bin.dir}" includeAntRuntime="false" classpath="${cp.lib}" debug="true">
         </javac>
 	</target>
 
