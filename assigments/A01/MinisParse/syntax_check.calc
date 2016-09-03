@@ -1,0 +1,5 @@
+let two = 2.0 in 
+    let three = 3.0 in
+        two * three
+    end
+end
