@@ -1,0 +1,32 @@
+2.4 The ant build script.
+
+  Ant - javac:
+    The following attributes are mandatory:
+      - srcdir
+          Specifies where java source files are stored.
+          (if there are no nested <src> elements or modulesourcepath
+          attributes/elements)
+
+  Ant - jflex:
+
+    Defined by (as in the example build.xml):
+
+      <taskdef classname="jflex.anttask.JFlexTask" name="jflex"
+               claspath="${lib.dir}/jflex-1.6.0.jar" />
+
+    The following attributes are required when calling the jflex task:
+
+      - file="file"
+          The path to the source grammar file.
+
+  Ant - beaver:
+
+    Ant task is defined as follows:
+
+      <taskdef name="beaver" classname="beaver.comp.run.AntTask"
+               classpath="${java.libs.dir}/beaver.jar"/>
+
+    Calling the beaver task:
+
+      - file="..."
+          Points to the grammar source (required).
