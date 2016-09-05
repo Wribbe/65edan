@@ -1,4 +1,0 @@
-end = -1.0
-result = 0.0
-for iter = 0.0 until end do iter = -1.0 od
-if not result then result = 1.0 fi

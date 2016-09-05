@@ -8,43 +8,23 @@ public class ParseTests extends AbstractTestSuite {
 		super("testfiles");// where test input files are
 	}
 
+    @Test
+    public void validAllConstructs() {
+        testValidSyntax("allConstructs.minis");
+    }
+
 	@Test
-	public void identifier() {
-		testValidSyntax("identifier.calc");
+	public void validShortest() {
+		testValidSyntax("shortest.minis");
 	}
 
 	@Test
-	public void let() {
-		testValidSyntax("let.calc");
-	}
-
-	@Test
-	public void numerical() {
-		testValidSyntax("numerical.calc");
-	}
-
-	@Test
-	public void product() {
-		testValidSyntax("product.calc");
-	}
-
-	@Test
-	public void error() {
-		testSyntaxError("error.calc");
-	}
-
-	@Test
-	public void error2() {
-		testSyntaxError("error2.calc");
-	}
-
-	@Test
-	public void error3() {
-		testSyntaxError("error3.calc");
+	public void errorParsing() {
+		testSyntaxError("parsingError.minis");
 	}
 
     @Test
-    public void noExpressionError() {
-        testSyntaxError("errorNoExpression.calc");
+    public void errorScanning() {
+        testSyntaxError("scanningError.minis");
     }
 }
