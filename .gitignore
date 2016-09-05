@@ -6,3 +6,6 @@ material
 
 # Omit generated source.
 **/src/gen/
+
+# Ignore jar files.
+*.jar
