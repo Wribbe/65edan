@@ -176,3 +176,113 @@ L02:
   Why are lexical states useful?
   ---
   Can switch out the DFA to another set to handle ex. multiline comments.
+
+L03:
+
+  Construct a CFG for a simple part of a programming language.
+  ---
+
+  What is a symbol?
+  ---
+  Symbols include both terminal and non-terminal words to the right in the CFG.
+
+  What is a non-terminal symbol?
+  ---
+  Non-token symbols that are defined by the grammar.
+
+  What is a terminal symbol?
+  ---
+  A symbol corresponding to a token.
+
+  What is a production?
+  ---
+  A production corresponds to X -> s_1, s_2, ... where s are non-/terminal
+  symbols. X is non-terminal.
+
+  What is a start symbol?
+  ---
+  One non-terminal symbol, usually the left hand side of the first production.
+
+  What is a parse tree?
+  ---
+  Tree that contains all the nodes. Non-terminal nodes are internal nodes and
+  terminal nodes are leafs.
+
+  What is a left-hand side of a production?
+  ---
+  The left side of the arrow. X -> s1, s2, ...
+
+  What is a right-hand side of a production?
+  ---
+  The right side of the arrow. X -> s1, s2, ...
+
+  What does L(G) mean if G is a grammar?
+  ---
+  Alp. T, T* -> possible sequences on T. L(G) -> subset of T* that can be
+  constructed using start symbol S and production rules P.
+
+  Derivation step?
+  ---
+  Using a production rule to replace a token with the corresponding result.
+
+  A derivation?
+  ---
+  Derivation is a sequence of derivation steps.
+
+  A leftmost derivation?
+  ---
+  When replacing the leftmost non-terminal -> left derivation.
+
+  A rightmost derivation?
+  ---
+  When replacing the rightmost non-terminal -> right derivation.
+
+  Relationship derivation <--> parse tree?
+  ---
+  A derivation corresponds to building a parse tree.
+
+  Ambiguous CFG?
+  ---
+  When a sentence can be derived to different parser trees.
+
+  Unambiguous CFG?
+  ---
+  A sentence can only be derived into a unique parser tree.
+
+  Example of an ambiguous CFG?
+  ---
+  "Exp + Exp * Exp" with Exp -> Int | Exp -> Exp + Exp | Exp -> Exp * Exp
+
+  Significant for LL parser?
+  ---
+  Parses left->right, Leftmost derivation. Builds a parse-tree from the top,
+  easier to understand than LR parser, but weaker.
+
+  Significant for LR parser?
+  ---
+  Parses left->right, Rightmost derivation. Builds a parse-tree from the
+  bottom. Harder to understand than LL parser but more powerful.
+
+  Difference between LL(1) vs LL(2)?
+  ---
+  LL(1) uses one look-ahead token and builds a construct after seeing the first
+  token of its sub-tree.
+
+  Difference between LR(1) vs LR(2)?
+  ---
+  LR(1) uses one look-ahead token and builds a construct after seeing the fist
+  token following its sub-tree.
+
+  Construct a recursive decent parser for a simple language.
+  ---
+
+  Grammar that cannot be handled by recursive decent parser?
+  ---
+  Left recursion??
+
+  Why is context free grammar more powerful than regular expressions?
+  ---
+
+  What is "context-free"?
+  ---
+  The symbols do not depend on their neighbours.
