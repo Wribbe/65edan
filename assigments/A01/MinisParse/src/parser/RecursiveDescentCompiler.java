@@ -21,24 +21,14 @@ public class RecursiveDescentCompiler extends RDPTemplate {
         System.exit(0);
     }
 
-    public void parseProgram() {
-        switch(compiler.peek()) {
-//            case FOR: forStatement(); break;
-//            case IF: ifStatement(); break;
-            case ID: assignment(); break;
-            default: compiler.error("Expected statement, got " +
-                                    compiler.peek());
-        }
+    public static void errorParsing() {
+        String name = LangParser.Terminals.NAMES[compiler.peek()];
+        name = name.toLowerCase();
+        fail("Parsing Error; Unexpected token: <" + name + ">.");
     }
 
-    private static void forStatement() {
-//        compiler.accept(FOR);
-//        compiler.accept(ID);
-//        compiler.accept(ASSIGN);
-//        expression();
-//        compiler.accept(DO);
-//        statement();
-//        compiler.accept(OD);
+    public void parseProgram() {
+        statement();
     }
 
     private static void expression() {
@@ -46,6 +36,16 @@ public class RecursiveDescentCompiler extends RDPTemplate {
             case ID: compiler.accept(ID); break;
             case NUMERAL: compiler.accept(NUMERAL); break;
             case NOT: compiler.accept(NOT); expression(); break;
+            default: errorParsing();
+        }
+    }
+
+    private static void statement() {
+        switch(compiler.peek()) {
+            case FOR: forStatement(); break;
+            case IF: ifStatement(); break;
+            case ID: assignment(); break;
+            default: errorParsing();
         }
     }
 
@@ -53,6 +53,26 @@ public class RecursiveDescentCompiler extends RDPTemplate {
         compiler.accept(ID);
         compiler.accept(ASSIGN);
         expression();
+    }
+
+    private static void forStatement() {
+        compiler.accept(FOR);
+        compiler.accept(ID);
+        compiler.accept(ASSIGN);
+        expression();
+        compiler.accept(UNTIL);
+        expression();
+        compiler.accept(DO);
+        statement();
+        compiler.accept(OD);
+    }
+
+    private static void ifStatement() {
+        compiler.accept(IF);
+        expression();
+        compiler.accept(THEN);
+        statement();
+        compiler.accept(FI);
     }
 
     public static final void main(String[] args) {
