@@ -28,7 +28,12 @@ public class RecursiveDescentCompiler extends RDPTemplate {
     }
 
     public void parseProgram() {
-        statement();
+        try {
+            statement();
+        } catch (RuntimeException e) {
+            String[] tokens = e.toString().split(":");
+            fail("Scanning Error; " + tokens[tokens.length-1].trim());
+        }
     }
 
     private static void expression() {
