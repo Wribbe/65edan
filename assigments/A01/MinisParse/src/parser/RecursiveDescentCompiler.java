@@ -32,7 +32,7 @@ public class RecursiveDescentCompiler extends RDPTemplate {
             statement();
         } catch (RuntimeException e) {
             String[] tokens = e.toString().split(":");
-            fail("Scanning Error; " + tokens[tokens.length-1].trim());
+            fail("Scanning Error; " + tokens[tokens.length-1].trim() + ".");
         }
     }
 
