@@ -9,3 +9,6 @@ material
 
 # Ignore jar files.
 *.jar
+
+# Ignore swap files.
+.*.sw*
