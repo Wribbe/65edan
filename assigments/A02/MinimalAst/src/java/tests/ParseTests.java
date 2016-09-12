@@ -14,6 +14,11 @@ public class ParseTests extends AbstractTestSuite {
 	}
 
 	@Test
+	public void simpleFuncionDeclaration() {
+		testValidSyntax("simpleFunctionDeclarations.lang");
+	}
+
+	@Test
 	public void error() {
 		testSyntaxError("error.lang");
 	}
