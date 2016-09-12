@@ -44,6 +44,7 @@ factor =
 let = LET binding_list.a IN exp.b END {: return new Let(a, b); :} ;
 
 ask =
+	//ASK USER /* epsilon */ {: return new Ask(new Opt()); :}
 	ASK USER {: return new Ask(new Opt()); :}
 	| ASK USER LBRACKET exp.a RBRACKET {: return new Ask(new Opt(a)); :}
 	;
