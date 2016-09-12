@@ -51,6 +51,7 @@ ask =
 
 binding_list =
 	binding.a {: return new List().add(a); :}
+	//| binding.a {: return new List().add(a); :} // Empty production, simulate error.
 	| binding_list.a binding.b {: return a.add(b); :}
 	;
 
