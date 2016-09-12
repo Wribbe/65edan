@@ -12,3 +12,9 @@ material
 
 # Ignore swap files.
 .*.sw*
+
+# Ignore .out files from test.
+*.out
+
+# Ignore intellij IDEA folder.
+.idea/
