@@ -1,0 +1,19 @@
+Program
+  Let
+    List
+      Binding
+        IdDecl ID="a"
+        Numeral NUMERAL="2.0"
+      Binding
+        IdDecl ID="b"
+        Numeral NUMERAL="4.0"
+      Binding
+        IdDecl ID="c"
+        Numeral NUMERAL="20.0"
+    Mul
+      Mul
+        Mul
+          IdUse ID="a"
+          IdUse ID="b"
+        IdUse ID="c"
+      Numeral NUMERAL="10.0"
