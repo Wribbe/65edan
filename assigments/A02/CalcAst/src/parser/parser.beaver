@@ -16,7 +16,7 @@
 
 %typeof program = "Program";
 %typeof exp = "Expr";
-%typeof factor = "Expr";
+//%typeof factor = "Expr";
 %typeof let = "Let";
 %typeof ask = "Ask";
 %typeof numeral = "Numeral";
