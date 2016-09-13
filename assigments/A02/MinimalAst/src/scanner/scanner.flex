@@ -36,6 +36,11 @@ ID = [a-zA-Z]+
 {WhiteSpace}  { }
 
 // token definitions
+"}"           { return sym(Terminals.RBRA); }
+"{"           { return sym(Terminals.LBRA); }
+")"           { return sym(Terminals.RPAR); }
+"("           { return sym(Terminals.LPAR); }
+"int"         { return sym(Terminals.INT); }
 {ID}          { return sym(Terminals.ID); }
 <<EOF>>       { return sym(Terminals.EOF); }
 

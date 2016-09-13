@@ -9,10 +9,15 @@
 	}
 :};
 
-%terminals ID;
+%terminals ID, INT, LPAR, RPAR, LBRA, RBRA;
 
 %typeof program = "Program";
+%typeof function = "Function";
 
 %goal program;
 
-program = ID.id {: return new Program(id); :} ;
+program = ID.id {: return new Program(id); :}
+    | function_list
+    ;
+
+function = INT ID LPAR RPAR LBRA RBRA {: return new Function(); :} ;
