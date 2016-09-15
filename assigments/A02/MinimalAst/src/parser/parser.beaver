@@ -13,11 +13,16 @@
 
 %typeof program = "Program";
 %typeof function = "Function";
+%typeof function_list = "List";
 
 %goal program;
 
-program = ID.id {: return new Program(id); :}
-    | function_list
+program = function_list.a {: return new Program(a); :}
     ;
 
-function = INT ID LPAR RPAR LBRA RBRA {: return new Function(); :} ;
+function = INT ID LPAR RPAR LBRA RBRA {: return new FunctionDeclaration(); :} ;
+
+function_list =
+    function.a {: return new List().add(a); :}
+    | function_list.a function.b {: return a.add(b); :}
+    ;
