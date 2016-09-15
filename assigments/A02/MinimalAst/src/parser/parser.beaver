@@ -7,6 +7,12 @@
 	protected void recoverFromError(Symbol token, TokenStream in) {
 		throw new SyntaxError("Cannot recover from the syntax error");
 	}
+    public static boolean DEBUG = true;
+    public static void debug(String string) {
+        if (DEBUG) {
+            System.out.println("[?] DEBUG: "+string);
+        }
+    }
 :};
 
 %terminals ID, INT, LPAR, RPAR, LBRA, RBRA;
