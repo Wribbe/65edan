@@ -15,20 +15,69 @@
     }
 :};
 
-%terminals ID, INT, LPAR, RPAR, LBRA, RBRA;
+%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM;
 
 %typeof program = "Program";
 %typeof function = "Function";
 %typeof function_list = "List";
+%typeof statement_list = "List";
+
+%typeof statement = "Statement";
+%typeof assignment = "AssignStatement";
+
 
 %goal program;
 
 program = function_list.a {: return new Program(a); :}
     ;
 
-function = INT ID LPAR RPAR LBRA RBRA {: return new FunctionDeclaration(); :} ;
+function = INT ID LPAR function_parameter_list.par RPAR LBRA statement_list RBRA {:
+                return new FunctionDeclaration();
+           :};
 
 function_list =
-    function.a {: return new List().add(a); :}
-    | function_list.a function.b {: return a.add(b); :}
+    function.a {:
+        debug("Returning new function list.");
+        return new List().add(a);
+    :}
+    | function_list.a function.b {:
+        debug("Adding new element to function list.");
+        return a.add(b);
+    :}
+    ;
+
+function_parameter_list =
+    /* epsilon */  {:
+         debug("Epsilon in function parameter list.");
+         return new Opt();
+    :}
+    | statement_list {:
+        debug("Inside statement list.");
+        return new Opt();
+    :}
+    ;
+
+assignment = INT ID SEMI {:
+        return new AssignStatement();
+    :};
+
+use = ID ASSIGN NUM SEMI {:
+        return new UseStatement();
+    :}
+    | ID ASSIGN ID SEMI {:
+        return new UseStatement();
+    :}
+    ;
+
+statement = assignment | use;
+
+statement_list =
+    statement.a {:
+        debug("Returning new statement list.");
+        return new List().add(a);
+    :}
+    | statement_list.a statement.b {:
+        debug("Adding element "+b+" to statement list.");
+        return a.add(b);
+    :}
     ;

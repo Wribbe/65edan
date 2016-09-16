@@ -2,3 +2,7 @@ Program ::= Function*;
 
 abstract Function;
 FunctionDeclaration : Function;
+
+abstract Statement;
+AssignStatement : Statement ::= <ID>;
+UseStatement : Statement;
