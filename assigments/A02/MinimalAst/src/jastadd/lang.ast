@@ -1,8 +1,10 @@
 Program ::= Function*;
 
 abstract Function;
-FunctionDeclaration : Function;
+FunctionDeclaration : Function ::= Name:IdDeclaration;
 
-abstract Statement;
-AssignStatement : Statement ::= <ID>;
-UseStatement : Statement;
+//abstract Statement;
+//AssignStatement : Statement ::= <ID>;
+//UseStatement : Statement;
+//
+//IdDeclaration ::= <ID>;

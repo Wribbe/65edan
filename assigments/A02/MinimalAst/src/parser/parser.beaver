@@ -15,25 +15,25 @@
     }
 :};
 
-%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM;
+%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
 
 %typeof program = "Program";
 %typeof function = "Function";
 %typeof function_list = "List";
-%typeof statement_list = "List";
+//%typeof statement_list = "List";
+//%typeof function_parameter_list = "List";
 
-%typeof statement = "Statement";
-%typeof assignment = "AssignStatement";
+%typeof id_declare = "IdDeclaration";
+
+//%typeof statement = "Statement";
+//%typeof assignment = "AssignStatement";
+
 
 
 %goal program;
 
 program = function_list.a {: return new Program(a); :}
     ;
-
-function = INT ID LPAR function_parameter_list.par RPAR LBRA statement_list RBRA {:
-                return new FunctionDeclaration();
-           :};
 
 function_list =
     function.a {:
@@ -46,38 +46,72 @@ function_list =
     :}
     ;
 
-function_parameter_list =
-    /* epsilon */  {:
-         debug("Epsilon in function parameter list.");
-         return new Opt();
-    :}
-    | statement_list {:
-        debug("Inside statement list.");
-        return new Opt();
+function =
+    INT id_declare.id LPAR RPAR  LBRA RBRA {:
+        return new Function(id);
     :}
     ;
 
-assignment = INT ID SEMI {:
-        return new AssignStatement();
-    :};
-
-use = ID ASSIGN NUM SEMI {:
-        return new UseStatement();
-    :}
-    | ID ASSIGN ID SEMI {:
-        return new UseStatement();
+id_declare = ID.id {:
+        return new IdDeclaration();
     :}
     ;
 
-statement = assignment | use;
-
-statement_list =
-    statement.a {:
-        debug("Returning new statement list.");
-        return new List().add(a);
-    :}
-    | statement_list.a statement.b {:
-        debug("Adding element "+b+" to statement list.");
-        return a.add(b);
-    :}
-    ;
+//id_declare = ID.id {:
+//        return new IdDeclaration();
+//    :}
+//    ;
+//
+//function = INT id_declare.id  LPAR function_parameter_list.par RPAR LBRA statement_list.list RBRA {:
+//                debug("Returning FunctionDeclaration.");
+//                return new FunctionDeclaration(id, par, list);
+//           :};
+//
+//function_list =
+//    function.a {:
+//        debug("Returning new function list.");
+//        return new List().add(a);
+//    :}
+//    | function_list.a function.b {:
+//        debug("Adding new element to function list.");
+//        return a.add(b);
+//    :}
+//    ;
+//
+//function_parameter_list =
+//    /* epsilon */  {:
+//         debug("Epsilon in function parameter list.");
+//         return new Opt();
+//    :}
+//    | INT id_declare.id {:
+//        return new List().add(id);
+//    :}
+//    | function_parameter_list.a COMMA INT id_declare.id {:
+//        return a.add(id);
+//    :}
+//    ;
+//
+//assignment = INT id_declare.a  SEMI {:
+//        return new AssignStatement(a);
+//    :};
+//
+//use = ID ASSIGN NUM SEMI {:
+//        return new UseStatement();
+//    :}
+//    | ID ASSIGN ID SEMI {:
+//        return new UseStatement();
+//    :}
+//    ;
+//
+//statement = assignment | use;
+//
+//statement_list =
+//    statement.a {:
+//        debug("Returning new statement list.");
+//        return new List().add(a);
+//    :}
+//    | statement_list.a statement.b {:
+//        debug("Adding element "+b+" to statement list.");
+//        return a.add(b);
+//    :}
+//    ;
