@@ -15,7 +15,8 @@
     }
 :};
 
-%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
+//%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
+%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM;
 
 %typeof program = "Program";
 %typeof function = "Function";
@@ -23,7 +24,15 @@
 //%typeof statement_list = "List";
 //%typeof function_parameter_list = "List";
 
-%typeof id_declare = "IdDeclaration";
+%typeof id = "ID";
+%typeof id_declare = "IdDeclare";
+%typeof id_use = "IdUse";
+%typeof literal = "Literal";
+
+%typeof block_element = "BlockElement";
+%typeof block_elements = "List";
+
+%typeof block = "Block";
 
 //%typeof statement = "Statement";
 //%typeof assignment = "AssignStatement";
@@ -46,14 +55,61 @@ function_list =
     :}
     ;
 
-function =
-    INT id_declare.id LPAR RPAR  LBRA RBRA {:
-        return new Function(id);
+block_element =
+    id_declare
+    | id_use
+    ;
+
+block_elements =
+    block_element.elem {:
+        debug("Returning new block_element_list.");
+        return new List().add(elem);
+    :}
+    | block_elements.list block_element.elem{:
+        debug("Adding block element to existing list.");
+        return list.add(elem);
     :}
     ;
 
-id_declare = ID.id {:
-        return new IdDeclaration();
+block =
+    LBRA RBRA {:
+        return new Block(new Opt());
+    :}
+    | LBRA block_elements.elements RBRA {:
+        return new Block(new Opt(elements));
+    :}
+    ;
+
+function =
+    INT id.id LPAR RPAR block.block {:
+        return new FunctionDeclaration(id, block);
+    :}
+    ;
+
+id_declare =
+    INT id.id SEMI {:
+        debug("Returned IdDeclare(id).");
+        return new IdDeclare(id);
+    :}
+    ;
+
+id_use =
+    id.id ASSIGN literal.num  SEMI {:
+        return new IdUse(id, num);
+    :}
+    | id.id1 ASSIGN id.id2 SEMI {:
+        return new IdUse(id1, id2);
+    :}
+    ;
+
+id = ID.id {:
+        debug("Returned new Id.");
+        return new ID(id);
+    :}
+    ;
+
+literal = NUM.num {:
+        return new Literal(num);
     :}
     ;
 

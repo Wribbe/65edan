@@ -1,10 +1,21 @@
 Program ::= Function*;
 
 abstract Function;
-FunctionDeclaration : Function ::= Name:IdDeclaration;
+FunctionDeclaration : Function ::= ID Block;
+
+ID : NumVar ::= <ID>;
+Literal : NumVar ::= <NUMERAL>;
+
+abstract NumVar;
+abstract BlockElement;
+IdUse : BlockElement ::= v1:NumVar v2:NumVar;
+IdDeclare : BlockElement ::= v1:NumVar;
+
+BlockElements ::= BlockElement*;
+
+Block ::= [BlockElements];
 
 //abstract Statement;
 //AssignStatement : Statement ::= <ID>;
 //UseStatement : Statement;
 //
-//IdDeclaration ::= <ID>;
