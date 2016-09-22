@@ -18,11 +18,10 @@
 %terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
 
 // Operator terminals.
-%terminals PLUS;
+//%terminals PLUS;
 
 %typeof program = "Program";
 %typeof function = "Function";
-%typeof function_list = "List";
 
 %typeof id = "ID";
 %typeof id_declare = "IdDeclare";
@@ -36,24 +35,31 @@
 
 %typeof function_parameters = "List";
 
+%typeof expression_list = "List";
+%typeof expression = "Expression";
+
 
 %goal program;
 
-program = function_list.a {: return new Program(a); :}
+program = expression_list.list {:
+        return new Program(list);
+    :}
     ;
+
+//### Expressions.
+
+expression_list =
+    expression.exp {:
+        return new List().add(exp);
+    :}
+    | expression_list.list expression.exp {:
+        return list.add(exp);
+    :}
+    ;
+
+expression = function;
 
 //### Functions.
-
-function_list =
-    function.a {:
-        debug("Returning new function list.");
-        return new List().add(a);
-    :}
-    | function_list.a function.b {:
-        debug("Adding new element to function list.");
-        return a.add(b);
-    :}
-    ;
 
 function =
     INT id.id LPAR RPAR block.block {:

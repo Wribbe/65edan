@@ -1,7 +1,6 @@
-Program ::= Function*;
+Program ::= Expression*;
 
-abstract Function;
-FunctionDeclaration : Function ::= ID [FunctionParameters : List] Block;
+FunctionDeclaration : Expression ::= ID [FunctionParameters : List] Block;
 
 ID : NumVar ::= <ID>;
 Literal : NumVar ::= <NUMERAL>;
@@ -12,6 +11,8 @@ IdUse : BlockElement ::= v1:NumVar v2:NumVar;
 IdDeclare : BlockElement ::= v1:NumVar;
 
 Block ::= [List];
+
+abstract Expression;
 
 //abstract Statement;
 //AssignStatement : Statement ::= <ID>;
