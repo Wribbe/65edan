@@ -4965,3 +4965,1047 @@ L06B.pdf:                          Summary	quesLons
 	
                                                                                   27	
 
+L07A.pdf:       EDAN65:	Compilers,	Lecture	07	A	
+Sta;c	Aspect-Oriented	Programming	
+                Görel	Hedin	
+               Revised:	2016-09-19	
+
+L07A.pdf:     This	lecture	
+                                                             runtime system	
+                                    source	code	(text)	
+  Regular	      Lexical	analyzer	                               activation
+                                                                              stack	
+expressions
+       (scanner)	                                     records	
+                                    tokens	
+Context-free	  Syntac;c	analyzer	
+                                                                             garbage
+ grammar
+           (parser)	
+                                                                             collection	
+                                    AST	(Abstract	syntax	tree)	
+                                  Visitors	                                   heap	
+ ASribute	                        Sta&c	aspects	
+               Seman&c	analyzer	
+ grammar
+                         ASribute	grammars	              objects	
+                                    ASributed	AST	
+                 Intermediate	
+                                                                Interpreter
+
+                code	generator	
+                                    intermediate	code	                         code
+                                                                   Virtual	     and
+                   Op;mizer	                                      machine
+     data	
+                                    intermediate	code	
+                  Target	code	
+                                                                 machine
+                   generator	
+                                       target	code	
+                                                                                     2	
+
+L07A.pdf:                            Recall	
+                      Seman&c	analysis	
+computa;ons	on	the	AST:	name	analysis,	type	analysis,	error	checking,	...	
+                                  	
+                                  	
+                                  	
+                     Expression	problem	
+How	can	we	add	both	computa;ons	and	language	constructs	modularly?	
+                                  	
+                                  	
+                                  	
+          Solu&ons	to	the	expression	problem	
+              •  Solu;on	1:	Visitors	(previous	lecture)	
+               •  Solu;on	2:	Sta;c	AOP	(this	lecture)	
+                                                                           3	
+
+L07A.pdf:                 Example:	Prin;ng	an	AST	
+                              Ordinary	programming	
+class	Exp	{	
+		abstract	void	print();	            Pros:	Straighaorward	code	
+}	                                   	
+class	Add	extends	Exp	{	             Cons:	
+		Exp	e1,	e2;	                       •  If	we	add	a	new	opera;on,	like	compu;ng	
+		void	print()	{	                       the	value,	all	classes	need	to	be	modiﬁed.	
+				e1.print();	                     •  We	get	tangled	code	–	many	diﬀerent	
+				System.out.print("+");		            concerns	in	the	same	class.	
+				e2.print();	
+		}	
+}	
+class	IntExp	extends	Exp	{	
+		int	value;	
+		void	print()	{	
+				System.out.print(value);	
+		}	
+}	
+...	
+                                                                                    4	
+
+L07A.pdf:                 Example:	Prin;ng	an	AST	
+                            Visitor	solu;on	
+class	Exp	{	                          class	Unparser	implements	Visitor	{	
+}	                                    		void	visit(Add	node)	{	
+class	Add	extends	Exp	{	              				node.e1.accept(this);	
+		Exp	e1,	e2;	                        				System.out.print("+");	
+		void	accept(Visitor	v)	{	           				node.e2.accept(this);	
+				v.visit(this);	                   		}	
+		}	                                  		void	visit(IntExpr	node)	{	
+}	                                    				System.out.print(node.value);	
+class	IntExp	extends	Exp	{	           		}	
+		int	value;	                         }	
+		void	accept(Visitor	v)	{	
+				v.visit(this);	
+		}	                             Pros:	Modular	addi;on	of	new	opera;on.	
+}	                               Separately	compiled.	
+...	                             	
+                                 Cons:	Clumsy	code	with	lots	of	boilerplate	
+                                 (accept	and	visit	methods).	Cannot	extend	
+                                 visitors	easily	if	the	language	is	extended.	
+                                                                               5	
+
+L07A.pdf:               Example:	Prin;ng	an	AST	
+                     Sta;c	Aspect-Oriented	Programming	
+class	Exp	{	                            aspect	Unparser	{	
+}	                                      		abstract	void	Exp.print();	
+class	Add	extends	Exp	{	                		void	Add.print()	{	
+		Exp	e1,	e2;	                          				e1.print();	
+}	                                      				System.out.print("+");		
+class	IntExp	extends	Exp	{	             				e2.print();	
+		int	value;	                           		}	
+}	                                      		void	IntExp.print()	{	
+...	                                    				System.out.print(value);	
+                                        		}	
+                                        }	
+Pros:	Straighaorward	code.	Modular	addi;on	of	new	opera;on.	No	problem	to	extend	the	
+language	–	addi;onal	methods	can	be	added	in	other	aspect.	
+	
+Cons:	Cannot	use	Java.	Need	more	advanced	language	like	AspectJ	or	JastAdd.	Not	
+separately	compiled.	
+                                                                                   6	
+
+L07A.pdf:            Inter-type	declara;ons	
+                     The	key	construct	in	sta;c	AOP	
+class	C	{	          aspect	A	{	
+}	                  		T	C.m()	{	                inter-type	declared	method	
+                    				...	
+class	D	{	          		}	
+}	                  		int	D.f	=	3;	             inter-type	declared	ﬁeld	
+                    }	
+         is	equivalent	to:	
+class	C	{	
+	T	m()	{	
+				...	
+		}	
+}	
+class	D	{	
+	int	f	=	3;	
+}	
+                                                                            7	
+
+L07A.pdf:Recall:	Dealing	with	the	expression	problem	
+•  Edit	the	AST	classes	(i.e.,	actually	not	solving	the	problem)	
+      •  Non-modular,	non-composi;onal.	
+      •  It	is	always	a	VERY	BAD	IDEA	to	edit	generated	code!	
+      •  Some;mes	used	anyway	in	industry.	
+•  Visitors:	an	OO	design	paSern.	
+      •  Modularize	through	clever	indirect	calls.	
+      •  Not	full	modulariza;on,	not	composi;on.	
+      •  Supported	by	many	parser	generators.	
+      •  Reasonably	useful,	commonly	used	in	industry.	
+•  Sta;c	Aspect-Oriented	Programming	(AOP)	
+      •  Also	known	as	inter-type	declara.ons	(ITDs)	or	introduc.on	
+      •  Use	new	language	constructs	(aspects)	to	factor	out	code.	
+      •  Solves	the	expression	problem	in	a	nice	simple	way.	
+      •  The	drawback:	you	need	a	new	language:	AspectJ,	JastAdd,	...	
+•  Advanced	language	constructs	
+      •  Use	more	advanced	language	constructs:	virtual	classes	in	gbeta,	traits	in	
+         Scala,	typeclasses	in	Haskell,	...	
+      •  Drawbacks:	More	complex	than	sta;c	AOP.	You	need	an	advanced	
+         language.	Not	much	prac;cal	experience	(so	far).	
+                  This	lecture:	Sta;c	AOP	
+                                                                                     8	
+
+L07A.pdf:                    Sta;c	AOP	in	JastAdd	
+  Abstract	grammar	
+         *.ast	
+           *.ast	
+                               JastAdd	          *.ast	
+                                                  *.java	
+         *.ast	                                 Generated	
+           *.jrag	           Generates	AST	      tangled		
+Computa;on	aspects	      classes	and	weaves	in	
+                                                AST	classes	
+	                             aspect	code	
+                         	
+                                                             9	
+
+L07A.pdf:           Example	aspect:	expression	evalua;on	
+Abstract	grammar		
+abstract	Expr;	
+abstract	BinExpr	:	Expr	::=	Lep:Expr	Right:Expr;	
+Add	:	BinExpr;	
+Sub	:	BinExpr;	
+IntExpr	:	Expr	::=	<INT:String>;	
+Aspect	
+aspect	Evaluator	{	
+		abstract	int	Expr.value();	
+		int	Add.value()	{	return	getLep().value()	+	getRight().value();	}	
+		int	Sub.value()	{	return	getLep().value()	–	getRight().value();	}	
+		int	IntExpr.value()	{	return	String.parseInt(getINT());	}	
+}	
+Inter-type	declara.ons:	The	value	methods	will	be	woven	into	the	
+classes	(Expr,	Add,	Sub,	IntExpr).	
+Also	known	as	introduc.on.	
+                                                                     10	
+
+L07A.pdf:                     Another	example:	unparsing	
+Abstract	grammar		
+abstract	Expr;	
+abstract	BinExpr	:	Expr	::=	Lep:Expr	Right:Expr;	
+Add	:	BinExpr;	
+Sub	:	BinExpr;	
+IntExpr	:	Expr	::=	<INT:String>;	
+Aspect	
+aspect	Unparser	{	
+		abstract	void	Expr.unparse(Stream	s,	String	indent);	
+		void	BinExp.unparse(Stream	s,	String	indent)	{	
+				getLep().unparse(s,indent);	
+				s.print(operatorString());	
+				getRight().unparse(s,indent);	
+		}	
+		abstract	String	BinExp.operatorString();	
+		String	Add.operatorString()	{	return	"+";	}	
+		String	Sub.operatorString()	{	return	"-";	}	
+		void	IntExpr.unparse(Stream	s,	String	indent)	{	s.print(getINT());	}	
+}	
+                                                                        11	
+
+L07A.pdf:                                     Weaving	the	classes	in	JastAdd	
+toy.ast	
+ abstract	Expr;	
+ abstract	BinExpr	:	Expr	::=	Lep:Expr	Right:Expr;	
+ Add	:	BinExpr;	
+ Sub	:	BinExpr;	
+ IntExpr	:	Expr	::=	<INT:String>;	
+ Evaluator.jrag	                                                                  class	Expr	extends	
+                                                                                     class	BinExpr	extends	
+                                                                                  ASTNode	{	
+ aspect	Evaluator	{	                                                              	 Expr	{	
+                                                                                          class	Add	extends	
+ 		abstract	int	Expr.value();	                                                    	 			void	unparse(...)	{	
+                                                                                          BinExpr	{	
+                                                                                              class	Sub	extends	
+ 		int	Add.value()	{	return	getLep().value()	+	getRight().value();	}	
+ 		int	Sub.value()	{	return	getLep().value()	–	getRight().value();	}	
+                                                                         JastAdd	 	 	 		int	value()	{	return	
+                                                                                              BinExpr	{	
+                                                                                  	 	 getLep().value()	+	
+                                                                                              		int	value()	{	return	
+ 		int	IntExpr.value()	{	return	String.parseInt(getINT());	}	                     	 	 getRight().value();	}	
+                                                                                              getLep().value()	-	
+ }	                                                                               }	 		}	 		String	operatorString()	
+                                                                                              getRight().value();	}	
+                                                                                  	 	 {	return	"+";	}	
+                                                                                              		String	operatorString()	
+                                                                                     }	 }	 {	return	"-";	}	
+                                                                                              }	
+ Unparser.jrag	
+ aspect	Unparser	{	
+ 		abstract	void	Expr.unparse(Stream	s,	String	indent);	
+ 		void	BinExp.unparse(Stream	s,	String	indent)	{	                                 Tangled	generated	
+ 				getLep().unparse(s,ind);	
+ 				s.print(operatorString());	
+                                                                                                    code	
+ 				getRight().unparse(s,ind);	
+ 		}	
+ 		abstract	BinExp.operatorString();	
+ 		String	Add.operatorString()	{	return	"+";	}	
+ 		String	Sub.operatorString()	{	return	"-"}	
+ 		void	IntExpr.unparse(Stream	s,	String	indent)	{	s.print(getINT());	}	
+ }	
+           Untangled	source	code	                                                                                     12	
+
+L07A.pdf: Features	that	can	be	inter-type	declared	or	
+            factored	out	to	JastAdd	aspects	
+•  Methods	
+•  Instance	variables	
+•  "implements"	clauses	
+•  "import"	clauses	
+•  aSribute	grammars	(see	later	lecture)	
+                                              13	
+
+L07A.pdf:                 Sta;c	aspects	vs	Visitors	
+                    Sta&c	aspects	        Visitors	
+What	can	be	        instance	variables	   only	methods	
+factored	out	from	  methods	
+AST	classes?	       implements	clauses	
+Type	safety?	       full	type	precision	  Casts	may	be	needed,	
+                                          depending	on	framework	
+Method	parameters	  any	number	           only	one	
+Ease	of	use?	       Very	simple	          Clumsy,	boilerplate	code	
+                                          needed.	
+Arbitrary	          Yes	                  No	–	you	can	extend	a	visitor,	
+composi&on	of	                            but	then	you	need	factories	to	
+modules?	                                 create	them.	And	you	cannot	
+                                          not	combine	two	extensions.	
+Separate	           Not	for	JastAdd	or	   Yes	
+compila&on?	        AspectJ.	
+Mainstream	OO	      No	–	you	need	        Yes,	use	Java	or	any	other	OO	
+language?	          JastAdd,	AspectJ,	or	 language.	
+                    similar	
+                                                                          14	
+
+L07A.pdf:                       Recall:	The	expression	problem	
+       How	add	both	classes	and	computa;ons	in	a	modular	way?	
+                                   Aspects	with	
+   Ordinary	OO		             inter-type	declara;ons	          The	Visitor	design	paSern	
+           A	                       A	       A.comp1	         A	                      Visitor	
+                                             B.comp1	
+         comp1	                              C.comp1	       accept	                visit(A)	
+         comp2	                                                                    visit(B)	
+                                                                                   visit(C)	
+                                             A.comp2	
+                                             B.comp2	
+                                             C.comp2	
+    B	            C	           B	        C	             B	          C	     Comp1	             Comp2	
+  comp1	        comp1	                                accept	     accept	 visit(A)	          visit(A)	
+  comp2	        comp2	                                                    visit(B)	          visit(B)	
+                                                                          visit(C)	          visit(C)	
+Classes	can	be	added	             Fully	modular.	      Computa;ons	can	be	added,	but	non-
+ modularly,	but	not	                                     modular	changes	needed	if	classes	
+    computa;ons.	                                              are	added.	Complex	code.	
+                                                                                                       15	
+
+L07A.pdf:        Full	Aspect-Oriented	Programming	
+Full	AOP	    =	     Sta;c	AOP	        +	   Dynamic	AOP	
+                                             advice	
+               inter-type	declara;ons		      pointcuts	
+                                             joinpoints	
+                   Modular	code.	        Modular	instrumenta;on.	
+                                                                  16	
+
+L07A.pdf:           Full	Aspect-Oriented	Programming	
+•  JastAdd	supports	only	a	small	part	of	AOP,	namely	sta.c	AOP	with	inter-
+   type	declara;ons.	
+•  Aspect-oriented	programming	is	a	wider	concept	that	usually	focuses	on	
+   dynamic	behavior:	a	general	code	instrumenta;on	technique:	
+      •  A	joinpoint	is	a	point	during	execu;on	where	advice	code	can	be	
+         added.	
+      •  A	pointcut	is	a	set	of	joinpoints	that	can	be	described	in	a	simple	
+         way,	e.g.,	
+            •  all	calls	to	a	method	m()	
+            •  all	accesses	of	a	variable	v	
+      •  Advice	is	code	you	can	specify	in	an	aspect	and	that	can	be	added	at	
+         joinpoints,	either	aper,	before,	or	around	the	joinpoint.	
+      •  Example	applica;ons:	
+            •  Add	logging	of	method	calls	in	an	aspect	(instead	of	adding	print	
+               statements	all	over	your	code)	
+            •  Add	synchroniza;on	code	to	basic	code	that	is	unsynchronized	
+                                                                                  17	
+
+L07A.pdf:                    The	interpreter	design	paSern	
+                    Commonly	used	for	many	computa;ons	in	a	compiler.	
+            Here	explained	using	Ordinary	OO.	Modularize	using	AOP	or	Visitors.	
+Intent:	Given	a	language,	deﬁne	a	representa.on	for	its	grammar	along	with	an	interpreter	
+            that	uses	the	representa.on	to	interpret	sentences	in	the	language.	
+                           [Gamma,	Helm,	Johnson,	Vlissides,	1994]	
+                                                                *	
+                                    AbstractExpression	
+                                interpret(Context)	
+            TerminalExpression	                           NonterminalExpression	
+         interpret(Context)	                          interpret(Context)	{	
+                                                      			child.interpret(...);	
+                                                      }	
+     AbstractExpression,	TerminalExpression,	NonterminalExpression,	interpret,	and	
+                             Context	are	just	ROLES	in	the	paSern.	
+                        In	our	programs,	we	will	use	our	own	names.	
+                                                                                        18	
+
+L07A.pdf:  abstract	Stmt;	
+                                                 Example	use	of	Interpreter	
+  Block	:	Stmt	::=	Stmt*;	                       PaSern	roles:	
+  Assign	:	Stmt	::=	<ID>	Expr;	                  			context:	vars	
+  abstract	Expr;	                                			interpret:	execute,		value	
+  Add	:	Expr	::=	Lep:Expr	Right:Expr;	
+  IdExpr	:	Expr	::=	<ID>;	
+  IntExpr	:	Expr	::=	<INT>;	
+               Stmt	                                                    Expr	
+         execute(vars)	                                             value(vars)	
+     Block	                 Assign	                    Add	            IdExpr	         IntExpr	
+execute(vars)	          execute(vars)	            value(vars)	      value(vars)	     value(vars)	
+  vars          	a	map	String	->	Value,	keeping	track	of	the	current	values	of	variables	
+  execute       	executes	a	Stmt,	changing	and	using	the	vars	map	
+  value         	executes	an	Expr	and	returns	its	value,	making	use	of	the	vars	map	
+                                                                                               19	
+
+L07A.pdf:        Example	implementa;on	using	JastAdd	aspects	
+abstract	Stmt;	                      aspect	Interpreter	{	
+                                     		abstract	void	Stmt.execute(Map<String,	Integer>	vars);	
+Block	:	Stmt	::=	Stmt*;	             	
+Assign	:	Stmt	::=	<ID>	Expr;	        		void	Block.execute(Map<String,	Integer>	vars)	{	
+abstract	Expr;	                      				for	(Stmt	s	:	getStmts())	{	s.execute(vars);	}	
+Add	:	Expr	::=	Lep:Expr	Right:Expr;	 		}	
+                                     		void	Assign.execute(Map<String,	Integer>	vars)	{	
+IdExpr	:	Expr	::=	<ID>;	             				int	value	=	getExpr().value(vars);	
+IntExpr	:	Expr	::=	<INT>;	           				vars.put(getID(),	value);	
+                                     		}		
+                                     	
+                                     		abstract	int	Expr.value(Map<String,	Integer>	vars);	
+                                     	
+                                     		int	Add.value(Map<String,	Integer>	vars)	{	
+                                     				return	getLep().value(vars)	+	getRight().value(vars);	
+                                     		}	
+                                     		int	IdExpr.value(Map<String,	Integer>	vars)	{	
+                                     				return	vars.get(getID());	
+                                     		}	
+                                     		int	IntExpr.value(Map<String,	Integer>	vars)	{	
+                                     				return	String.parseInt(getINT());	
+                                     		}	
+                                     }	
+                                                                                                20	
+
+L07A.pdf:                         Summary	ques;ons	
+•  What	are	diﬀerent	ways	of	solving	the	Expression	Problem?	
+•  What	is	an	intertype	declara;on?	
+•  What	is	aspect-oriented	programming?	
+•  How	does	sta;c	AOP	diﬀer	from	dynamic	AOP?	
+•  Implement	a	computa;on	over	the	AST	using	sta;c	aspects.	
+•  What	are	advantages	and	disadvantages	of	sta;c	AOP	as	compared	to	Visitors?	
+                                                                                21	
+
+L07B.pdf:       EDAN65:	Compilers,	Lecture	07	B          	
+Introduc=on	to	A>ribute	Grammars	
+           synthesized,	inherited,	broadcas=ng	
+                  Görel	Hedin	
+                 Revised:	2016-09-19	
+
+L07B.pdf:     This	lecture	
+                                                             runtime system	
+                                    source	code	(text)	
+  Regular	      Lexical	analyzer	                               activation
+                                                                              stack	
+expressions
+       (scanner)	                                     records	
+                                    tokens	
+Context-free	  Syntac=c	analyzer	
+                                                                             garbage
+ grammar
+           (parser)	
+                                                                             collection	
+                                    AST	(Abstract	syntax	tree)	
+                                  Visitors	                                   heap	
+ A>ribute	                        Inter-type	declared	methods	
+               Seman&c	analyzer	
+ grammar
+                         A.ribute	grammars	              objects	
+                                    A>ributed	AST	
+                 Intermediate	
+                                                                Interpreter
+
+                code	generator	
+                                    intermediate	code	                         code
+                                                                   Virtual	     and
+                   Op=mizer	                                      machine
+     data	
+                                    intermediate	code	
+                  Target	code	
+                                                                 machine
+                   generator	
+                                       target	code	
+                                                                                     2	
+
+L07B.pdf:             Computa=ons	on	the	AST	
+IMPERATIVE	COMPUTATIONS	               DECLARATIVE	COMPUTATIONS	
+•  Deﬁne	methods	that	"do"	something.	 •  Deﬁne	proper=es	of	nodes	
+•  Side-eﬀects	                        •  No	side-eﬀects	
+     •  Modify	objects	                •  Useful	for	compu=ng	
+     •  Output	to	ﬁles	                     •  Name	bindings	
+•  Useful	for	                              •  Types	of	expressions	
+     •  Execu=on/Interpreta=on	             •  Error	informa=on	
+     •  Unparsing	                     •  Technique	
+     •  Prin=ng	error	messages	             •  A>ribute	grammars	
+•  Technique	
+     •  Inter-type	declared	methods	   	
+     •  Visitors	
+	
+                                                                     3	
+
+L07B.pdf:                   Example	proper=es	
+                    Does	this	method	have	any	compile-=me	errors?	
+    int	gcd2(int	a,	int	b)	{	                   What	is	the	type	of	this	expression?	
+    		if	(b	==	0)	{	
+    				return	a;	
+    		}		
+    		return	gcd2(b,	a	%	b);	
+    }		
+What	is	the	declara=on	of	this	b?	
+                            A.ribute	grammars:	
+                            Express	these	proper=es	as	a#ributes	of	AST	nodes.	
+                            Deﬁne	the	a>ributes	by	simple	directed	equa,ons.	
+                            The	equa=ons	can	be	solved	automa=cally.	                 4	
+
+L07B.pdf:                             Simple	example	
+                             a>ributes	and	equa=ons	
+          AST	node	                        eq	z=b.x+1	
+                                                           	     z	
+                                           eq	c.y=z+c.v	
+               	
+                                                      b	        c	
+          a>ribute	
+               z	
+                                        eq	x=2	    	                	  eq	v=5	
+                                                   x	               y	
+         equa=on:	
+                                                                    v	
+     eq	a0	=	f(a1,	...,	an)	
+                                                What	is	the	value	of	y?	
+                                             Solve	the	equa=on	system!	
+deﬁned	a>ribute	
+                                            (Easy!	Just	use	subs=tu=on.)	
+            func=on	of	other	a>ributes	
+                                                                               5	
+
+L07B.pdf:                              Simple	example	
+                       synthesized	and	inherited	a>ributes	
+deﬁnes	a>ribute	in	the	node	–	the	a>ribute	is	synthesized	
+                                                  eq	z=b.x+1	
+                                                                  	  syn	z	
+                                                  eq	c.y=z+c.v	
+deﬁnes	a>ribute	in	the	child	–	the	a>ribute	is	inherited	      b	      c	
+                                               eq	x=2	    	               	    eq	v=5	
+                                                        syn	x	          inh	y	
+                                                                        syn	v	
+Donald	Knuth	introduced	a>ribute	grammars	in	1968.	
+The	term	"inherited"	is	not	related	to	inheritance	in	object-orienta=on.	
+Both	terms	originated	during	the	1960s.	
+                                                                                       6	
+
+L07B.pdf:                          Simple	example	
+       declaring	a>ributes	and	equa=ons	in	a	(JastAdd)	grammar	
+Abstract	grammar:	
+                                                    eq	z=b.x+1	
+                                                                    A	  syn	z	
+A	::=	B	C;	                                         eq	c.y=z+c.v	
+B;	
+C;	
+                                                            getB	        getC	
+A>ribute	grammar	module:	
+ aspect	SomeAttributes	{	
+ 		syn	int	A.z();	
+ 		syn	int	B.x();	
+ 		syn	int	C.v();	                               eq	x=2	 B	                   C	 eq	v=5	
+ 		inh	int	C.y();	                                        syn	x	            inh	y	
+ 		eq		A.z()	=	getB().x()+1;	                                               syn	v	
+ 		eq		A.getC().v()	=	z()	+	getC().v();	
+ 		eq		B.x()	=	2;	
+ 		eq		C.v()	=	5;	            uses	inter-type	declara=ons	for	a>ributes	and	equa=ons	
+ }	
+ Note!	The	grammar	is	declara=ve.	The	order	of	the	equa=ons	is	irrelevant.	
+ JastAdd	solves	the	equa=on	system	automa=cally.	
+                                                                                         7	
+
+L07B.pdf:                       Some	shorthands	
+These	rules:	
+syn	int	A.z();	
+eq		A.z()	=	getB().x()+1;	
+are	equivalent	to:	
+ syn	int	A.z()	=	getB().x()+1;	
+ and	we	could	also	use	method	body	syntax:	
+ syn	int	A.z()	{	
+ 		return	getB().x()+1;	
+ }	
+                                            8	
+
+L07B.pdf:             Equa=ons	must	be	free	from	
+            (externally	visible)	side	eﬀects	
+While	this	is	formulated	as	a	method,	execu=ng	it	has	no	side-eﬀects,	so	this	is	ﬁne.	
+syn	int	A.z()	{	
+		return	getB().x()+1;	
+}	
+It	is	also	ﬁne	to	have	assignments	to	local	
+variables,	like	this.	The	eﬀect	of	changing	r	
+is	not	visible	amer	execu=ng	the	method.	
+syn	int	A.z()	{	
+		int	r	=	0;	
+		r	=	getB().x()+1;	
+		return	r;	
+}	
+                                                                                       9	
+
+L07B.pdf:           Equa=ons	must	be	free	from	
+          (externally	visible)	side	eﬀects	
+What	is	wrong	with	this	a>ribute	grammar?	
+syn	int	A.x()	=	Globals.variable;	
+	
+syn	int	B.y()	{	
+		Globals.variable++;	
+		return	3;	
+}	
+                                            10	
+
+L07B.pdf:              Equa=ons	must	be	free	from	
+           (externally	visible)	side	eﬀects	
+What	is	wrong	with	this	a>ribute	grammar?	
+ syn	int	A.x()	=	Globals.variable;	
+ 	
+ syn	int	B.y()	{	
+ 		Globals.variable++;	
+ 		return	3;	
+ }	
+Equa=ons	are	not	allowed	to	change	other	than	
+local	data.	If	they	do,	they	are	not	equa=ons.	
+	
+Warning!	JastAdd	cannot	discover	if	you	have	side-
+eﬀects	in	your	equa=ons!	If	your	deﬁni=ons	rely	on	
+global	data	that	is	changed,	the	wrong	results	will	
+be	computed.	
+                                                     11	
+
+L07B.pdf:          Well-formed	a>ribute	grammar	
+                                      	
+Abstract	grammar:	
+                                         An	a>ribute	grammar	is	well-formed,	if	
+A	::=	B	C;	
+                                         there	is	exactly	one	deﬁning	equa=on	
+B;	
+C;	                                      for	each	a>ribute	in	any	AST.	
+                                         	
+A>ribute	grammar	module:	                JastAdd	checks	this	at	compile	=me.	
+ aspect	SomeAttributes	{	
+ 		syn	int	A.z();	
+ 		syn	int	B.x();	
+ 		syn	int	C.v();	
+ 		inh	int	C.y();	
+ 		eq		A.z()	=	getB().x()+1;	
+ 		eq		A.getC().v()	=	z()	+	getC().v();	
+ 		eq		B.x()	=	2;	
+ 		eq		C.v()	=	5;	
+ }	
+                                                                               12	
+
+L07B.pdf:            Well-deﬁned	a>ribute	grammar	
+                                                 	
+ An	a>ribute	grammar	is	well-deﬁned,	
+ if	it	has	a	computable	unique	solu=on	for	any	AST.	
+ 	
+ An	ordinary	a>ribute	grammar	is	well-deﬁned	
+ if	it	is	well-formed	and	non-circular.	
+Is	this	a>ribute	grammar	well-deﬁned?	
+ aspect	SomeAttributes	{	
+ 		syn	int	A.c()	=	d();	
+ 		syn	int	A.d()	=	c();	
+ }	
+                             Circular	a>ribute	grammar.	Well-formed,	but	not	well-deﬁned.	
+ JastAdd	checks	circularity	at	run=me.	
+ 	
+ It	is	possible	to	allow	circular	a>ributes,	but	they	will	then	
+ have	to	be	explicitly	declared	as	circular.	See	later	lecture.	                           13	
+
+L07B.pdf:                          Abstract	grammar	
+                       deﬁnes	the	structure	of	ASTs	
+Abstract	grammar:	                            Example	AST	for	"a	+	b	+	c"	
+abstract	Exp;	                          (an	instance	of	the	abstract	grammar)	
+Add	:	Exp	::=	Left:Exp	Right:Exp;	
+IdUse	:	Exp	::=	<ID>;	                                            Add	
+                                                       Lem	            Right	
+                                                      Add	              IdUse	
+                                                                         ID="c"	
+                                               Lem	          Right	
+   The	terminal	symbols	(like	ID)	are	
+   intrinsic	a>ributes	–		constructed	
+   when	building	the	AST.	They	are	not	       IdUse	       IdUse	
+   deﬁned	by	equa=ons.	                       ID="a"	       ID="b"	
+                                                                                 14	
+
+L07B.pdf:                       A>ribute	grammars	
+            extends	abstract	grammars	with	a>ributes	
+Abstract	grammar:	                       Example	AST	for	"a	+	b	+	c"	
+abstract	Exp;	                     (an	instance	of	the	abstract	grammar)	
+Add	:	Exp	::=	Left:Exp	Right:Exp;	
+IdUse	:	Exp	::=	<ID>;	                                         Add	 type=...	
+A>ribute	grammar	modules:	            type=...	    Add	                IdUse	
+                                                                        ID="c"	
+ syn	IdDecl	IdUse.decl()	=	...;	
+                                                                        decl=...	
+                                                                       type=...	
+ syn	Type	Exp.type();	                   IdUse	         IdUse	
+ eq		Add.type()	=	...;	                   ID="a"	        ID="b"	
+ eq		IdUse.type()	=	...;	
+                                         decl=...	      decl=...	
+                                         type=...	      type=...	
+ Each	declared	a>ribute	...	              ...	will	have	instances	in	the	AST	
+                                                                                  15	
+
+L07B.pdf:                A>ributes	and	equa=ons	
+Abstract	grammar:	                                     Example	AST	for	"a	+	b	+	c"	
+abstract	Exp;	                                   (an	instance	of	the	abstract	grammar)	
+Add	:	Exp	::=	Left:Exp	Right:Exp;	
+IdUse	:	Exp	::=	<ID>;	                                                     Add	
+                                                               Add	              IdUse	
+                                                                                  ID="c"	
+ Think	of	a>ributes	as	"ﬁelds"	in	the	tree	nodes.	
+  syn	Type	ASTClass.attribute();	
+                                                       IdUse	       IdUse	
+                                                       ID="a"	       ID="b"	
+ Each	equa=on	deﬁnes	an	a>ribute	in	terms	of	
+ other	a>ributes	in	the	tree.	
+  eq	definedAttribute	=	function	of	other	attributes;	
+ An	evaluator	computes	the	values	of	the	a>ributes	(solves	the	equa=on	system).	
+ Think	of	the	equa=ons	as	"methods"	called	by	the	evaluator.	
+                                                                                          16	
+
+L07B.pdf:                      A>ribute	mechanisms	
+Synthesized*	–	the	equa=on	is	in	the	same	node	as	the	a>ribute	
+	
+Inherited*	–	the	equa=on	is	in	an	ancestor	
+	
+Broadcas&ng*	–	the	equa=on	holds	for	a	complete	subtree	
+	
+Reference	–	the	a>ribute	can	be	a	reference	to	an	AST	node.	
+	
+Parameterized	–	the	a>ribute	can	have	parameters	
+	
+NTA	–	the	a>ribute	is	a	"nonterminal"	(a	fresh	node	or	subtree)	
+	
+Collec&on	–	the	a>ribute	is	deﬁned	by	a	set	of	contribu=ons,	instead	of	by	an	equa=on.	
+	
+Circular	–	the	a>ribute	may	depend	on	itself	(solved	using	ﬁxed-point	itera=on)	
+	
+*	Treated	in	this	lecture	
+                                                                                        17	
+
+L07B.pdf:                       Synthesized	a>ributes	
+Synthesized	a>ribute:	                                                 A	
+The	equa=on	is	in	the	same	node	as	the	a>ribute.	
+                                                   eq	s()	=	f(...);	   B	
+                                                                    s	=	...	
+For	compu=ng	proper=es	that	depend	on	informa=on	in	the	node	
+or	its	children.	
+	
+Typically	used	for	propaga=ng	informa=on	upwards	in	the	tree.	
+                                                                             18	
+
+L07B.pdf:            Synthesized	a>ributes,	example	1	
+A	::=	B;	                        Draw	the	a#ribute	and	its	value!	
+B;	
+syn	int	B.s()	=	3;	                                A	
+                                                   B	
+                                                                   19	
+
+L07B.pdf:                Synthesized	a>ributes,	example	1	
+A	::=	B;	
+B;	
+syn	int	B.s()	=	3;	                                                        A	
+Or	equivalently,	write	the	declara=on	and	equa=on	separately.	
+syn	int	B.s();	                                                            B	
+eq		B.s()	=	3;	                                                           s	=	3	
+Or	equivalently,	write	the	equa=on	as	a	method	body:	
+syn	int	B.s()	{	                             Nota	bene!	
+		return	3;	                                 The	method	body	must	be	free	of	
+}	                                           externally	visible	side-eﬀects.	
+Don't	do	this!	
+int	B.counter	=	0;	//	Ordinary	field	 Warning!	
+syn	int	B.s()	{	                             Side-eﬀects	are	not	checked	by	JastAdd.	
+		counter++;	//	Visible	side-effect	 The	a>ributes	will	get	inconsistent	values.	
+		return	counter;	
+}	                                                                                    20	
+
+L07B.pdf:              Synthesized	a>ributes,	example	2	
+A	::=	B;	                                               Three	diﬀerent	ASTs.	
+abstract	B;	                                     Draw	the	a#ributes	and	their	values!	
+C	:	B;	
+D	:	B;	
+E	:	D;	                                                 A	           A	            A	
+Diﬀerent	subclasses	can	have	diﬀerent	equa=ons.	
+                                                        C	           D	            E	
+syn	int	B.s();	
+eq	C.s()	=	4;	
+eq	D.s()	=	5;	
+eq	E.s()	=	6;	
+                                                                                       21	
+
+L07B.pdf:                 Synthesized	a>ributes,	example	2	
+A	::=	B;	
+abstract	B;	
+C	:	B;	
+D	:	B;	
+E	:	D;	                                                      A	            A	          A	
+Diﬀerent	subclasses	can	have	diﬀerent	equa=ons.	
+                                                             C	            D	          E	
+syn	int	B.s();	                                             s	=	4	        s	=	5	      s	=	6	
+eq	C.s()	=	4;	
+eq	D.s()	=	5;	
+eq	E.s()	=	6;	
+Note	that	equa=ons	can	override	equa=ons	in	superclasses,	
+in	analogy	to	how	methods	can	override	methods	in	OO	languages.	
+	
+JastAdd	checks	that	each	concrete	class	has	equa=ons	for	all	its	synthesized	a>ributes.	
+	
+A	synthesized	a>ribute	is	similar	to	a	side-eﬀect	free	method,	but:	
+•  its	value	is	cached	(memoized)	
+•  circularity	is	checked	at	run=me	(results	in	excep=on)	                                   22	
+
+L07B.pdf:                         Inherited	a>ributes	
+Inherited	a>ribute:	                       eq	getB().s()	=	f(...);	   A	
+The	equa=on	is	in	an	ancestor	
+                                                                      B	
+                                                                      C	
+                                                                   s	=	...	
+For	compu=ng	a	property	that	depends	on	the	context	of	the	node.	
+	
+Typically	used	for	propaga=ng	informa=on	downwards	in	the	tree.	
+                                                                            23	
+
+L07B.pdf:            Inherited	a>ributes,	example	1	
+A	::=	B	C;	                     Draw	the	a#ribute	and	its	value!	
+B;	
+C;	
+                                              A	
+inh	int	B.i();	
+eq	A.getB().i()	=	2;	
+                                          B	      C	
+                                                                  24	
+
+L07B.pdf:            Inherited	a>ributes,	example	1	
+A	::=	B	C;	
+B;	
+C;	
+                                            A	
+inh	int	B.i();	
+eq	A.getB().i()	=	2;	
+                                       B	      C	
+                                     i	=	2	
+                                                  25	
+
+L07B.pdf:               Inherited	a>ributes,	example	2	
+A	::=	Left:B	Right:B;	                    Draw	the	a#ributes	and	their	values!	
+B;	
+                                                             A	
+The	parent	can	specify	diﬀerent	equa=ons	
+for	its	diﬀerent	children.	
+inh	int	B.i();	
+eq	A.getLeft().i()	=	2;	                                 B	      B	
+eq	A.getRight().i()	=	3;	
+                                                                                26	
+
+L07B.pdf:                 Inherited	a>ributes,	example	2	
+ A	::=	Left:B	Right:B;	
+ B;	
+                                                                          A	
+ The	parent	can	specify	diﬀerent	equa=ons	
+ for	its	diﬀerent	children.	
+ inh	int	B.i();	
+ eq	A.getLeft().i()	=	2;	                                            B	          B	
+ eq	A.getRight().i()	=	3;	                                         i	=	2	       i	=	3	
+                                                                         Dot	
+This	is	useful,	for	example,	when	deﬁning	scope	rules	
+for	qualiﬁed	access.	The	lookup	a>ributes	should	have	
+diﬀerent	values	for	the	diﬀerent	IdUses.	                    IdUse	            IdUse	
+                                                             ID="a"	            ID="a"	
+                                                       lookup("a")	=	...	     lookup("a")	=	...	
+                                                                                                 27	
+
+L07B.pdf:             Inherited	a>ributes,	example	3	
+ A	::=	Left:B	Right:B;	                         Draw	the	a#ributes	and	their	values!	
+ B	::=	C	D;	
+ C;	
+ D	::=	E;	
+ E;	                                                                   A	
+The	equa=ons	hold	for	the	complete	children	subtrees.	
+                                                               B	               B	
+ eq	A.getLeft().i()	=	2;	
+ eq	A.getRight().i()	=	3;	
+ inh	int	C.i();	                                           C	      D	       C	      D	
+ inh	int	E.i();	
+                                                                   E	                E	
+                                                                                        28	
+
+L07B.pdf:                 Inherited	a>ributes,	example	3	
+ A	::=	Left:B	Right:B;	
+ B	::=	C	D;	
+ C;	
+ D	::=	E;	
+ E;	                                                                    A	
+The	equa=ons	hold	for	the	complete	children	subtrees.	
+                                                              B	                  B	
+ eq	A.getLeft().i()	=	2;	
+ eq	A.getRight().i()	=	3;	
+ inh	int	C.i();	                                         C	        D	        C	        D	
+ inh	int	E.i();	                                       i	=	2	              i	=	3	
+                                                                   E	                  E	
+                                                                 i	=	2	              i	=	3	
+ This	is	called	broadcas,ng.	
+                                                                                            29	
+
+L07B.pdf:              Inherited	a>ributes,	example	4	
+ A	::=	Left:B	Right:B;	                    Draw	the	a#ributes	and	their	values!	
+ B	::=	C	D;	
+ C;	
+ D	::=	E;	
+ E;	                                                              A	
+An	equa=on	can	be	overruled	in	a	subtree.	
+The	nearest	equa=on	holds.	                               B	               B	
+ eq	A.getLeft().i()	=	2;	
+ eq	A.getRight().i()	=	3;	                            C	      D	       C	      D	
+ eq	B.getD().i()	=	i()	+	5;	
+ inh	int	B.i();	
+ inh	int	C.i();	                                              E	                E	
+ inh	int	E.i();	
+                                                                                   30	
+
+L07B.pdf:              Inherited	a>ributes,	example	4	
+ A	::=	Left:B	Right:B;	
+ B	::=	C	D;	
+ C;	
+ D	::=	E;	
+ E;	                                                          A	
+An	equa=on	can	be	overruled	in	a	subtree.	
+                                           i	=	2	   B	                  B	   i	=	3	
+The	nearest	equa=on	holds.	
+ eq	A.getLeft().i()	=	2;	
+ eq	A.getRight().i()	=	3;	                     C	        D	        C	        D	
+ eq	B.getD().i()	=	i()	+	5;	                 i	=	2	              i	=	3	
+ inh	int	B.i();	
+ inh	int	C.i();	                                         E	                  E	
+ inh	int	E.i();	
+                                                       i	=	7	              i	=	8	
+                                                                                  31	
+
+L07B.pdf:               Inherited	a>ributes,	example	5	
+  A	::=	B	C;	
+  B	::=	D;	
+  C	::=	D;	
+                                               Draw	the	a#ributes	and	their	values!	
+  D;	
+                                                                   A	
+There	must	be	an	equa=on	for	each	a>ribute	in	
+any	possible	AST.	
+	
+What	is	the	problem	with	this	grammar?	                     B	              C	
+  eq	B.getD().i()	=	6;	
+  inh	int	D.i();	                                           D	              D	
+                                                                                     32	
+
+L07B.pdf:                 Inherited	a>ributes,	example	5	
+  A	::=	B	C;	
+  B	::=	D;	
+  C	::=	D;	
+  D;	
+                                                                        A	
+There	must	be	an	equa=on	for	each	a>ribute	in	
+any	possible	AST.	
+	
+What	is	the	problem	with	this	grammar?	                          B	              C	
+  eq	B.getD().i()	=	6;	
+  inh	int	D.i();	                                                D	              D	
+                                                               i	=	6	         i	=	???	
+Where	can	we	add	an	equa,on	to	solve	the	problem?	
+	
+In	C	or	A.	Or	in	their	superclass	ASTNode.	
+                                                     This	a>ribute	has	no	equa=on!	
+                                                JastAdd	will	ﬁnd	this	and	report	an	error.	
+                                                                                        33	
+
+L07B.pdf:                Broadcas=ng	of	inherited	a>ributes	
+Tradi&onal	AG:	                              JastAdd:	
+Equa=on	for	inherited	a>ribute	              Equa=on	for	inherited	a>ribute	
+must	be	in	the	immediate	parent.	            is	"broadcasted"	to	complete	subtree.	
+Leads	to	"copy	rules".	                      No	"copy	rules"	are	needed.	
+syn	b	   A	     eq	c.a=b	                             syn	b	   A	    eq	c.a=b	
+     B	         C	       inh	a	                            B	        C	
+                        eq	d.a=a	
+                D	                                                   D	
+                                  copy	rule	
+              inh	a	                                               inh	a	
+                                                                                    34	
+
+L07B.pdf:              Inherited	a>ributes,	example	6	
+ A	::=	B	C;	
+ B	::=	D;	
+ C	::=	D;	
+                                                     Draw	the	a#ributes	and	their	values!	
+ D;	
+                                                                         A	
+The	parent	can	write	an	equa=on	that	holds	for	all	children.	
+ eq	A.getChild().i()	=	8;	
+ inh	int	D.i();	                                                  B	              C	
+                                                                  D	              D	
+                                                                                           35	
+
+L07B.pdf:                Inherited	a>ributes,	example	6	
+ A	::=	B	C;	
+ B	::=	D;	
+ C	::=	D;	
+ D;	
+                                                                     A	
+The	parent	can	write	an	equa=on	that	holds	for	all	children.	
+ eq	A.getChild().i()	=	8;	
+ inh	int	D.i();	                                                B	        C	
+This	is	equivalent	to	wri=ng	an	equa=on	for	each	child:	        D	        D	
+ eq	A.getB().i()	=	8;	                                        i	=	8	    i	=	8	
+ eq	A.getC().i()	=	8;	
+ inh	int	D.i();	
+                                                                               36	
+
+L07B.pdf:                 Inherited	a>ributes,	example	7	
+ A	::=	B*;	                                           Draw	the	a#ributes	and	their	values!	
+ B	::=	C;	
+ C;	                                                                       A	
+For	list	children,	an	index	can	be	used	in	the	equa=on	                   List	
+ eq	A.getB(int	index).i()	=	(index+1)	*	(index+1);	
+ inh	int	C.i();	
+                                                                   B	       B	      B	
+                                                                   C	       C	      C	
+                                                                                            37	
+
+L07B.pdf:                 Inherited	a>ributes,	example	7	
+ A	::=	B*;	
+ B	::=	C;	
+ C;	                                                                  A	
+For	list	children,	an	index	can	be	used	in	the	equa=on	              List	
+ eq	A.getB(int	index).i()	=	(index+1)	*	(index+1);	
+ inh	int	C.i();	
+                                                                B	      B	     B	
+                                                                C	      C	     C	
+                                                              i	=	1	  i	=	4	 i	=	9	
+This	is	useful,	for	example,	when	deﬁning	name	analysis	with	
+declare-before-use	seman=cs.	
+                                                                                    38	
+
+L07B.pdf:                            Demand	evalua=on	
+A>ributes	are	not	evaluated	un=l	demanded.	                  Program	
+Simple	recursive	caching	algorithm:	
+If	not	cached	
+		ﬁnd	the	equa=on	                                                          localLookup("a")	 3	
+		compute	its	right-hand	side	                                Block	        localLookup("b")	 6	
+		cache	the	value	                                                             lookup("b")	      7	
+ﬁ	
+Return	the	cached	value	
+                                                       List	                   List	
+                                               Decl	                          Assign	
+Example	program	                         Type	   IdDecl	           IdUse	                 IdUse	
+demanding	a>ributes:	                             ID="a"	          ID="a"	                ID="b"	
+                                                                    decl	 1	                decl	   4	
+Program	p	=	...	
+Assign	a	=	p.getBlock().getStmt(0);	                             lookup("a")	 2	       lookup("b")	    5	
+System.out.println(a.getTo().decl());	
+System.out.println(a.getFrom().decl());	
+                                                                                                       39	
+
+L07B.pdf:                          Summary	ques=ons	
+•  What	is	an	a>ribute	grammar?	
+•  What	is	an	intrinsic	a>ribute?	
+•  What	is	an	externally	visible	side-eﬀect?	Why	are	they	not	allowed	in	the	
+   equa=ons?	
+•  What	is	a	synthesized	a>ribute?	
+•  What	is	an	inherited	a>ribute?	
+•  What	is	broadcas=ng?	
+•  What	is	the	diﬀerence	between	a	declara=ve	and	an	impera=ve	speciﬁca=on?	
+•  What	is	demand	evalua=on?	
+•  Why	are	a>ributes	cached?	
+You	can	now	do	all	of	Assignment	3.	
+But	it	is	recommended	to	do	the	7B	quiz	ﬁrst!	
+                                                                              40	
+
