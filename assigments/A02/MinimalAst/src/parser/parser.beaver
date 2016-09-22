@@ -15,7 +15,7 @@
     }
 :};
 
-%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM;
+%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
 
 %typeof program = "Program";
 %typeof function = "Function";
@@ -31,13 +31,13 @@
 
 %typeof block = "Block";
 
+%typeof function_parameters = "List";
 
 
 %goal program;
 
 program = function_list.a {: return new Program(a); :}
     ;
-
 
 //### Functions.
 
@@ -54,7 +54,19 @@ function_list =
 
 function =
     INT id.id LPAR RPAR block.block {:
-        return new FunctionDeclaration(id, block);
+        return new FunctionDeclaration(id, new Opt(), block);
+    :}
+    | INT id.id LPAR function_parameters.fp RPAR block.block {:
+        return new FunctionDeclaration(id, new Opt(fp), block);
+    :}
+    ;
+
+function_parameters =
+    INT id.id {:
+        return new List().add(id);
+    :}
+    | function_parameters.list COMMA INT id.id {:
+        return list.add(id);
     :}
     ;
 

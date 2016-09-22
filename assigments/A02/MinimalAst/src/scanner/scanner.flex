@@ -28,7 +28,7 @@ import lang.ast.LangParser.SyntaxError;
 
 // macros
 WhiteSpace = [ ] | \t | \f | \n | \r
-ID = [a-zA-Z]+
+ID = [a-zA-Z][a-zA-Z1-9]*
 NUMERAL = [1-9]+
 
 %%
@@ -37,7 +37,7 @@ NUMERAL = [1-9]+
 {WhiteSpace}  { }
 
 // token definitions
-//","           { return sym(Terminals.COMMA); }
+","           { return sym(Terminals.COMMA); }
 "="           { return sym(Terminals.ASSIGN); }
 ";"           { return sym(Terminals.SEMI); }
 "}"           { return sym(Terminals.RBRA); }

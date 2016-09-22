@@ -1,7 +1,7 @@
 Program ::= Function*;
 
 abstract Function;
-FunctionDeclaration : Function ::= ID Block;
+FunctionDeclaration : Function ::= ID [FunctionParameters : List] Block;
 
 ID : NumVar ::= <ID>;
 Literal : NumVar ::= <NUMERAL>;
@@ -11,9 +11,7 @@ abstract BlockElement;
 IdUse : BlockElement ::= v1:NumVar v2:NumVar;
 IdDeclare : BlockElement ::= v1:NumVar;
 
-BlockElements ::= BlockElement*;
-
-Block ::= [BlockElements];
+Block ::= [List];
 
 //abstract Statement;
 //AssignStatement : Statement ::= <ID>;
