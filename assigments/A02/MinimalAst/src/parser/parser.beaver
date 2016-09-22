@@ -15,14 +15,11 @@
     }
 :};
 
-//%terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
 %terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM;
 
 %typeof program = "Program";
 %typeof function = "Function";
 %typeof function_list = "List";
-//%typeof statement_list = "List";
-//%typeof function_parameter_list = "List";
 
 %typeof id = "ID";
 %typeof id_declare = "IdDeclare";
@@ -33,9 +30,6 @@
 %typeof block_elements = "List";
 
 %typeof block = "Block";
-
-//%typeof statement = "Statement";
-//%typeof assignment = "AssignStatement";
 
 
 
@@ -124,62 +118,3 @@ literal = NUM.num {:
         return new Literal(num);
     :}
     ;
-
-//id_declare = ID.id {:
-//        return new IdDeclaration();
-//    :}
-//    ;
-//
-//function = INT id_declare.id  LPAR function_parameter_list.par RPAR LBRA statement_list.list RBRA {:
-//                debug("Returning FunctionDeclaration.");
-//                return new FunctionDeclaration(id, par, list);
-//           :};
-//
-//function_list =
-//    function.a {:
-//        debug("Returning new function list.");
-//        return new List().add(a);
-//    :}
-//    | function_list.a function.b {:
-//        debug("Adding new element to function list.");
-//        return a.add(b);
-//    :}
-//    ;
-//
-//function_parameter_list =
-//    /* epsilon */  {:
-//         debug("Epsilon in function parameter list.");
-//         return new Opt();
-//    :}
-//    | INT id_declare.id {:
-//        return new List().add(id);
-//    :}
-//    | function_parameter_list.a COMMA INT id_declare.id {:
-//        return a.add(id);
-//    :}
-//    ;
-//
-//assignment = INT id_declare.a  SEMI {:
-//        return new AssignStatement(a);
-//    :};
-//
-//use = ID ASSIGN NUM SEMI {:
-//        return new UseStatement();
-//    :}
-//    | ID ASSIGN ID SEMI {:
-//        return new UseStatement();
-//    :}
-//    ;
-//
-//statement = assignment | use;
-//
-//statement_list =
-//    statement.a {:
-//        debug("Returning new statement list.");
-//        return new List().add(a);
-//    :}
-//    | statement_list.a statement.b {:
-//        debug("Adding element "+b+" to statement list.");
-//        return a.add(b);
-//    :}
-//    ;
