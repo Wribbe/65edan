@@ -44,6 +44,9 @@
 program = function_list.a {: return new Program(a); :}
     ;
 
+
+//### Functions.
+
 function_list =
     function.a {:
         debug("Returning new function list.");
@@ -55,9 +58,22 @@ function_list =
     :}
     ;
 
-block_element =
-    id_declare
-    | id_use
+function =
+    INT id.id LPAR RPAR block.block {:
+        return new FunctionDeclaration(id, block);
+    :}
+    ;
+
+
+//### Blocks.
+
+block =
+    LBRA RBRA {:
+        return new Block(new Opt());
+    :}
+    | LBRA block_elements.elements RBRA {:
+        return new Block(new Opt(elements));
+    :}
     ;
 
 block_elements =
@@ -71,20 +87,13 @@ block_elements =
     :}
     ;
 
-block =
-    LBRA RBRA {:
-        return new Block(new Opt());
-    :}
-    | LBRA block_elements.elements RBRA {:
-        return new Block(new Opt(elements));
-    :}
+block_element =
+    id_declare
+    | id_use
     ;
 
-function =
-    INT id.id LPAR RPAR block.block {:
-        return new FunctionDeclaration(id, block);
-    :}
-    ;
+
+//### Declaration / Uses.
 
 id_declare =
     INT id.id SEMI {:
@@ -101,6 +110,9 @@ id_use =
         return new IdUse(id1, id2);
     :}
     ;
+
+
+//### Basic types.
 
 id = ID.id {:
         debug("Returned new Id.");
