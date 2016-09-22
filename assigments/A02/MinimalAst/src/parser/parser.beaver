@@ -17,6 +17,9 @@
 
 %terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
 
+// Operator terminals.
+%terminals PLUS;
+
 %typeof program = "Program";
 %typeof function = "Function";
 %typeof function_list = "List";
