@@ -7,8 +7,8 @@ Literal : NumVar ::= <NUMERAL>;
 
 abstract NumVar;
 abstract BlockElement;
-IdUse : BlockElement ::= v1:NumVar v2:NumVar;
-IdDeclare : BlockElement ::= v1:NumVar;
+IdUse : Expression ::= v1:NumVar v2:NumVar;
+IdDeclare : Expression ::= v1:NumVar;
 
 Block ::= [List];
 
