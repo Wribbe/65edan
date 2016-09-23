@@ -6,15 +6,9 @@ ID : NumVar ::= <ID>;
 Literal : NumVar ::= <NUMERAL>;
 
 abstract NumVar;
-abstract BlockElement;
 IdUse : Expression ::= v1:NumVar v2:NumVar;
 IdDeclare : Expression ::= v1:NumVar;
 
 Block ::= [List];
 
 abstract Expression;
-
-//abstract Statement;
-//AssignStatement : Statement ::= <ID>;
-//UseStatement : Statement;
-//

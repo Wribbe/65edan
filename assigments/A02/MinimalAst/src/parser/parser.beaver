@@ -28,7 +28,7 @@
 %typeof id_use = "Expression";
 %typeof literal = "Literal";
 
-%typeof block_element = "BlockElement";
+%typeof block_element = "Expression";
 %typeof block_elements = "List";
 
 %typeof block = "Block";
@@ -37,8 +37,6 @@
 
 %typeof expression_list = "List";
 %typeof expression = "Expression";
-
-%typeof sub_expression = "Expression";
 
 
 %goal program;
@@ -61,12 +59,7 @@ expression_list =
 
 expression =
     function
-    | sub_expression
-    ;
-
-sub_expression =
-    id_declare
-    | id_use
+    | block_element
     ;
 
 //### Functions.
