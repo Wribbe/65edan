@@ -18,7 +18,7 @@
 %terminals ID, INT, LPAR, RPAR, LBRA, RBRA, SEMI, ASSIGN, NUM, COMMA;
 
 // Operator terminals.
-//%terminals PLUS;
+%terminals PLUS;
 
 %typeof program = "Program";
 %typeof function = "Function";
@@ -39,6 +39,8 @@
 %typeof expression = "Expression";
 
 %typeof var = "NumVar";
+
+%typeof addExpression = "Add";
 
 
 %goal program;
@@ -62,6 +64,12 @@ expression_list =
 expression =
     function
     | block_element
+    ;
+
+addExpression =
+    var.v1 PLUS var.v2 SEMI{:
+        return new Add(v1, v2);
+    :}
     ;
 
 //### Functions.
@@ -110,6 +118,7 @@ block_elements =
 block_element =
     id_declare
     | id_use
+    | addExpression
     ;
 
 

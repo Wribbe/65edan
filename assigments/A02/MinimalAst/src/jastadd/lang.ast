@@ -11,4 +11,6 @@ IdDeclare : Expression ::= v1:NumVar;
 
 Block ::= [List];
 
+Add : Expression ::= v1:NumVar v2:NumVar;
+
 abstract Expression;
