@@ -38,6 +38,8 @@
 %typeof expression_list = "List";
 %typeof expression = "Expression";
 
+%typeof var = "NumVar";
+
 
 %goal program;
 
@@ -121,16 +123,15 @@ id_declare =
     ;
 
 id_use =
-    id.id ASSIGN literal.num  SEMI {:
-        return new IdUse(id, num);
-    :}
-    | id.id1 ASSIGN id.id2 SEMI {:
-        return new IdUse(id1, id2);
+    id.id ASSIGN var.v SEMI {:
+        return new IdUse(id, v);
     :}
     ;
 
 
 //### Basic types.
+
+var = id | literal;
 
 id = ID.id {:
         debug("Returned new Id.");
