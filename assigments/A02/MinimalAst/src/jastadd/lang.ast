@@ -1,16 +1,1 @@
-Program ::= Expression*;
-
-FunctionDeclaration : Expression ::= ID [FunctionParameters : List] Block;
-
-ID : NumVar ::= <ID>;
-Literal : NumVar ::= <NUMERAL>;
-
-abstract NumVar;
-IdUse : Expression ::= v1:NumVar v2:NumVar;
-IdDeclare : Expression ::= v1:NumVar;
-
-Block ::= [List];
-
-Add : Expression ::= v1:NumVar v2:NumVar;
-
-abstract Expression;
+Program ::= <ID>;

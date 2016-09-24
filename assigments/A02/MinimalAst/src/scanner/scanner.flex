@@ -12,8 +12,8 @@ import lang.ast.LangParser.SyntaxError;
 %extends beaver.Scanner
 
 // the interface between the scanner and the parser is the nextToken() method
-%type beaver.Symbol
-%function nextToken
+%type beaver.Symbol 
+%function nextToken 
 
 // store line and column information in the tokens
 %line
@@ -28,8 +28,7 @@ import lang.ast.LangParser.SyntaxError;
 
 // macros
 WhiteSpace = [ ] | \t | \f | \n | \r
-ID = [a-zA-Z][a-zA-Z1-9]*
-NUMERAL = [1-9]+
+ID = [a-zA-Z]+
 
 %%
 
@@ -37,17 +36,7 @@ NUMERAL = [1-9]+
 {WhiteSpace}  { }
 
 // token definitions
-"+"           { return sym(Terminals.PLUS); }
-","           { return sym(Terminals.COMMA); }
-"="           { return sym(Terminals.ASSIGN); }
-";"           { return sym(Terminals.SEMI); }
-"}"           { return sym(Terminals.RBRA); }
-"{"           { return sym(Terminals.LBRA); }
-")"           { return sym(Terminals.RPAR); }
-"("           { return sym(Terminals.LPAR); }
-"int"         { return sym(Terminals.INT); }
 {ID}          { return sym(Terminals.ID); }
-{NUMERAL}     { return sym(Terminals.NUM); }
 <<EOF>>       { return sym(Terminals.EOF); }
 
 /* error fallback */
