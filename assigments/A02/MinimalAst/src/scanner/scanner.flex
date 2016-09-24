@@ -12,8 +12,8 @@ import lang.ast.LangParser.SyntaxError;
 %extends beaver.Scanner
 
 // the interface between the scanner and the parser is the nextToken() method
-%type beaver.Symbol 
-%function nextToken 
+%type beaver.Symbol
+%function nextToken
 
 // store line and column information in the tokens
 %line
