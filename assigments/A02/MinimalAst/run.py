@@ -3,7 +3,7 @@
 import os
 import subprocess
 
-JAR_NAME = "calcAstCompiler.jar"
+JAR_NAME = "minAstCompiler.jar"
 
 def run(command):
     try:
