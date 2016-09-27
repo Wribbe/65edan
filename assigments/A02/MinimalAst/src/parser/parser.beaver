@@ -16,6 +16,7 @@
 
 %typeof expression = "Expression";
 %typeof factor = "Expression";
+%typeof term = "Expression";
 
 //%typeof id_declare = "IdDeclare";
 
@@ -24,13 +25,17 @@
 program = expression.a {: return new Program(a); :} ;
 
 expression =
-    factor
-    | expression.a MUL factor.b {:
-        return new Mul(a, b);
+    term
+    | expression.expression PLUS term.term {:
+        return new Add(expression, term);
     :}
-    | expression.a PLUS factor.b {:
-        return new Add(a, b);
+    ;
+
+term =
+    term.term MUL factor.factor {:
+      return new Mul(term, factor);
     :}
+    | factor
     ;
 
 factor =
