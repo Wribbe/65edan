@@ -9,4 +9,6 @@ Let : Expr ::= Binding* Expr;
 Binding ::= IdDecl Expr;
 IdDecl ::= <ID>;
 
+Block ::= [Expression*];
+
 Ask : Expr ::= [Default:Expr];

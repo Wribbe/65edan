@@ -45,9 +45,14 @@ function =
     id_declare.id_declare LPAR RPAR LBRA RBRA {:
         return new FunctionDeclaration(id_declare, new Opt());
     :}
-    | id_declare.id_declare LPAR RPAR LBRA expressions.exps RBRA{:
-        return new FunctionDeclaration(id_declare, new Opt(exps));
+    | id_declare.id_declare LPAR RPAR LBRA block.block RBRA{:
+        return new FunctionDeclaration(id_declare, new Opt(block));
     :}
+    ;
+
+
+block =
+    expressions
     ;
 
 
