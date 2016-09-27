@@ -37,10 +37,13 @@ NUMERAL = [1-9]+
 {WhiteSpace}  { }
 
 // token definitions
+"}"           { return sym(Terminals.RBRA); }
+"{"           { return sym(Terminals.LBRA); }
 ")"           { return sym(Terminals.RPAR); }
 "("           { return sym(Terminals.LPAR); }
 "*"           { return sym(Terminals.MUL); }
 "+"           { return sym(Terminals.PLUS); }
+"int"         { return sym(Terminals.INT); }
 {NUMERAL}     { return sym(Terminals.NUMERAL); }
 {ID}          { return sym(Terminals.ID); }
 <<EOF>>       { return sym(Terminals.EOF); }

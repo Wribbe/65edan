@@ -9,9 +9,9 @@
 	}
 :};
 
-%terminals ID, NUMERAL;
+%terminals ID, NUMERAL, INT;
 %terminals PLUS, MUL;
-%terminals LPAR, RPAR;
+%terminals LPAR, RPAR, LBRA, RBRA;
 
 %typeof program = "Program";
 
@@ -19,11 +19,46 @@
 %typeof factor = "Expression";
 %typeof term = "Expression";
 
+%typeof id_declare = "IdDeclare";
+
+%typeof functions = "List";
+%typeof expressions = "List";
+
+%typeof function = "FunctionDeclaration";
+
 //%typeof id_declare = "IdDeclare";
 
 %goal program;
 
-program = expression.a {: return new Program(a); :} ;
+program = functions.functions {: return new Program(functions); :} ;
+
+functions =
+    function.function {:
+        return new List().add(function);
+    :}
+    | functions.function_list function.function  {:
+        return function_list.add(function);
+    :}
+    ;
+
+function =
+    id_declare.id_declare LPAR RPAR LBRA RBRA {:
+        return new FunctionDeclaration(id_declare, new Opt());
+    :}
+    | id_declare.id_declare LPAR RPAR LBRA expressions.exps RBRA{:
+        return new FunctionDeclaration(id_declare, new Opt(exps));
+    :}
+    ;
+
+
+expressions =
+    expression.expression {:
+        return new List().add(expression);
+    :}
+    | expressions.expression_list expression.expression {:
+        return expression_list.add(expression);
+    :}
+    ;
 
 expression =
     term
@@ -58,8 +93,9 @@ id_use = ID.id {:
     return new IdUse(id);
     :}
     ;
-//
-//id_declare = ID.id {:
-//    return new IdDeclare(id);
-//    :}
-//    ;
+
+id_declare =
+    INT ID.id {:
+      return new IdDeclare(id);
+    :}
+    ;

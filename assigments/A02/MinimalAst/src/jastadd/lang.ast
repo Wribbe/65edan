@@ -1,11 +1,16 @@
 abstract Expression;
 
-Program ::= Expression;
+Program ::= FunctionDeclaration*;
 
 BinaryExpression : Expression ::= Left:Expression Right:Expression;
 
 Add : BinaryExpression;
 Mul : BinaryExpression;
 
+Expressions ::= Expression*;
+
+FunctionDeclaration ::= IdDeclare [Expressions];
+
 Numeral : Expression ::= <NUMERAL>;
 IdUse : Expression ::= <ID>;
+IdDeclare ::= <ID>;
