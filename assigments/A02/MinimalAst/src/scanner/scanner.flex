@@ -37,6 +37,7 @@ NUMERAL = [1-9]+
 {WhiteSpace}  { }
 
 // token definitions
+"*"           { return sym(Terminals.MUL); }
 "+"           { return sym(Terminals.PLUS); }
 {NUMERAL}     { return sym(Terminals.NUMERAL); }
 {ID}          { return sym(Terminals.ID); }

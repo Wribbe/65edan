@@ -2,7 +2,10 @@ abstract Expression;
 
 Program ::= Expression;
 
-Add : Expression ::= v1:Expression v2:Expression;
+BinaryExpression : Expression ::= Left:Expression Right:Expression;
+
+Add : BinaryExpression;
+Mul : BinaryExpression;
 
 Numeral : Expression ::= <NUMERAL>;
 IdUse : Expression ::= <ID>;

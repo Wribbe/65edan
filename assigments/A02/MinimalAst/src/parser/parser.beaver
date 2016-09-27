@@ -9,7 +9,8 @@
 	}
 :};
 
-%terminals ID, PLUS, NUMERAL;
+%terminals ID, NUMERAL;
+%terminals PLUS, MUL;
 
 %typeof program = "Program";
 
@@ -24,6 +25,9 @@ program = expression.a {: return new Program(a); :} ;
 
 expression =
     factor
+    | expression.a MUL factor.b {:
+        return new Mul(a, b);
+    :}
     | expression.a PLUS factor.b {:
         return new Add(a, b);
     :}
