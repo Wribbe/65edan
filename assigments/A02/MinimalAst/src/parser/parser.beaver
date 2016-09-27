@@ -25,6 +25,7 @@
 %typeof expressions = "List";
 
 %typeof function = "FunctionDeclaration";
+%typeof block = "List";
 
 //%typeof id_declare = "IdDeclare";
 
@@ -42,17 +43,23 @@ functions =
     ;
 
 function =
-    id_declare.id_declare LPAR RPAR LBRA RBRA {:
+    id_declare.id_declare LPAR RPAR {:
         return new FunctionDeclaration(id_declare, new Opt());
     :}
-    | id_declare.id_declare LPAR RPAR LBRA block.block RBRA{:
+    | id_declare.id_declare LPAR RPAR block.block {:
         return new FunctionDeclaration(id_declare, new Opt(block));
     :}
     ;
 
 
 block =
-    expressions
+    LBRA RBRA {:
+        return new List().add(new Opt());
+    :}
+    | LBRA block.block RBRA {:
+        return block;
+    :}
+    | expressions
     ;
 
 
