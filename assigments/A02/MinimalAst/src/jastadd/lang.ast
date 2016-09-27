@@ -1,1 +1,8 @@
-Program ::= <ID>;
+abstract Expression;
+
+Program ::= Expression;
+
+Add : Expression ::= v1:Expression v2:Expression;
+
+Numeral : Expression ::= <NUMERAL>;
+IdUse : Expression ::= <ID>;

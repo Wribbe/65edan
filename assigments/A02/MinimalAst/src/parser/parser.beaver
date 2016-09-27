@@ -9,10 +9,44 @@
 	}
 :};
 
-%terminals ID;
+%terminals ID, PLUS, NUMERAL;
 
 %typeof program = "Program";
 
+%typeof expression = "Expression";
+%typeof factor = "Expression";
+
+//%typeof id_declare = "IdDeclare";
+
 %goal program;
 
-program = ID.id {: return new Program(id); :} ;
+program = expression.a {: return new Program(a); :} ;
+
+expression =
+    factor
+    | expression.a PLUS factor.b {:
+        return new Add(a, b);
+    :}
+    ;
+
+factor =
+    numeral
+    | id_use
+//    | id_declare
+    ;
+
+
+numeral = NUMERAL.num {:
+        return new Numeral(num);
+    :}
+    ;
+
+id_use = ID.id {:
+    return new IdUse(id);
+    :}
+    ;
+//
+//id_declare = ID.id {:
+//    return new IdDeclare(id);
+//    :}
+//    ;
