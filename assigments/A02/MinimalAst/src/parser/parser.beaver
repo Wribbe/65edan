@@ -11,6 +11,7 @@
 
 %terminals ID, NUMERAL;
 %terminals PLUS, MUL;
+%terminals LPAR, RPAR;
 
 %typeof program = "Program";
 
@@ -41,6 +42,9 @@ term =
 factor =
     numeral
     | id_use
+    | LPAR expression.expression RPAR {:
+      return expression;
+    :}
 //    | id_declare
     ;
 
