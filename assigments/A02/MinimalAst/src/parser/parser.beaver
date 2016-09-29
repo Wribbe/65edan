@@ -10,8 +10,8 @@
 :};
 
 %terminals ID, NUMERAL, INT;
-%terminals PLUS, MUL;
-%terminals LPAR, RPAR, LBRA, RBRA;
+%terminals PLUS, MUL, ASSIGN;
+%terminals LPAR, RPAR, LBRA, RBRA, SEMI;
 
 %typeof program = "Program";
 
@@ -19,19 +19,20 @@
 %typeof factor = "Expression";
 %typeof term = "Expression";
 
-%typeof id_declare = "IdDeclare";
-
 %typeof functions = "List";
 %typeof expressions = "List";
 
 %typeof function = "FunctionDeclaration";
 %typeof block = "List";
 
+%typeof non_assign_expression = "Expression";
+
 //%typeof id_declare = "IdDeclare";
 
 %goal program;
 
 program = functions.functions {: return new Program(functions); :} ;
+
 
 functions =
     function.function {:
@@ -42,12 +43,10 @@ functions =
     :}
     ;
 
+
 function =
-    id_declare.id_declare LPAR RPAR {:
-        return new FunctionDeclaration(id_declare, new Opt());
-    :}
-    | id_declare.id_declare LPAR RPAR block.block {:
-        return new FunctionDeclaration(id_declare, new Opt(block));
+    INT ID.id LPAR RPAR block.block {:
+        return new FunctionDeclaration(id, new Opt(block));
     :}
     ;
 
@@ -60,54 +59,63 @@ block =
         return block;
     :}
     | expressions
+    | INT ID.id {:
+        return new IdDeclare(id);
+    :}
     ;
 
 
 expressions =
-    expression.expression {:
+    expression.expression SEMI {:
         return new List().add(expression);
     :}
-    | expressions.expression_list expression.expression {:
+    | expressions.expression_list expression.expression SEMI {:
         return expression_list.add(expression);
     :}
     ;
 
+
 expression =
+    id_use.id ASSIGN non_assign_expression.exp {:
+        return new Assign(id, exp);
+    :}
+    ;
+
+
+non_assign_expression =
     term
     | expression.expression PLUS term.term {:
         return new Add(expression, term);
     :}
     ;
 
+
 term =
     term.term MUL factor.factor {:
-      return new Mul(term, factor);
+        return new Mul(term, factor);
     :}
     | factor
     ;
+
 
 factor =
     numeral
     | id_use
     | LPAR expression.expression RPAR {:
-      return expression;
+        return expression;
     :}
-//    | id_declare
     ;
 
 
-numeral = NUMERAL.num {:
+numeral =
+    NUMERAL.num {:
         return new Numeral(num);
     :}
     ;
 
-id_use = ID.id {:
-    return new IdUse(id);
-    :}
-    ;
 
-id_declare =
-    INT ID.id {:
-      return new IdDeclare(id);
+id_use =
+    ID.id {:
+        return new IdUse(id);
     :}
     ;

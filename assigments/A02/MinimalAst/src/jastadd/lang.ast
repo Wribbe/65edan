@@ -7,10 +7,12 @@ BinaryExpression : Expression ::= Left:Expression Right:Expression;
 Add : BinaryExpression;
 Mul : BinaryExpression;
 
-FunctionDeclaration ::= IdDeclare [Block];
+FunctionDeclaration ::= <ID> [Block];
 
 Block;
 
 Numeral : Expression ::= <NUMERAL>;
 IdUse : Expression ::= <ID>;
-IdDeclare ::= <ID>;
+IdDeclare : Expression ::= <ID>;
+
+Assign : Expression ::= <ID> Value:Expression;
