@@ -38,6 +38,8 @@ NUMERAL = [1-9]+
 
 // token definitions
 "return"      { return sym(Terminals.RETURN); }
+"int"         { return sym(Terminals.INT); }
+"if"          { return sym(Terminals.IF); }
 ","           { return sym(Terminals.COMMA); }
 "="           { return sym(Terminals.ASSIGN); }
 ";"           { return sym(Terminals.SEMI); }
@@ -47,7 +49,6 @@ NUMERAL = [1-9]+
 "("           { return sym(Terminals.LPAR); }
 "*"           { return sym(Terminals.MUL); }
 "+"           { return sym(Terminals.PLUS); }
-"int"         { return sym(Terminals.INT); }
 {NUMERAL}     { return sym(Terminals.NUMERAL); }
 {ID}          { return sym(Terminals.ID); }
 <<EOF>>       { return sym(Terminals.EOF); }

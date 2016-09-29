@@ -19,7 +19,7 @@
 // Structural terminals.
 %terminals LPAR, RPAR, LBRA, RBRA, SEMI, COMMA;
 // Control logic terminals.
-%terminals RETURN;
+%terminals RETURN, IF;
 
 %typeof program = "Program";
 
@@ -40,6 +40,8 @@
 
 %typeof id_use = "IdUse";
 %typeof id_declare = "IdDeclare";
+
+%typeof control_flow_statement = "Expression";
 
 
 %goal program;
@@ -103,17 +105,36 @@ block =
         return new List();
     :}
     | LBRA expressions.exps RBRA {:
-        return exps ;
+        return exps;
+    :}
+    | LBRA block.block RBRA {:
+        return block;
     :}
     ;
 
 
 expressions =
+    arithemetic_expressions
+    | control_flow_expressions
+    ;
+
+
+arithemetic_expressions =
     expression.expression SEMI {:
         return new List().add(expression);
     :}
     | expressions.expression_list expression.expression SEMI {:
         return expression_list.add(expression);
+    :}
+    ;
+
+
+control_flow_expressions =
+    control_flow_statement.control {:
+        return new List().add(control);
+    :}
+    | expressions.expression_list control_flow_statement.control {:
+        return expression_list.add(control);
     :}
     ;
 
@@ -128,6 +149,13 @@ expression =
     | id_declare.id
     | RETURN non_assign_expression.expression {:
         return new Return(expression);
+    :}
+    ;
+
+
+control_flow_statement =
+    IF LPAR RPAR LBRA RBRA {:
+        return new IF(new Opt());
     :}
     ;
 

@@ -14,6 +14,8 @@ FunctionUse : Expression ::= IdUse [FunctionParameters:List];
 Assign : Expression ::= ID:IdExpression Value:Expression;
 Return : Expression ::= Expression;
 
+IF : Expression ::= [Block:Expressions];
+
 IdExpression : Expression;
 IdUse : IdExpression ::= <ID>;
 IdDeclare : IdExpression ::= <ID>;
