@@ -1,21 +1,19 @@
-abstract Expression;
-
 Program ::= FunctionDeclaration*;
+
+abstract Expression;
+Expressions ::= Expression*;
 
 BinaryExpression : Expression ::= Left:Expression Right:Expression;
 
 Add : BinaryExpression;
 Mul : BinaryExpression;
 
-FunctionDeclaration ::= <ID> [Block];
+FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions];
 
-Block;
-
-Numeral : Expression ::= <NUMERAL>;
+Assign : Expression ::= ID:IdExpression Value:Expression;
 
 IdExpression : Expression;
-
 IdUse : IdExpression ::= <ID>;
 IdDeclare : IdExpression ::= <ID>;
 
-Assign : Expression ::= ID:IdExpression Value:Expression;
+Numeral : Expression ::= <NUMERAL>;

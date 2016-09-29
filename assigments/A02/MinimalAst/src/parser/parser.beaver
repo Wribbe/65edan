@@ -14,7 +14,7 @@
 
 %terminals ID, NUMERAL, INT;
 %terminals PLUS, MUL, ASSIGN;
-%terminals LPAR, RPAR, LBRA, RBRA, SEMI;
+%terminals LPAR, RPAR, LBRA, RBRA, SEMI, COMMA;
 
 %typeof program = "Program";
 
@@ -49,15 +49,27 @@ functions =
 
 
 function =
-    INT ID.id LPAR RPAR block.block {:
-        return new FunctionDeclaration(id, new Opt(block));
+    id_declare.id LPAR function_parameters.funcparam RPAR block.block {:
+        return new FunctionDeclaration(id, new Opt(funcparam), new Opt(block));
+    :}
+    ;
+
+function_parameters =
+    /* Epsilon */ {:
+        return new List();
+    :}
+    | id_declare.id {:
+        return new List().add(id);
+    :}
+    | function_parameters.list COMMA id_declare.id {:
+        return list.add(id);
     :}
     ;
 
 
 block =
     LBRA RBRA {:
-        return new List().add(new Opt());
+        return new List();
     :}
     | LBRA expressions.exps RBRA {:
         return exps ;
