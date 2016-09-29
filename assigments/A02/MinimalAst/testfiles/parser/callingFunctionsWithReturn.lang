@@ -1,5 +1,5 @@
 int f(int t) {
     int a;
     int b;
-    int x = (z1(a, b) + z2(b, b)) + z3() * z4(b);
+    int x = (z1(a, b) + z2(b, b)) + z3(5, 4) * z4(z5(b, 9), 7*4);
 }

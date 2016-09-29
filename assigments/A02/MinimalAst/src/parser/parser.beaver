@@ -82,11 +82,11 @@ function_use_parameters =
     /* Epsilon */ {:
         return new List();
     :}
-    | id_use.id {:
-        return new List().add(id);
+    | non_assign_expression.expression {:
+        return new List().add(expression);
     :}
-    | function_use_parameters.list COMMA id_use.id {:
-        return list.add(id);
+    | function_use_parameters.list COMMA non_assign_expression.expression {:
+        return list.add(expression);
     :}
     ;
 
