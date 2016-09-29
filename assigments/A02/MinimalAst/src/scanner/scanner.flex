@@ -40,6 +40,7 @@ NUMERAL = [1-9]+
 "return"      { return sym(Terminals.RETURN); }
 "int"         { return sym(Terminals.INT); }
 "if"          { return sym(Terminals.IF); }
+"=="          { return sym(Terminals.EQ); }
 ","           { return sym(Terminals.COMMA); }
 "="           { return sym(Terminals.ASSIGN); }
 ";"           { return sym(Terminals.SEMI); }

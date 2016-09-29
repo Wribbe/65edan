@@ -20,6 +20,8 @@
 %terminals LPAR, RPAR, LBRA, RBRA, SEMI, COMMA;
 // Control logic terminals.
 %terminals RETURN, IF;
+// Logical operators.
+%terminals EQ;
 
 %typeof program = "Program";
 
@@ -42,6 +44,7 @@
 %typeof id_declare = "IdDeclare";
 
 %typeof control_flow_statement = "Expression";
+%typeof logic_expression = "LogicExpression";
 
 
 %goal program;
@@ -154,8 +157,15 @@ expression =
 
 
 control_flow_statement =
-    IF LPAR RPAR LBRA RBRA {:
-        return new IF(new Opt());
+    IF LPAR logic_expression.logic RPAR block.block {:
+        return new IF(logic, new Opt(block));
+    :}
+    ;
+
+
+logic_expression =
+    id_use.id EQ non_assign_expression.expression {:
+        return new  EQ(id, expression);
     :}
     ;
 
