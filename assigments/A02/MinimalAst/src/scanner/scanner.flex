@@ -37,6 +37,7 @@ NUMERAL = [1-9]+
 {WhiteSpace}  { }
 
 // token definitions
+"return"      { return sym(Terminals.RETURN); }
 ","           { return sym(Terminals.COMMA); }
 "="           { return sym(Terminals.ASSIGN); }
 ";"           { return sym(Terminals.SEMI); }

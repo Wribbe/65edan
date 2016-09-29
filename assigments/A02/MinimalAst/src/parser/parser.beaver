@@ -12,9 +12,14 @@
     }
 :};
 
+// Type terminals.
 %terminals ID, NUMERAL, INT;
+// Arithmetic terminals.
 %terminals PLUS, MUL, ASSIGN;
+// Structural terminals.
 %terminals LPAR, RPAR, LBRA, RBRA, SEMI, COMMA;
+// Control logic terminals.
+%terminals RETURN;
 
 %typeof program = "Program";
 
@@ -36,7 +41,9 @@
 %typeof id_use = "IdUse";
 %typeof id_declare = "IdDeclare";
 
+
 %goal program;
+
 
 program = function_declarations.functions {: return new Program(functions); :} ;
 
@@ -118,8 +125,9 @@ expression =
     | id_declare.id ASSIGN non_assign_expression.exp {:
         return new Assign(id, exp);
     :}
-    | INT ID.id {:
-        return new IdDeclare(id);
+    | id_declare.id
+    | RETURN non_assign_expression.expression {:
+        return new Return(expression);
     :}
     ;
 
