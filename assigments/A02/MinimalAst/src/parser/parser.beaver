@@ -22,10 +22,11 @@
 %typeof factor = "Expression";
 %typeof term = "Expression";
 
-%typeof functions = "List";
+%typeof function_declarations = "List";
+%typeof function_declaration_parameters = "List";
 %typeof expressions = "List";
 
-%typeof function = "FunctionDeclaration";
+%typeof function_declaration = "FunctionDeclaration";
 %typeof block = "List";
 
 %typeof non_assign_expression = "Expression";
@@ -35,33 +36,33 @@
 
 %goal program;
 
-program = functions.functions {: return new Program(functions); :} ;
+program = function_declarations.functions {: return new Program(functions); :} ;
 
 
-functions =
-    function.function {:
+function_declarations =
+    function_declaration.function {:
         return new List().add(function);
     :}
-    | functions.function_list function.function  {:
+    | function_declarations.function_list function_declaration.function  {:
         return function_list.add(function);
     :}
     ;
 
 
-function =
-    id_declare.id LPAR function_parameters.funcparam RPAR block.block {:
-        return new FunctionDeclaration(id, new Opt(funcparam), new Opt(block));
+function_declaration =
+    id_declare.id LPAR function_declaration_parameters.fps RPAR block.block {:
+        return new FunctionDeclaration(id, new Opt(fps), new Opt(block));
     :}
     ;
 
-function_parameters =
+function_declaration_parameters =
     /* Epsilon */ {:
         return new List();
     :}
     | id_declare.id {:
         return new List().add(id);
     :}
-    | function_parameters.list COMMA id_declare.id {:
+    | function_declaration_parameters.list COMMA id_declare.id {:
         return list.add(id);
     :}
     ;
