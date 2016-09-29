@@ -27,7 +27,7 @@
 
 %typeof non_assign_expression = "Expression";
 
-//%typeof id_declare = "IdDeclare";
+%typeof id_use = "IdUse";
 
 %goal program;
 
@@ -55,12 +55,8 @@ block =
     LBRA RBRA {:
         return new List().add(new Opt());
     :}
-    | LBRA block.block RBRA {:
-        return block;
-    :}
-    | expressions
-    | INT ID.id {:
-        return new IdDeclare(id);
+    | LBRA expressions.exps RBRA {:
+        return exps ;
     :}
     ;
 
@@ -78,6 +74,12 @@ expressions =
 expression =
     id_use.id ASSIGN non_assign_expression.exp {:
         return new Assign(id, exp);
+    :}
+    | INT id_use.id ASSIGN non_assign_expression.exp {:
+        return new Assign(id, exp);
+    :}
+    | INT ID.id {:
+        return new IdDeclare(id);
     :}
     ;
 

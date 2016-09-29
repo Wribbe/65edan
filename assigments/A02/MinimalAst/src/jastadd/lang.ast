@@ -15,4 +15,4 @@ Numeral : Expression ::= <NUMERAL>;
 IdUse : Expression ::= <ID>;
 IdDeclare : Expression ::= <ID>;
 
-Assign : Expression ::= <ID> Value:Expression;
+Assign : Expression ::= ID:IdUse Value:Expression;
