@@ -28,6 +28,7 @@
 %typeof non_assign_expression = "Expression";
 
 %typeof id_use = "IdUse";
+%typeof id_declare = "IdDeclare";
 
 %goal program;
 
@@ -75,7 +76,7 @@ expression =
     id_use.id ASSIGN non_assign_expression.exp {:
         return new Assign(id, exp);
     :}
-    | INT id_use.id ASSIGN non_assign_expression.exp {:
+    | id_declare.id ASSIGN non_assign_expression.exp {:
         return new Assign(id, exp);
     :}
     | INT ID.id {:
@@ -86,7 +87,7 @@ expression =
 
 non_assign_expression =
     term
-    | expression.expression PLUS term.term {:
+    | non_assign_expression.expression PLUS term.term {:
         return new Add(expression, term);
     :}
     ;
@@ -103,7 +104,7 @@ term =
 factor =
     numeral
     | id_use
-    | LPAR expression.expression RPAR {:
+    | LPAR non_assign_expression.expression RPAR {:
         return expression;
     :}
     ;
@@ -112,6 +113,13 @@ factor =
 numeral =
     NUMERAL.num {:
         return new Numeral(num);
+    :}
+    ;
+
+
+id_declare =
+    INT ID.id {:
+        return new IdDeclare(id);
     :}
     ;
 

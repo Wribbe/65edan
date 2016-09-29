@@ -12,7 +12,10 @@ FunctionDeclaration ::= <ID> [Block];
 Block;
 
 Numeral : Expression ::= <NUMERAL>;
-IdUse : Expression ::= <ID>;
-IdDeclare : Expression ::= <ID>;
 
-Assign : Expression ::= ID:IdUse Value:Expression;
+IdExpression : Expression;
+
+IdUse : IdExpression ::= <ID>;
+IdDeclare : IdExpression ::= <ID>;
+
+Assign : Expression ::= ID:IdExpression Value:Expression;
