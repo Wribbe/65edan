@@ -9,6 +9,7 @@ Add : BinaryExpression;
 Mul : BinaryExpression;
 
 FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions];
+FunctionUse : Expression ::= IdUse [FunctionParameters:List];
 
 Assign : Expression ::= ID:IdExpression Value:Expression;
 

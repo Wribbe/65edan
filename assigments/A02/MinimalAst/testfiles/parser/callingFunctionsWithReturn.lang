@@ -1,0 +1,5 @@
+int f(int t) {
+    int a;
+    int b;
+    int x = (z1(a, b) + z2(b, b)) + z3() * z4(b);
+}

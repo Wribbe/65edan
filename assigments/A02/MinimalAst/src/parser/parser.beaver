@@ -24,6 +24,8 @@
 
 %typeof function_declarations = "List";
 %typeof function_declaration_parameters = "List";
+%typeof function_use_parameters = "List";
+
 %typeof expressions = "List";
 
 %typeof function_declaration = "FunctionDeclaration";
@@ -55,6 +57,7 @@ function_declaration =
     :}
     ;
 
+
 function_declaration_parameters =
     /* Epsilon */ {:
         return new List();
@@ -63,6 +66,26 @@ function_declaration_parameters =
         return new List().add(id);
     :}
     | function_declaration_parameters.list COMMA id_declare.id {:
+        return list.add(id);
+    :}
+    ;
+
+
+function_use =
+    id_use.id LPAR function_use_parameters.funcparams RPAR {:
+        return new FunctionUse(id, new Opt(funcparams));
+    :}
+    ;
+
+
+function_use_parameters =
+    /* Epsilon */ {:
+        return new List();
+    :}
+    | id_use.id {:
+        return new List().add(id);
+    :}
+    | function_use_parameters.list COMMA id_use.id {:
         return list.add(id);
     :}
     ;
@@ -123,6 +146,7 @@ factor =
     | LPAR non_assign_expression.expression RPAR {:
         return expression;
     :}
+    | function_use
     ;
 
 
