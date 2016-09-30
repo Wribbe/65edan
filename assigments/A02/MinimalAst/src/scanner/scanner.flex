@@ -42,7 +42,12 @@ NUMERAL = [1-9]+
 "else"        { return sym(Terminals.ELSE); }
 "int"         { return sym(Terminals.INT); }
 "if"          { return sym(Terminals.IF); }
+"!="          { return sym(Terminals.NOEQ); }
 "=="          { return sym(Terminals.EQ); }
+"<="          { return sym(Terminals.LTEQ); }
+">="          { return sym(Terminals.GTEQ); }
+"<"           { return sym(Terminals.LT); }
+">"           { return sym(Terminals.GT); }
 ","           { return sym(Terminals.COMMA); }
 "="           { return sym(Terminals.ASSIGN); }
 ";"           { return sym(Terminals.SEMI); }

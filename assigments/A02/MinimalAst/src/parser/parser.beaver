@@ -21,7 +21,7 @@
 // Control logic terminals.
 %terminals RETURN, IF, ELSE, WHILE;
 // Logical operators.
-%terminals EQ;
+%terminals NOEQ, EQ, LTEQ, GTEQ, LT, GT;
 
 %typeof program = "Program";
 
@@ -192,8 +192,23 @@ while_statement =
 
 
 logic_expression =
-    factor.factor EQ non_assign_expression.expression {:
+    factor.factor NOEQ  non_assign_expression.expression {:
+        return new NOEQ(factor, expression);
+    :}
+    | factor.factor EQ non_assign_expression.expression {:
         return new  EQ(factor, expression);
+    :}
+    | factor.factor LTEQ non_assign_expression.expression {:
+        return new  LTEQ(factor, expression);
+    :}
+    | factor.factor GTEQ non_assign_expression.expression {:
+        return new  GTEQ(factor, expression);
+    :}
+    | factor.factor LT non_assign_expression.expression {:
+        return new  LT(factor, expression);
+    :}
+    | factor.factor GT non_assign_expression.expression {:
+        return new  GT(factor, expression);
     :}
     ;
 

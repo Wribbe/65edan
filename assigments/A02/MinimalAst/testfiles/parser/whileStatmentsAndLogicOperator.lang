@@ -1,0 +1,21 @@
+// Test while() {} and !=, ==, <, >, <=, >= operators.
+int g(int v1, int v2, int v3) {
+    while(v1 != 2) {
+        if (v1 == 2 ) {
+            v1 = v1 + 1;
+        }
+    }
+    if (v1 < 2) {
+        print(v1);
+    } else {
+        if (v2 > v3) {
+            print(v2);
+        }
+    }
+    if (v3 <= v3) {
+        print(v3);
+    }
+    if (v2 >= v1) {
+        print(v2);
+    }
+}

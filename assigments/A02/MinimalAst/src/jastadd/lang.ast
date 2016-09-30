@@ -20,7 +20,12 @@ IF : ControlFlowExpression ::= Logic:LogicExpression [Block:Expressions] [Contro
 WHILE : ControlFlowExpression ::= Logic:LogicExpression [Block:Expressions];
 ELSE: ControlFlowExpression ::= [Block:Expressions];
 
+NOEQ : LogicExpression ::= ID:Expression Expression;
 EQ : LogicExpression ::= ID:Expression Expression;
+LTEQ  : LogicExpression ::= ID:Expression Expression;
+GTEQ  : LogicExpression ::= ID:Expression Expression;
+LT : LogicExpression ::= ID:Expression Expression;
+GT : LogicExpression ::= ID:Expression Expression;
 
 IdExpression : Expression;
 IdUse : IdExpression ::= <ID>;
