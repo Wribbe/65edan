@@ -158,7 +158,6 @@ expression =
     :}
     | function_use
     | control_flow_statement
-    | logic_expression
     ;
 
 
@@ -193,28 +192,28 @@ while_statement =
 
 
 logic_expression =
-    non_assign_expression.exp1 NOEQ  non_assign_expression.exp2 {:
+    non_logic_expression.exp1 NOEQ  non_assign_expression.exp2 {:
         return new NOEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 EQ non_assign_expression.exp2 {:
+    | non_logic_expression.exp1 EQ non_assign_expression.exp2 {:
         return new  EQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 LTEQ non_assign_expression.exp2 {:
+    | non_logic_expression.exp1 LTEQ non_assign_expression.exp2 {:
         return new  LTEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 GTEQ non_assign_expression.exp2 {:
+    | non_logic_expression.exp1 GTEQ non_assign_expression.exp2 {:
         return new  GTEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 LT non_assign_expression.exp2 {:
+    | non_logic_expression.exp1 LT non_assign_expression.exp2 {:
         return new  LT(exp1, exp2);
     :}
-    | non_assign_expression.exp1 GT non_assign_expression.exp2 {:
+    | non_logic_expression.exp1 GT non_assign_expression.exp2 {:
         return new  GT(exp1, exp2);
     :}
     ;
 
 
-non_assign_expression =
+non_logic_expression =
     term
     | non_assign_expression.expression PLUS term.term {:
         return new Add(expression, term);
@@ -222,6 +221,12 @@ non_assign_expression =
     | non_assign_expression.expression MINUS term.term {:
         return new Minus(expression, term);
     :}
+    ;
+
+
+non_assign_expression =
+    non_logic_expression
+    | logic_expression
     ;
 
 
