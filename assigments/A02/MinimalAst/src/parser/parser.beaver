@@ -193,23 +193,23 @@ while_statement =
 
 
 logic_expression =
-    factor.factor NOEQ  non_assign_expression.expression {:
-        return new NOEQ(factor, expression);
+    non_assign_expression.exp1 NOEQ  non_assign_expression.exp2 {:
+        return new NOEQ(exp1, exp2);
     :}
-    | factor.factor EQ non_assign_expression.expression {:
-        return new  EQ(factor, expression);
+    | non_assign_expression.exp1 EQ non_assign_expression.exp2 {:
+        return new  EQ(exp1, exp2);
     :}
-    | factor.factor LTEQ non_assign_expression.expression {:
-        return new  LTEQ(factor, expression);
+    | non_assign_expression.exp1 LTEQ non_assign_expression.exp2 {:
+        return new  LTEQ(exp1, exp2);
     :}
-    | factor.factor GTEQ non_assign_expression.expression {:
-        return new  GTEQ(factor, expression);
+    | non_assign_expression.exp1 GTEQ non_assign_expression.exp2 {:
+        return new  GTEQ(exp1, exp2);
     :}
-    | factor.factor LT non_assign_expression.expression {:
-        return new  LT(factor, expression);
+    | non_assign_expression.exp1 LT non_assign_expression.exp2 {:
+        return new  LT(exp1, exp2);
     :}
-    | factor.factor GT non_assign_expression.expression {:
-        return new  GT(factor, expression);
+    | non_assign_expression.exp1 GT non_assign_expression.exp2 {:
+        return new  GT(exp1, exp2);
     :}
     ;
 
