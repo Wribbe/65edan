@@ -3,4 +3,5 @@ int a(int v1, int v2) {
     int y;
     x = 5;
     y = x;
+    return x % y;
 }

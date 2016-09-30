@@ -48,6 +48,8 @@
 
 %typeof else_statement = "ELSE";
 
+%typeof return_statement = "Return";
+
 
 %goal program;
 
@@ -66,8 +68,14 @@ function_declarations =
 
 
 function_declaration =
-    id_declare.id LPAR function_declaration_parameters.fps RPAR block.block {:
-        return new FunctionDeclaration(id, new Opt(fps), new Opt(block));
+    id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA return_statement.retstm RBRA {:
+        return new FunctionDeclaration(id, new Opt(fps), new Opt(), retstm);
+    :}
+    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA block.block return_statement.retstm RBRA {:
+        return new FunctionDeclaration(id, new Opt(fps), new Opt(block), retstm);
+    :}
+    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA expressions.exps return_statement.retstm RBRA {:
+        return new FunctionDeclaration(id, new Opt(fps), new Opt(exps), retstm);
     :}
     ;
 
@@ -153,17 +161,22 @@ expression =
         return new Assign(id, exp);
     :}
     | id_declare.id
-    | RETURN non_assign_expression.expression {:
-        return new Return(expression);
-    :}
     | function_use
     | control_flow_statement
+    ;
+
+
+return_statement =
+    RETURN non_assign_expression.expression SEMI {:
+        return new Return(expression);
+    :}
     ;
 
 
 control_flow_statement =
     if_statement
     | while_statement
+    | return_statement
     ;
 
 
@@ -192,28 +205,28 @@ while_statement =
 
 
 logic_expression =
-    non_logic_expression.exp1 NOEQ  non_assign_expression.exp2 {:
+    |non_assign_expression.exp1 NOEQ  non_assign_expression.exp2 {:
         return new NOEQ(exp1, exp2);
     :}
-    | non_logic_expression.exp1 EQ non_assign_expression.exp2 {:
+    | non_assign_expression.exp1 EQ non_assign_expression.exp2 {:
         return new  EQ(exp1, exp2);
     :}
-    | non_logic_expression.exp1 LTEQ non_assign_expression.exp2 {:
+    | non_assign_expression.exp1 LTEQ non_assign_expression.exp2 {:
         return new  LTEQ(exp1, exp2);
     :}
-    | non_logic_expression.exp1 GTEQ non_assign_expression.exp2 {:
+    | non_assign_expression.exp1 GTEQ non_assign_expression.exp2 {:
         return new  GTEQ(exp1, exp2);
     :}
-    | non_logic_expression.exp1 LT non_assign_expression.exp2 {:
+    | non_assign_expression.exp1 LT non_assign_expression.exp2 {:
         return new  LT(exp1, exp2);
     :}
-    | non_logic_expression.exp1 GT non_assign_expression.exp2 {:
+    | non_assign_expression.exp1 GT non_assign_expression.exp2 {:
         return new  GT(exp1, exp2);
     :}
     ;
 
 
-non_logic_expression =
+non_assign_expression =
     term
     | non_assign_expression.expression PLUS term.term {:
         return new Add(expression, term);
@@ -221,12 +234,6 @@ non_logic_expression =
     | non_assign_expression.expression MINUS term.term {:
         return new Minus(expression, term);
     :}
-    ;
-
-
-non_assign_expression =
-    non_logic_expression
-    | logic_expression
     ;
 
 

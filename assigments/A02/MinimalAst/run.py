@@ -83,10 +83,10 @@ def main(args):
             paths_ok.append(file_path)
 
     testfiles = []
-    if not args:
-        testfiles = paths_ok
-    elif 'err' in args or 'error' in args:
+    if 'err' in args or 'error' in args:
         testfiles = paths_error
+    else:
+        testfiles = paths_ok
 
     for filepath in testfiles:
         run_in_compiler(filepath)

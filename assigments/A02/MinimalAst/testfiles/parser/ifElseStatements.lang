@@ -16,4 +16,5 @@ int f() {
             //Nothing really happens in here.
         }
     }
+    return 1;
 }

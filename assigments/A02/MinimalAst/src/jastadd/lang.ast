@@ -11,7 +11,7 @@ Div : BinaryExpression;
 Minus : BinaryExpression;
 Remainder : BinaryExpression;
 
-FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions];
+FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions] Return;
 FunctionUse : Expression ::= IdUse [FunctionParameters:List];
 
 Assign : Expression ::= ID:IdExpression Value:Expression;

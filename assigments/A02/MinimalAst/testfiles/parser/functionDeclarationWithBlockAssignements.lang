@@ -3,4 +3,5 @@ int a() {
     int y;
     x = 5;
     y = x;
+    return 0;
 }
