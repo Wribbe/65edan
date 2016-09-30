@@ -46,7 +46,7 @@
 %typeof control_flow_statement = "Expression";
 %typeof logic_expression = "LogicExpression";
 
-%typeof else_statement = "ControlFlowExpression";
+%typeof else_statement = "ELSE";
 
 
 %goal program;
@@ -158,6 +158,7 @@ expression =
     :}
     | function_use
     | control_flow_statement
+    | logic_expression
     ;
 
 

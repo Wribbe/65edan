@@ -18,10 +18,9 @@ Assign : Expression ::= ID:IdExpression Value:Expression;
 Return : Expression ::= Expression;
 
 abstract LogicExpression;
-ControlFlowExpression : Expression;
-IF : ControlFlowExpression ::= Logic:LogicExpression [Block:Expressions] [ControlFlowExpression];
-WHILE : ControlFlowExpression ::= Logic:LogicExpression [Block:Expressions];
-ELSE: ControlFlowExpression ::= [Block:Expressions];
+IF : Expression ::= Logic:LogicExpression [Block:Expressions] [ELSE];
+WHILE : Expression ::= Logic:LogicExpression [Block:Expressions];
+ELSE: Expression ::= [Block:Expressions];
 
 NOEQ : LogicExpression ::= ID:Expression Expression;
 EQ : LogicExpression ::= ID:Expression Expression;
