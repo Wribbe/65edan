@@ -3,13 +3,15 @@ int f() {
     if (a == 4 + 5) {
         if (b == a) {
 
+        } else {
+            int x;
+            x = 5;
+            return x;
         }
     }
 
     if (a == g(5, 4)) {
-    }
-    bananabread();
-    else {
+    } else {
         if (4 == 5) {
         }
     }

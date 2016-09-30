@@ -46,6 +46,8 @@
 %typeof control_flow_statement = "Expression";
 %typeof logic_expression = "LogicExpression";
 
+%typeof else_statement = "ControlFlowExpression";
+
 
 %goal program;
 
@@ -155,23 +157,28 @@ expression =
         return new Return(expression);
     :}
     | function_use
+    | control_flow_statement
     ;
 
 
 control_flow_statement =
     if_statement
-    | ELSE LPAR logic_expression.logic RPAR block.block {:
-        return new ELSE(new Opt(logic), new Opt(block));
-    :}
-    | ELSE block.block {:
-        return new ELSE(new Opt(), new Opt(block));
-    :}
     ;
 
 
 if_statement =
-    IF LPAR logic_expression.logic RPAR block.block {:
+    IF LPAR logic_expression.logic RPAR block.block else_statement.elsestm {:
+        return new IF(logic, new Opt(block), new Opt(elsestm));
+    :}
+    | IF LPAR logic_expression.logic RPAR block.block  {:
         return new IF(logic, new Opt(block), new Opt());
+    :}
+    ;
+
+
+else_statement =
+    ELSE block.block {:
+        return new ELSE(new Opt(block));
     :}
     ;
 

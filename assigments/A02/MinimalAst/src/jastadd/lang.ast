@@ -17,7 +17,7 @@ Return : Expression ::= Expression;
 abstract LogicExpression;
 ControlFlowExpression : Expression;
 IF : ControlFlowExpression ::= Logic:LogicExpression [Block:Expressions] [ControlFlowExpression];
-ELSE: ControlFlowExpression ::= [Logic:LogicExpression] [Block:Expression];
+ELSE: ControlFlowExpression ::= [Block:Expressions];
 
 EQ : LogicExpression ::= ID:Expression Expression;
 
