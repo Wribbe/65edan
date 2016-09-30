@@ -28,8 +28,8 @@ import lang.ast.LangParser.SyntaxError;
 
 // macros
 WhiteSpace = [ ] | \t | \f | \n | \r | \s*\/\/.*
-ID = [a-zA-Z][a-zA-Z1-9]*
-NUMERAL = [1-9]+
+ID = [a-zA-Z][a-zA-Z0-9]*
+NUMERAL = [0-9]+
 
 %%
 
