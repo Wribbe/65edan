@@ -7,6 +7,7 @@ BinaryExpression : Expression ::= Left:Expression Right:Expression;
 
 Add : BinaryExpression;
 Mul : BinaryExpression;
+DIV : BinaryExpression;
 
 FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions];
 FunctionUse : Expression ::= IdUse [FunctionParameters:List];

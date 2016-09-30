@@ -55,6 +55,7 @@ NUMERAL = [1-9]+
 "{"           { return sym(Terminals.LBRA); }
 ")"           { return sym(Terminals.RPAR); }
 "("           { return sym(Terminals.LPAR); }
+"/"           { return sym(Terminals.DIV); }
 "*"           { return sym(Terminals.MUL); }
 "+"           { return sym(Terminals.PLUS); }
 {NUMERAL}     { return sym(Terminals.NUMERAL); }

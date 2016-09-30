@@ -15,7 +15,7 @@
 // Type terminals.
 %terminals ID, NUMERAL, INT;
 // Arithmetic terminals.
-%terminals PLUS, MUL, ASSIGN;
+%terminals PLUS, MUL, ASSIGN, DIV;
 // Structural terminals.
 %terminals LPAR, RPAR, LBRA, RBRA, SEMI, COMMA;
 // Control logic terminals.
@@ -224,6 +224,9 @@ non_assign_expression =
 term =
     term.term MUL factor.factor {:
         return new Mul(term, factor);
+    :}
+    | term.term DIV factor.factor {:
+        return new DIV(term, factor);
     :}
     | factor
     ;
