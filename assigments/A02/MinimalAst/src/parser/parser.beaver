@@ -19,7 +19,7 @@
 // Structural terminals.
 %terminals LPAR, RPAR, LBRA, RBRA, SEMI, COMMA;
 // Control logic terminals.
-%terminals RETURN, IF, ELSE;
+%terminals RETURN, IF, ELSE, WHILE;
 // Logical operators.
 %terminals EQ;
 
@@ -163,6 +163,7 @@ expression =
 
 control_flow_statement =
     if_statement
+    | while_statement
     ;
 
 
@@ -179,6 +180,13 @@ if_statement =
 else_statement =
     ELSE block.block {:
         return new ELSE(new Opt(block));
+    :}
+    ;
+
+
+while_statement =
+    WHILE LPAR logic_expression.logic RPAR block.block {:
+        return new WHILE(logic, new Opt(block));
     :}
     ;
 
