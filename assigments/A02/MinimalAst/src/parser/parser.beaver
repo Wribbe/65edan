@@ -19,7 +19,7 @@
 // Structural terminals.
 %terminals LPAR, RPAR, LBRA, RBRA, SEMI, COMMA;
 // Control logic terminals.
-%terminals RETURN, IF;
+%terminals RETURN, IF, ELSE;
 // Logical operators.
 %terminals EQ;
 
@@ -133,6 +133,7 @@ arithemetic_expressions =
 
 
 control_flow_expressions =
+
     control_flow_statement.control {:
         return new List().add(control);
     :}
@@ -158,15 +159,26 @@ expression =
 
 
 control_flow_statement =
+    if_statement
+    | ELSE LPAR logic_expression.logic RPAR block.block {:
+        return new ELSE(new Opt(logic), new Opt(block));
+    :}
+    | ELSE block.block {:
+        return new ELSE(new Opt(), new Opt(block));
+    :}
+    ;
+
+
+if_statement =
     IF LPAR logic_expression.logic RPAR block.block {:
-        return new IF(logic, new Opt(block));
+        return new IF(logic, new Opt(block), new Opt());
     :}
     ;
 
 
 logic_expression =
-    id_use.id EQ non_assign_expression.expression {:
-        return new  EQ(id, expression);
+    factor.factor EQ non_assign_expression.expression {:
+        return new  EQ(factor, expression);
     :}
     ;
 

@@ -38,6 +38,7 @@ NUMERAL = [1-9]+
 
 // token definitions
 "return"      { return sym(Terminals.RETURN); }
+"else"        { return sym(Terminals.ELSE); }
 "int"         { return sym(Terminals.INT); }
 "if"          { return sym(Terminals.IF); }
 "=="          { return sym(Terminals.EQ); }

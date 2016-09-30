@@ -1,7 +1,16 @@
 int f() {
+
     if (a == 4 + 5) {
         if (b == a) {
 
+        }
+    }
+
+    if (a == g(5, 4)) {
+    }
+    bananabread();
+    else {
+        if (4 == 5) {
         }
     }
 }
