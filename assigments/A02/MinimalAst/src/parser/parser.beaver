@@ -153,6 +153,7 @@ expression =
     | RETURN non_assign_expression.expression {:
         return new Return(expression);
     :}
+    | function_use
     ;
 
 
