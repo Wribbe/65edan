@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 
 JAR_NAME = "minAstCompiler.jar"
 
@@ -57,7 +58,7 @@ def run_in_compiler(filename):
     print("")
 
 
-def main():
+def main(args):
 
     TEST_FOLDER = os.path.join("testfiles", "parser")
 
@@ -69,11 +70,26 @@ def main():
     for command in commands:
         run(command)
 
-    testfiles = [os.path.join(TEST_FOLDER, filename) for filename in
-                 os.listdir(TEST_FOLDER) if filename.endswith(".lang")]
+    paths_ok = []
+    paths_error = []
+
+    for filename in os.listdir(TEST_FOLDER):
+        if not filename.endswith(".lang"):
+            continue
+        file_path = os.path.join(TEST_FOLDER, filename)
+        if filename.startswith('error'):
+            paths_error.append(file_path)
+        else:
+            paths_ok.append(file_path)
+
+    testfiles = []
+    if not args:
+        testfiles = paths_ok
+    elif 'err' in args or 'error' in args:
+        testfiles = paths_error
 
     for filepath in testfiles:
         run_in_compiler(filepath)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
