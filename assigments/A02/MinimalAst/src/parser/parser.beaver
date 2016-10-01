@@ -45,6 +45,7 @@
 
 %typeof control_flow_statement = "Expression";
 %typeof logic_expression = "LogicExpression";
+%typeof assignable_expression = "Expression";
 
 %typeof else_statement = "ELSE";
 
@@ -154,10 +155,10 @@ control_flow_expressions =
 
 
 expression =
-    id_use.id ASSIGN non_assign_expression.exp {:
+    id_use.id ASSIGN assignable_expression.exp {:
         return new Assign(id, exp);
     :}
-    | id_declare.id ASSIGN non_assign_expression.exp {:
+    | id_declare.id ASSIGN assignable_expression.exp {:
         return new Assign(id, exp);
     :}
     | id_declare.id
@@ -204,8 +205,14 @@ while_statement =
     ;
 
 
+assignable_expression =
+    non_assign_expression
+    | logic_expression
+    ;
+
+
 logic_expression =
-    |non_assign_expression.exp1 NOEQ  non_assign_expression.exp2 {:
+    non_assign_expression.exp1 NOEQ non_assign_expression.exp2 {:
         return new NOEQ(exp1, exp2);
     :}
     | non_assign_expression.exp1 EQ non_assign_expression.exp2 {:
