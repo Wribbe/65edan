@@ -27,9 +27,9 @@ import lang.ast.LangParser.SyntaxError;
 %}
 
 // macros
-WhiteSpace = [ ] | \t | \f | \n | \r
-ID = [a-zA-Z]+
-NUMERAL = [1-9]+
+WhiteSpace = [ ] | \t | \f | \n | \r | \s*\/\/.*
+ID = [a-zA-Z][a-zA-Z0-9]*
+NUMERAL = [0-9]+
 
 %%
 
@@ -37,6 +37,17 @@ NUMERAL = [1-9]+
 {WhiteSpace}  { }
 
 // token definitions
+"return"      { return sym(Terminals.RETURN); }
+"while"       { return sym(Terminals.WHILE); }
+"else"        { return sym(Terminals.ELSE); }
+"int"         { return sym(Terminals.INT); }
+"if"          { return sym(Terminals.IF); }
+"!="          { return sym(Terminals.NOEQ); }
+"=="          { return sym(Terminals.EQ); }
+"<="          { return sym(Terminals.LTEQ); }
+">="          { return sym(Terminals.GTEQ); }
+"<"           { return sym(Terminals.LT); }
+">"           { return sym(Terminals.GT); }
 ","           { return sym(Terminals.COMMA); }
 "="           { return sym(Terminals.ASSIGN); }
 ";"           { return sym(Terminals.SEMI); }
@@ -44,9 +55,13 @@ NUMERAL = [1-9]+
 "{"           { return sym(Terminals.LBRA); }
 ")"           { return sym(Terminals.RPAR); }
 "("           { return sym(Terminals.LPAR); }
-"int"         { return sym(Terminals.INT); }
+"%"           { return sym(Terminals.REM); }
+"/"           { return sym(Terminals.DIV); }
+"*"           { return sym(Terminals.MUL); }
+"-"           { return sym(Terminals.MINUS); }
+"+"           { return sym(Terminals.PLUS); }
+{NUMERAL}     { return sym(Terminals.NUMERAL); }
 {ID}          { return sym(Terminals.ID); }
-{NUMERAL}     { return sym(Terminals.NUM); }
 <<EOF>>       { return sym(Terminals.EOF); }
 
 /* error fallback */

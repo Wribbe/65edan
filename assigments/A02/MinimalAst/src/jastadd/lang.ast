@@ -1,10 +1,36 @@
-Program ::= Function*;
+Program ::= FunctionDeclaration*;
 
-abstract Function;
-FunctionDeclaration : Function ::= Name:IdDeclaration;
+abstract Expression;
+Expressions ::= Expression*;
 
-//abstract Statement;
-//AssignStatement : Statement ::= <ID>;
-//UseStatement : Statement;
-//
-//IdDeclaration ::= <ID>;
+BinaryExpression : Expression ::= Left:Expression Right:Expression;
+
+Add : BinaryExpression;
+Mul : BinaryExpression;
+Div : BinaryExpression;
+Minus : BinaryExpression;
+Remainder : BinaryExpression;
+
+FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions] Return;
+FunctionUse : Expression ::= IdUse [FunctionParameters:List];
+
+Assign : Expression ::= ID:IdExpression Value:Expression;
+Return : Expression ::= Expression;
+
+LogicExpression : Expression;
+IF : Expression ::= Logic:LogicExpression [Block:Expressions] [ELSE];
+WHILE : Expression ::= Logic:LogicExpression [Block:Expressions];
+ELSE: Expression ::= [Block:Expressions];
+
+NOEQ : LogicExpression ::= ID:Expression Expression;
+EQ : LogicExpression ::= ID:Expression Expression;
+LTEQ  : LogicExpression ::= ID:Expression Expression;
+GTEQ  : LogicExpression ::= ID:Expression Expression;
+LT : LogicExpression ::= ID:Expression Expression;
+GT : LogicExpression ::= ID:Expression Expression;
+
+IdExpression : Expression;
+IdUse : IdExpression ::= <ID>;
+IdDeclare : IdExpression ::= <ID>;
+
+Numeral : Expression ::= <NUMERAL>;

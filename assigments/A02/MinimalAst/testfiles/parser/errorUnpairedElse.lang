@@ -1,0 +1,10 @@
+int f() {
+    if (a == b) {
+        // This is okay.
+    } else {
+        // This is okay.
+    } else {
+        // This should not be here.
+    }
+    return 0;
+}
