@@ -141,18 +141,20 @@ def main(args=[]):
                            ' getClass().getName());'
             }
 
-    unindented_lines = create_aspect("Visitor", objects, aspect_methods)
-    indented_lines = indent(unindented_lines)
+    if 'aspect' in args:
+        unindented_lines = create_aspect("Visitor", objects, aspect_methods)
+        indented_lines = indent(unindented_lines)
 
-    print("\n".join(indented_lines))
+        print("\n".join(indented_lines))
+    elif 'class' in args:
+        unindented_class_lines = create_class("TraversingVisitor",
+                                              ['lang.ast.Visitor'],
+                                              objects,
+                                              {})
 
-    unindented_class_lines = create_class("TraversingVisitor",
-                                          ['lang.ast.Visitor'],
-                                          objects,
-                                          {})
-
-    class_lines = indent(unindented_class_lines)
-    print('\n'.join(class_lines))
+        class_lines = indent(unindented_class_lines)
+        print('\n'.join(class_lines))
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(sys.argv[1:])
