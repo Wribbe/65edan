@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+
+sep = os.linesep
 
 def create_aspect(aspect_name, list_objects, aspect_methods):
 
@@ -141,20 +147,44 @@ def main(args=[]):
                            ' getClass().getName());'
             }
 
-    if 'aspect' in args:
+    def make_aspect():
         unindented_lines = create_aspect("Visitor", objects, aspect_methods)
         indented_lines = indent(unindented_lines)
+        return sep.join(indented_lines)
 
-        print("\n".join(indented_lines))
-    elif 'class' in args:
+    def make_class():
         unindented_class_lines = create_class("TraversingVisitor",
                                               ['lang.ast.Visitor'],
                                               objects,
                                               {})
 
         class_lines = indent(unindented_class_lines)
-        print('\n'.join(class_lines))
+        return sep.join(class_lines)
+
+    if 'aspect' in args:
+        print(make_aspect())
+    elif 'class' in args:
+        print(make_class())
+    else:
+        current_path = os.getcwd()
+
+        visitor_jarg_tokens = ['src', 'jastadd', 'Visitor.jarg']
+        visitor_class_tokens = ['src', 'java', 'lang', 'TravelingVisitor.java']
+
+        jarg_path = os.path.join(*visitor_jarg_tokens)
+        class_path = os.path.join(*visitor_class_tokens)
+
+        file_objects = {
+                    jarg_path : make_aspect(),
+                    class_path : make_class(),
+                }
+
+        for path, data in file_objects.items():
+            path = os.path.join(current_path, path)
+            print("Printing data to: {}".format(path))
+            with open(path, 'w') as file_handle:
+                file_handle.write(data+sep)
+            print("Done writing.")
 
 if __name__ == "__main__":
-    import sys
     main(sys.argv[1:])
