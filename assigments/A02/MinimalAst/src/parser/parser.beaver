@@ -143,17 +143,6 @@ arithemetic_expressions =
     ;
 
 
-control_flow_expressions =
-
-    control_flow_statement.control {:
-        return new List().add(control);
-    :}
-    | expressions.expression_list control_flow_statement.control {:
-        return expression_list.add(control);
-    :}
-    ;
-
-
 expression =
     id_use.id ASSIGN assignable_expression.exp {:
         return new Assign(id, exp);
@@ -167,9 +156,19 @@ expression =
     ;
 
 
-return_statement =
-    RETURN non_assign_expression.expression SEMI {:
-        return new Return(expression);
+assignable_expression =
+    non_assign_expression
+    | logic_expression
+    ;
+
+
+control_flow_expressions =
+
+    control_flow_statement.control {:
+        return new List().add(control);
+    :}
+    | expressions.expression_list control_flow_statement.control {:
+        return expression_list.add(control);
     :}
     ;
 
@@ -205,9 +204,10 @@ while_statement =
     ;
 
 
-assignable_expression =
-    non_assign_expression
-    | logic_expression
+return_statement =
+    RETURN non_assign_expression.expression SEMI {:
+        return new Return(expression);
+    :}
     ;
 
 
