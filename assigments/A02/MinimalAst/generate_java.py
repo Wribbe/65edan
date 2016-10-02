@@ -42,7 +42,7 @@ def create_aspect(aspect_name, list_objects, aspect_methods):
 def create_class(dict_data):
 
     class_name = dict_data['class_name']
-    implementations = dict_data['implementations']
+    inheritance = dict_data['inheritance']
     list_objects = dict_data['objects']
     methods_objects = dict_data['class_methods']
     abstract = dict_data['abstract']
@@ -59,8 +59,7 @@ def create_class(dict_data):
                           'abstract',
                           'class',
                            class_name,
-                          'implements',
-                          ' '.join(implementations),
+                          ' '.join(inheritance),
                           '{'
                          ]
 
@@ -96,7 +95,7 @@ def create_class(dict_data):
 def create_traversing_visitor(objects):
 
     class_name = "TraversingVisitor"
-    implementations = ['lang.ast.Visitor']
+    inheritance = ['implements', 'lang.ast.Visitor']
     abstract = True
 
     class_methods = {
@@ -116,7 +115,7 @@ def create_traversing_visitor(objects):
 
     dict_data = {
             'class_name': class_name,
-            'implementations': implementations,
+            'inheritance': inheritance,
             'objects': objects,
             'class_methods': class_methods,
             'abstract': abstract,
