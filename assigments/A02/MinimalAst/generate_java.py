@@ -5,6 +5,11 @@ import sys
 
 sep = os.linesep
 
+
+def emptyline(lines):
+    lines.append("")
+
+
 def create_aspect(aspect_name, list_objects, aspect_methods):
 
     lines = []
@@ -48,11 +53,14 @@ def create_class(dict_data):
     abstract = dict_data['abstract']
     class_functions = dict_data['class_functions']
     default_class_method = dict_data['default_class_method']
+    state_variables = dict_data.get('state_variables', [])
 
     lines = [
              'package lang;',
              'import lang.ast.*;',
             ]
+
+    emptyline(lines)
 
     decleration_tokens = [
                           'public',
@@ -70,7 +78,16 @@ def create_class(dict_data):
 
     lines.append(class_declaration)
 
-    lines += class_functions
+    if class_functions:
+        emptyline(lines)
+        lines += class_functions
+
+    if state_variables:
+        emptyline(lines)
+        lines.append('//state variables')
+    for state_variable in state_variables:
+        lines.append(state_variable)
+    emptyline(lines)
 
     for element in list_objects:
 
@@ -86,6 +103,7 @@ def create_class(dict_data):
         lines.append(format_string.format(element))
         lines.append(element_method)
         lines.append("}")
+        emptyline(lines)
 
     lines.append("}")
 
@@ -185,7 +203,10 @@ def indent(list_lines):
 
         indentation = indentation_step * level * ' '
         indented_line = "{}{}".format(indentation, line)
-        indented_lines.append(indented_line)
+        if not line.strip(): # Don't append only whitespace.
+            indented_lines.append(indented_line.strip())
+        else:
+            indented_lines.append(indented_line)
 
         if "{" in line:
             level += 1
