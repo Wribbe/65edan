@@ -168,8 +168,8 @@ def main(args=[]):
     else:
         current_path = os.getcwd()
 
-        visitor_jarg_tokens = ['src', 'jastadd', 'Visitor.jarg']
-        visitor_class_tokens = ['src', 'java', 'lang', 'TravelingVisitor.java']
+        visitor_jarg_tokens = ['src', 'jastadd', 'Visitor.jrag']
+        visitor_class_tokens = ['src', 'java', 'lang', 'TraversingVisitor.java']
 
         jarg_path = os.path.join(*visitor_jarg_tokens)
         class_path = os.path.join(*visitor_class_tokens)
