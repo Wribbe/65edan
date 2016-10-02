@@ -76,13 +76,16 @@ def create_class(dict_data):
     for element in list_objects:
 
         format_string = "public Object visit({} node, Object data) {{"
-        lines.append(format_string.format(element))
 
         element_method = methods_objects.get(element)
         if not element_method:
             element_method = default_class_method
-        lines.append(element_method)
+        if not element_method: # No default, don't print.
+            continue
 
+        # Append whole object function.
+        lines.append(format_string.format(element))
+        lines.append(element_method)
         lines.append("}")
 
     lines.append("}")
