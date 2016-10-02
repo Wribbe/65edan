@@ -129,6 +129,48 @@ def create_traversing_visitor(objects):
     return sep.join(class_lines)
 
 
+def create_msn_visitor(objects):
+
+    class_name = "MsnVisitor"
+    inheritance = ['extends', 'TraversingVisitor']
+    abstract = False
+
+    class_methods = {
+
+            }
+
+    class_functions = [
+            "private Object visitChildren(ASTNode node, Object data) {",
+            "   for (int i = 0; i < node.getNumChild(); ++i) {",
+            "       node.getChild(i).accept(this, data);",
+            "   }",
+            "   return data;",
+            "}",
+        ]
+
+    default_class_method = "return visitChildren(node, data);"
+
+    state_variables = [
+                'private int maxDepth = 0;'
+            ]
+
+    dict_data = {
+            'class_name': class_name,
+            'inheritance': inheritance,
+            'objects': objects,
+            'class_methods': class_methods,
+            'abstract': abstract,
+            'class_functions': [line.strip() for line in class_functions],
+            'default_class_method': default_class_method,
+            'state_variables': state_variables,
+            }
+
+    unindented_class_lines = create_class(dict_data)
+
+    class_lines = indent(unindented_class_lines)
+    return sep.join(class_lines)
+
+
 def indent(list_lines):
 
     indentation_step = 4
@@ -190,25 +232,31 @@ def main(args=[]):
         indented_lines = indent(unindented_lines)
         return sep.join(indented_lines)
 
-    def make_class():
-        return create_traversing_visitor(objects)
+    def make_classes():
+        return [create_traversing_visitor(objects),
+                create_msn_visitor(objects),
+               ]
 
     if 'aspect' in args:
         print(make_aspect())
     elif 'class' in args:
-        print(make_class())
+        for class_data in make_classes():
+            print(class_data)
     else:
         current_path = os.getcwd()
 
         visitor_jarg_tokens = ['src', 'jastadd', 'Visitor.jrag']
         visitor_class_tokens = ['src', 'java', 'lang', 'TraversingVisitor.java']
+        msn_class_tokens = ['src', 'java', 'lang', 'MsnVisitor.java']
 
         jarg_path = os.path.join(*visitor_jarg_tokens)
         class_path = os.path.join(*visitor_class_tokens)
+        msn_class_path = os.path.join(*msn_class_tokens)
 
         file_objects = {
                     jarg_path : make_aspect(),
-                    class_path : make_class(),
+                    class_path : create_traversing_visitor(objects),
+                    msn_class_path: create_msn_visitor(objects),
                 }
 
         for path, data in file_objects.items():
