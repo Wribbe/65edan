@@ -39,8 +39,15 @@ def create_aspect(aspect_name, list_objects, aspect_methods):
     return lines
 
 
-def create_class(class_name, implementations, list_objects, methods_objects,
-        abstract=False):
+def create_class(dict_data):
+
+    class_name = dict_data['class_name']
+    implementations = dict_data['implementations']
+    list_objects = dict_data['objects']
+    methods_objects = dict_data['class_methods']
+    abstract = dict_data['abstract']
+    class_functions = dict_data['class_functions']
+    default_class_method = dict_data['default_class_method']
 
     lines = [
              'package lang;',
@@ -64,19 +71,7 @@ def create_class(class_name, implementations, list_objects, methods_objects,
 
     lines.append(class_declaration)
 
-
-    private_method_lines = [
-            "private Object visitChildren(ASTNode node, Object data) {",
-            "for (int i = 0; i < node.getNumChild(); ++i) {",
-            "node.getChild(i).accept(this, data);",
-            "}",
-            "return data;",
-            "}",
-        ]
-
-    lines += private_method_lines
-
-    default_class_method = "return visitChildren(node, data);"
+    lines += class_functions
 
     for element in list_objects:
 
@@ -93,6 +88,43 @@ def create_class(class_name, implementations, list_objects, methods_objects,
     lines.append("}")
 
     return lines
+
+
+def create_traversing_visitor(objects):
+
+    class_name = "TraversingVisitor"
+    implementations = ['lang.ast.Visitor']
+    abstract = True
+
+    class_methods = {
+
+            }
+
+    class_functions = [
+            "private Object visitChildren(ASTNode node, Object data) {",
+            "   for (int i = 0; i < node.getNumChild(); ++i) {",
+            "       node.getChild(i).accept(this, data);",
+            "   }",
+            "   return data;",
+            "}",
+        ]
+
+    default_class_method = "return visitChildren(node, data);"
+
+    dict_data = {
+            'class_name': class_name,
+            'implementations': implementations,
+            'objects': objects,
+            'class_methods': class_methods,
+            'abstract': abstract,
+            'class_functions': [line.strip() for line in class_functions],
+            'default_class_method': default_class_method,
+            }
+
+    unindented_class_lines = create_class(dict_data)
+
+    class_lines = indent(unindented_class_lines)
+    return sep.join(class_lines)
 
 
 def indent(list_lines):
@@ -151,24 +183,13 @@ def main(args=[]):
                            ' getClass().getName());'
             }
 
-    class_methods = {
-
-            }
-
     def make_aspect():
         unindented_lines = create_aspect("Visitor", objects, aspect_methods)
         indented_lines = indent(unindented_lines)
         return sep.join(indented_lines)
 
     def make_class():
-        unindented_class_lines = create_class("TraversingVisitor",
-                                              ['lang.ast.Visitor'],
-                                              objects,
-                                              class_methods,
-                                              abstract=True)
-
-        class_lines = indent(unindented_class_lines)
-        return sep.join(class_lines)
+        return create_traversing_visitor(objects)
 
     if 'aspect' in args:
         print(make_aspect())
