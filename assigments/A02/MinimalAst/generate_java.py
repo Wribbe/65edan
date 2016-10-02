@@ -39,7 +39,8 @@ def create_aspect(aspect_name, list_objects, aspect_methods):
     return lines
 
 
-def create_class(class_name, implementations, list_objects, methods_objects):
+def create_class(class_name, implementations, list_objects, methods_objects,
+        abstract=False):
 
     lines = [
              'package lang;',
@@ -55,6 +56,9 @@ def create_class(class_name, implementations, list_objects, methods_objects):
                           ' '.join(implementations),
                           '{'
                          ]
+
+    if not abstract:
+        del(decleration_tokens[1])
 
     class_declaration = ' '.join(decleration_tokens)
 
@@ -147,6 +151,10 @@ def main(args=[]):
                            ' getClass().getName());'
             }
 
+    class_methods = {
+
+            }
+
     def make_aspect():
         unindented_lines = create_aspect("Visitor", objects, aspect_methods)
         indented_lines = indent(unindented_lines)
@@ -156,7 +164,8 @@ def main(args=[]):
         unindented_class_lines = create_class("TraversingVisitor",
                                               ['lang.ast.Visitor'],
                                               objects,
-                                              {})
+                                              class_methods,
+                                              abstract=True)
 
         class_lines = indent(unindented_class_lines)
         return sep.join(class_lines)
