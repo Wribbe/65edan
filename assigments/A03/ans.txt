@@ -46,7 +46,7 @@
   'type-table' for each symbol to keep track of their type.
 
 
-  Calling a Program object and make it print to stadard error would be:
+  Calling a Program object and make it print to standard error would be:
 
     program.checkNames(System.err);
 
@@ -61,4 +61,15 @@
   will be cleaned up by the garbage collector.
 
 
+2.1.)
 
+  Could add a method that manipulates a shared global variable or parameter
+  inside of each relevant AST class, but that would be inflexible.
+
+  Using a state variable inside the TraversingVisitor is enough when running a
+  single instance of the class. If multiple Traversing visitors are used, using
+  the return variable would be more flexible.
+
+
+  A typed return value would enable compile-time type-checking. It would also
+  remove the need for casting the returned Objects.
