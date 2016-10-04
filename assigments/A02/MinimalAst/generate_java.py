@@ -10,40 +10,6 @@ def emptyline(lines):
     lines.append("")
 
 
-def create_aspect(aspect_name, list_objects, aspect_methods):
-
-    lines = []
-
-    lines.append("aspect {} {{".format(aspect_name))
-    lines.append("public interface {} {{".format(aspect_name))
-
-    for element in list_objects:
-        format_string = "public Object visit({} node, Object data);"
-        lines.append(format_string.format(element))
-
-    lines.append("}")
-
-    defult_visit_method = "return visitor.visit(this, data);"
-
-    accept_objects = list_objects
-
-    for element in accept_objects:
-        format_string = "public Object {}.accept({} {}, Object data) {{"
-        asp_lower = aspect_name.lower()
-        lines.append(format_string.format(element, aspect_name, asp_lower))
-
-        element_method = aspect_methods.get(element)
-        if not element_method:
-            element_method = defult_visit_method
-        lines.append(element_method)
-
-        lines.append("}")
-
-    lines.append("}")
-
-    return lines
-
-
 def create_class(dict_data):
 
     class_name = dict_data['class_name']
@@ -55,6 +21,7 @@ def create_class(dict_data):
     state_variables = dict_data.get('state_variables', [])
     preamble = dict_data.get('preamble', [])
     object_type = dict_data.get('object_type', [])
+    format_string = dict_data.get('format_string', "")
 
     lines = [] + preamble
 
@@ -84,7 +51,6 @@ def create_class(dict_data):
 
     for element in list_objects:
 
-        format_string = "public Object visit({} node, Object data) {{"
 
         element_method = methods_objects.get(element)
         if not element_method:
@@ -126,6 +92,8 @@ def create_traversing_visitor(objects):
 
     preamble = ['package lang;', 'import lang.ast.*;']
 
+    format_string = "public Object visit({} node, Object data) {{"
+
     dict_data = {
             'class_name': class_name,
             'inheritance': inheritance,
@@ -135,6 +103,7 @@ def create_traversing_visitor(objects):
             'default_class_method': default_class_method,
             'preamble': preamble,
             'object_type': object_type,
+            'format_string': format_string,
             }
 
     unindented_class_lines = create_class(dict_data)
@@ -187,6 +156,8 @@ def create_msn_visitor(objects):
                 'private int maxDepth = 0;'
             ]
 
+    format_string = "public Object visit({} node, Object data) {{"
+
     dict_data = {
             'class_name': class_name,
             'inheritance': inheritance,
@@ -197,6 +168,53 @@ def create_msn_visitor(objects):
             'state_variables': state_variables,
             'preamble': preamble,
             'object_type': object_type,
+            'format_string': format_string,
+            }
+
+    unindented_class_lines = create_class(dict_data)
+
+    class_lines = indent(unindented_class_lines)
+    return sep.join(class_lines)
+
+
+def create_visitor_aspect(objects):
+
+    class_name = "Visitor"
+    object_type = ['aspect']
+    inheritance = []
+
+    class_methods = {
+            }
+
+    preamble = ['import java.io.PrintStream;']
+
+    class_method_lines = ["public interface Visitor {"]
+    method_format = "public Object visit({} node, Object data);"
+    for element in objects:
+        class_method_lines.append(method_format.format(element))
+    class_method_lines.append('}')
+
+    class_functions = class_method_lines
+
+
+    default_class_method = "return visitor.visit(this, data);"
+
+    state_variables = [
+            ]
+
+    format_string = "public Object {}.accept(Visitor visitor, Object data) {{"
+
+    dict_data = {
+            'class_name': class_name,
+            'inheritance': inheritance,
+            'objects': objects,
+            'class_methods': class_methods,
+            'class_functions': [line.strip() for line in class_functions],
+            'default_class_method': default_class_method,
+            'state_variables': state_variables,
+            'preamble': preamble,
+            'object_type': object_type,
+            'format_string': format_string,
             }
 
     unindented_class_lines = create_class(dict_data)
@@ -298,7 +316,7 @@ def main(args=[]):
         msn_class_path = os.path.join(*msn_class_tokens)
 
         file_objects = {
-                    jarg_path : make_aspect(),
+                    jarg_path : create_visitor_aspect(objects),
                     class_path : create_traversing_visitor(objects),
                     msn_class_path: create_msn_visitor(objects),
                 }
