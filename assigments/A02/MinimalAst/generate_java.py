@@ -296,6 +296,19 @@ def create_pertty_print_aspect(objects):
             'ASTNode': astnode_methods
         })
 
+    # Add ast-types that only get a primitive attribute.
+    def prim_expression(get_type):
+        return "out.print(get{}());".format(get_type)
+
+    prim_types = [
+                ('IdUse', 'ID'),
+                ('IdDeclare', 'ID'),
+                ('Numeral', 'NUMERAL'),
+            ]
+
+    class_methods.update({ast_type : prim_expression(prim_type) for ast_type,
+                          prim_type in prim_types})
+
     format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
 
     dict_data = {

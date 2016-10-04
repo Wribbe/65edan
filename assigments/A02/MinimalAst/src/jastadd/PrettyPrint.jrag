@@ -43,4 +43,16 @@ aspect PrettyPrint  {
         getRight().prettyPrint(out, indent);
     }
 
+    public void IdUse.prettyPrint(PrintStream out, String indent) {
+        out.print(getID());
+    }
+
+    public void IdDeclare.prettyPrint(PrintStream out, String indent) {
+        out.print(getID());
+    }
+
+    public void Numeral.prettyPrint(PrintStream out, String indent) {
+        out.print(getNUMERAL());
+    }
+
 }
