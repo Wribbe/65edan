@@ -223,6 +223,51 @@ def create_visitor_aspect(objects):
     return sep.join(class_lines)
 
 
+def create_pertty_print_aspect(objects):
+
+    class_name = "Visitor"
+    object_type = ['aspect']
+    inheritance = []
+
+    class_methods = {
+            }
+
+    preamble = ['import java.io.PrintStream;']
+
+    class_method_lines = ["public interface Visitor {"]
+    method_format = "public Object visit({} node, Object data);"
+    for element in objects:
+        class_method_lines.append(method_format.format(element))
+    class_method_lines.append('}')
+
+    class_functions = class_method_lines
+
+
+    default_class_method = "return visitor.visit(this, data);"
+
+    state_variables = [
+            ]
+
+    format_string = "public Object {}.accept(Visitor visitor, Object data) {{"
+
+    dict_data = {
+            'class_name': class_name,
+            'inheritance': inheritance,
+            'objects': objects,
+            'class_methods': class_methods,
+            'class_functions': [line.strip() for line in class_functions],
+            'default_class_method': default_class_method,
+            'state_variables': state_variables,
+            'preamble': preamble,
+            'object_type': object_type,
+            'format_string': format_string,
+            }
+
+    unindented_class_lines = create_class(dict_data)
+
+    class_lines = indent(unindented_class_lines)
+    return sep.join(class_lines)
+
 def indent(list_lines):
 
     text = sep.join(list_lines)
