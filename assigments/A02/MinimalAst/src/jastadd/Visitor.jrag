@@ -1,6 +1,9 @@
 aspect Visitor {
     public interface Visitor {
         public Object visit(ASTNode node, Object data);
+        public Object visit(Program node, Object data);
+        public Object visit(List node, Object data);
+        public Object visit(Opt node, Object data);
         public Object visit(Add node, Object data);
         public Object visit(Mul node, Object data);
         public Object visit(Div node, Object data);
@@ -27,6 +30,15 @@ aspect Visitor {
     }
     public Object ASTNode.accept(Visitor visitor, Object data) {
         throw new Error("Visitor: accept method not available for " + getClass().getName());
+    }
+    public Object Program.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+    public Object List.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+    public Object Opt.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
     }
     public Object Add.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);

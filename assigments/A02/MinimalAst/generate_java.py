@@ -158,6 +158,11 @@ def create_msn_visitor(objects):
         }
 
     class_functions = [
+            "public static int result(ASTNode root) {",
+            "   MsnVisitor visitor = new MsnVisitor();",
+            "   root.accept(visitor, null);",
+            "   return visitor.maxDepth;",
+            "}",
         ]
 
     #default_class_method = "return visitChildren(node, data);"
@@ -213,6 +218,9 @@ def main(args=[]):
 
     objects = [
             "ASTNode",
+            "Program",
+            "List",
+            "Opt",
             "Add",
             "Mul",
             "Div",
