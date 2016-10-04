@@ -74,13 +74,13 @@ def create_class(dict_data):
             try:
                 temp_format = method.get('function_format')
                 current_format = temp_format
-                body_text = strip_text(method.get('body'))
+                body_text = method.get('body')
             except AttributeError:
                 body_text = method
 
             # Append whole object function.
             lines.append(current_format.format(element))
-            lines.append(body_text)
+            lines.append(strip_text(body_text))
             lines.append("}")
             emptyline(lines)
 
@@ -283,13 +283,16 @@ def create_pertty_print_aspect(objects):
     class_methods.update(binary_methods)
 
     # Add ASTNode methods.
+    diff_ast_func = "public void {}.prettyPrint(PrintStream out) {{"
     astnode_methods = [
-            sep.join(["prettyPrint(out, \"\");",
-                                 "out.println();",]),
-            { 'function_format': "public void {}.prettyPrint(PrintStream out) {{",
-              'body': sep.join(["for (int i=0; i<getNumChild(); i++) {",
-                                "   getChild(i).pertyPrint(out, indent);",
-                                "}",])},
+
+            { 'function_format': diff_ast_func,
+              'body': sep.join(["prettyPrint(out, \"\");",
+                                "out.println();",])},
+
+            sep.join(["for (int i=0; i<getNumChild(); i++) {",
+                      "   getChild(i).prettyPrint(out, indent);",
+                      "}",]),
             ]
 
     class_methods.update({

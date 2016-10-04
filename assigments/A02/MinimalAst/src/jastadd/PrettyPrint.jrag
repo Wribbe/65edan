@@ -2,14 +2,14 @@ import java.io.PrintStream;
 
 aspect PrettyPrint  {
 
-    public void ASTNode.prettyPrint(PrintStream out, String indent) {
+    public void ASTNode.prettyPrint(PrintStream out) {
         prettyPrint(out, "");
         out.println();
     }
 
-    public void ASTNode.prettyPrint(PrintStream out) {
+    public void ASTNode.prettyPrint(PrintStream out, String indent) {
         for (int i=0; i<getNumChild(); i++) {
-            getChild(i).pertyPrint(out, indent);
+            getChild(i).prettyPrint(out, indent);
         }
     }
 

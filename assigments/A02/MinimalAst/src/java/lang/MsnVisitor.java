@@ -20,7 +20,7 @@ public class MsnVisitor extends TraversingVisitor {
         int givenDepth = (int) data;
         int myDepth = givenDepth+1;
         if (myDepth > maxDepth) {
-               maxDepth = myDepth;
+            maxDepth = myDepth;
         }
         return visitChildren(node, (Object)myDepth);
     }
@@ -29,7 +29,7 @@ public class MsnVisitor extends TraversingVisitor {
         int givenDepth = (int) data;
         int myDepth = givenDepth+1;
         if (myDepth > maxDepth) {
-               maxDepth = myDepth;
+            maxDepth = myDepth;
         }
         return visitChildren(node, (Object)myDepth);
     }
@@ -38,7 +38,7 @@ public class MsnVisitor extends TraversingVisitor {
         int givenDepth = (int) data;
         int myDepth = givenDepth+1;
         if (myDepth > maxDepth) {
-               maxDepth = myDepth;
+            maxDepth = myDepth;
         }
         return visitChildren(node, (Object)myDepth);
     }
