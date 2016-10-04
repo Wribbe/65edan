@@ -1,0 +1,35 @@
+import java.io.PrintStream;
+
+aspect Visitor  {
+
+    public void Add.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" + ")
+        getRight().prettyPrint(out, indent);
+    }
+
+    public void Mul.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" * ")
+        getRight().prettyPrint(out, indent);
+    }
+
+    public void Div.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" / ")
+        getRight().prettyPrint(out, indent);
+    }
+
+    public void Minus.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" - ")
+        getRight().prettyPrint(out, indent);
+    }
+
+    public void Remainder.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" % ")
+        getRight().prettyPrint(out, indent);
+    }
+
+}

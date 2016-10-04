@@ -234,21 +234,35 @@ def create_pertty_print_aspect(objects):
 
     preamble = ['import java.io.PrintStream;']
 
-    class_method_lines = ["public interface Visitor {"]
-    method_format = "public Object visit({} node, Object data);"
-    for element in objects:
-        class_method_lines.append(method_format.format(element))
-    class_method_lines.append('}')
-
+    class_method_lines = []
     class_functions = class_method_lines
 
-
-    default_class_method = "return visitor.visit(this, data);"
+    default_class_method = ""
 
     state_variables = [
             ]
 
-    format_string = "public Object {}.accept(Visitor visitor, Object data) {{"
+    def binary_expression(operator):
+        lines = []
+        lines.append("getLeft().prettyPrint(out, indent);")
+        lines.append("out.print(\" {} \");".format(operator))
+        lines.append("getRight().prettyPrint(out, indent);")
+        return sep.join(lines)
+
+    binary_expressions = [
+                ('Add', '+'),
+                ('Mul', '*'),
+                ('Div', '/'),
+                ('Minus', '-'),
+                ('Remainder', '%'),
+            ]
+
+    binary_methods = {name : binary_expression(operand) for (name, operand) in
+            binary_expressions}
+
+    class_methods.update(binary_methods)
+
+    format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
 
     dict_data = {
             'class_name': class_name,
@@ -267,6 +281,7 @@ def create_pertty_print_aspect(objects):
 
     class_lines = indent(unindented_class_lines)
     return sep.join(class_lines)
+
 
 def indent(list_lines):
 
