@@ -51,16 +51,16 @@ def create_class(dict_data):
 
     for element in list_objects:
 
-        element_method = methods_objects.get(element)
-        if not element_method:
-            element_method = default_class_method
-        if not element_method: # No default, don't print.
+        element_methods = methods_objects.get(element)
+        if not element_methods:
+            element_methods = default_class_method
+        if not element_methods: # No default, don't print.
             continue
 
-        if hasattr(element_method, "strip"): # It's a plain string.
-            element_method = [element_method] # repackage.
+        if hasattr(element_methods, "strip"): # It's a plain string.
+            element_methods = [element_methods] # repackage.
 
-        for method in element_method:
+        for method in element_methods:
             current_format = format_string
             try:
                 temp_format = method.get('function_format')
@@ -68,6 +68,7 @@ def create_class(dict_data):
                 body_text = method.get('body')
             except AttributeError:
                 body_text = method
+
             # Append whole object function.
             lines.append(current_format.format(element))
             lines.append(body_text)
