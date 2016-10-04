@@ -1,6 +1,6 @@
 import java.io.PrintStream;
 
-aspect Visitor  {
+aspect PrettyPrint  {
 
     public void ASTNode.prettyPrint(PrintStream out, String indent) {
         prettyPrint(out, "");

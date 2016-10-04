@@ -236,7 +236,7 @@ def create_visitor_aspect(objects):
 
 def create_pertty_print_aspect(objects):
 
-    class_name = "Visitor"
+    class_name = "PrettyPrint"
     object_type = ['aspect']
     inheritance = []
 
