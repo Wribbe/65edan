@@ -262,6 +262,12 @@ def create_pertty_print_aspect(objects):
 
     class_methods.update(binary_methods)
 
+    class_methods.update({
+            'ASTNode': sep.join(["prettyPrint(out, \"\");",
+                                 "out.println();",])
+
+        })
+
     format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
 
     dict_data = {

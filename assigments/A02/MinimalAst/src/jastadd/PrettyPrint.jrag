@@ -2,6 +2,11 @@ import java.io.PrintStream;
 
 aspect Visitor  {
 
+    public void ASTNode.prettyPrint(PrintStream out, String indent) {
+        prettyPrint(out, "");
+        out.println();
+    }
+
     public void Add.prettyPrint(PrintStream out, String indent) {
         getLeft().prettyPrint(out, indent);
         out.print(" + ")
