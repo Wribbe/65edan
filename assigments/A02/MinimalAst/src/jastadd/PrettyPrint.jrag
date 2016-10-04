@@ -9,7 +9,7 @@ aspect PrettyPrint  {
 
     public void ASTNode.prettyPrint(PrintStream out) {
         for (int i=0; i<getNumChild(); i++) {
-               getChild(i).pertyPrint(out, indent);
+            getChild(i).pertyPrint(out, indent);
         }
     }
 

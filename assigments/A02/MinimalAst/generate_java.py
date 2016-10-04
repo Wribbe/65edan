@@ -10,6 +10,15 @@ def emptyline(lines):
     lines.append("")
 
 
+def strip_text(text):
+
+    if type(text) == list:
+        text_lines = list
+    else:
+        text_lines = text.splitlines()
+    return sep.join([line.strip() for line in text_lines])
+
+
 def create_class(dict_data):
 
     class_name = dict_data['class_name']
@@ -65,7 +74,7 @@ def create_class(dict_data):
             try:
                 temp_format = method.get('function_format')
                 current_format = temp_format
-                body_text = method.get('body')
+                body_text = strip_text(method.get('body'))
             except AttributeError:
                 body_text = method
 
