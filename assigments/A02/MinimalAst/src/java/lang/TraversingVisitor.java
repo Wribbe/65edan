@@ -3,7 +3,7 @@ import lang.ast.*;
 
 public abstract class TraversingVisitor implements lang.ast.Visitor {
 
-    private Object visitChildren(ASTNode node, Object data) {
+    protected Object visitChildren(ASTNode node, Object data) {
         for (int i = 0; i < node.getNumChild(); ++i) {
             node.getChild(i).accept(this, data);
         }

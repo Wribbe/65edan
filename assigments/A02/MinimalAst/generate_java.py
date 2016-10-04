@@ -121,7 +121,7 @@ def create_traversing_visitor(objects):
             }
 
     class_functions = [
-            "private Object visitChildren(ASTNode node, Object data) {",
+            "protected Object visitChildren(ASTNode node, Object data) {",
             "   for (int i = 0; i < node.getNumChild(); ++i) {",
             "       node.getChild(i).accept(this, data);",
             "   }",
@@ -153,14 +153,31 @@ def create_msn_visitor(objects):
     inheritance = ['extends', 'TraversingVisitor']
     abstract = False
 
+    increment_function = sep.join(["int givenDepth = (int) data;",
+                                    "int myDepth = givenDepth+1;",
+                                    "if (myDepth > maxDepth) {",
+                                    "   maxDepth = myDepth;",
+                                    "}",
+                                    "return visitChildren(node, (Object)myDepth);",
+                                   ])
+
+    increment_types = [
+                "FunctionDeclaration",
+                "WHILE",
+                "IF"
+            ]
+
     class_methods = {
-            "ASTNode": "return maxDepth;",
-        }
+            "Program": "return visitChildren(node, 0);",
+            }
+
+    increment_dict = {name : increment_function for name in increment_types}
+    class_methods.update(increment_dict)
 
     class_functions = [
             "public static int result(ASTNode root) {",
             "   MsnVisitor visitor = new MsnVisitor();",
-            "   root.accept(visitor, null);",
+            "   root.accept(visitor, 0);",
             "   return visitor.maxDepth;",
             "}",
         ]
@@ -190,6 +207,9 @@ def create_msn_visitor(objects):
 
 
 def indent(list_lines):
+
+    text = sep.join(list_lines)
+    list_lines = text.splitlines()
 
     indentation_step = 4
     level = 0
