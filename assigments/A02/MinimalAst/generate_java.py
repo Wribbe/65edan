@@ -334,44 +334,34 @@ def main(args=[]):
                            ' getClass().getName());'
             }
 
-    def make_aspect():
-        unindented_lines = create_aspect("Visitor", objects, aspect_methods)
-        indented_lines = indent(unindented_lines)
-        return sep.join(indented_lines)
+    current_path = os.getcwd()
 
-    def make_classes():
-        return [create_traversing_visitor(objects),
-                create_msn_visitor(objects),
-               ]
+    visitor_jarg_tokens = ['src', 'jastadd', 'Visitor.jrag']
+    prettyp_aspect_tokens = ['src', 'jastadd', 'PrettyPrint.jrag']
+    visitor_class_tokens = ['src', 'java', 'lang', 'TraversingVisitor.java']
+    msn_class_tokens = ['src', 'java', 'lang', 'MsnVisitor.java']
 
-    if 'aspect' in args:
-        print(make_aspect())
-    elif 'class' in args:
-        for class_data in make_classes():
-            print(class_data)
-    else:
-        current_path = os.getcwd()
+    # Aspects.
+    jarg_path = os.path.join(*visitor_jarg_tokens)
+    pretty_print_path = os.path.join(*prettyp_aspect_tokens)
 
-        visitor_jarg_tokens = ['src', 'jastadd', 'Visitor.jrag']
-        visitor_class_tokens = ['src', 'java', 'lang', 'TraversingVisitor.java']
-        msn_class_tokens = ['src', 'java', 'lang', 'MsnVisitor.java']
+    # Classes.
+    class_path = os.path.join(*visitor_class_tokens)
+    msn_class_path = os.path.join(*msn_class_tokens)
 
-        jarg_path = os.path.join(*visitor_jarg_tokens)
-        class_path = os.path.join(*visitor_class_tokens)
-        msn_class_path = os.path.join(*msn_class_tokens)
+    file_objects = {
+                jarg_path : create_visitor_aspect(objects),
+                class_path : create_traversing_visitor(objects),
+                msn_class_path: create_msn_visitor(objects),
+                pretty_print_path: create_pertty_print_aspect(objects),
+            }
 
-        file_objects = {
-                    jarg_path : create_visitor_aspect(objects),
-                    class_path : create_traversing_visitor(objects),
-                    msn_class_path: create_msn_visitor(objects),
-                }
-
-        for path, data in file_objects.items():
-            path = os.path.join(current_path, path)
-            print("Printing data to: {}".format(path))
-            with open(path, 'w') as file_handle:
-                file_handle.write(data+sep)
-            print("Done writing.")
+    for path, data in file_objects.items():
+        path = os.path.join(current_path, path)
+        print("Printing data to: {}".format(path))
+        with open(path, 'w') as file_handle:
+            file_handle.write(data+sep)
+        print("Done writing.")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
