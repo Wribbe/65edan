@@ -51,18 +51,28 @@ def create_class(dict_data):
 
     for element in list_objects:
 
-
         element_method = methods_objects.get(element)
         if not element_method:
             element_method = default_class_method
         if not element_method: # No default, don't print.
             continue
 
-        # Append whole object function.
-        lines.append(format_string.format(element))
-        lines.append(element_method)
-        lines.append("}")
-        emptyline(lines)
+        if hasattr(element_method, "strip"): # It's a plain string.
+            element_method = [element_method] # repackage.
+
+        for method in element_method:
+            current_format = format_string
+            try:
+                temp_format = method.get('function_format')
+                current_format = temp_format
+                body_text = method.get('body')
+            except AttributeError:
+                body_text = method
+            # Append whole object function.
+            lines.append(current_format.format(element))
+            lines.append(body_text)
+            lines.append("}")
+            emptyline(lines)
 
     lines.append("}")
 
@@ -262,10 +272,18 @@ def create_pertty_print_aspect(objects):
 
     class_methods.update(binary_methods)
 
-    class_methods.update({
-            'ASTNode': sep.join(["prettyPrint(out, \"\");",
-                                 "out.println();",])
+    # Add ASTNode methods.
+    astnode_methods = [
+            sep.join(["prettyPrint(out, \"\");",
+                                 "out.println();",]),
+            { 'function_format': "public void {}.prettyPrint(PrintStream out) {{",
+              'body': sep.join(["for (int i=0; i<getNumChild(); i++) {",
+                                "   getChild(i).pertyPrint(out, indent);",
+                                "}",])},
+            ]
 
+    class_methods.update({
+            'ASTNode': astnode_methods
         })
 
     format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
