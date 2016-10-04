@@ -25,7 +25,7 @@ def create_aspect(aspect_name, list_objects, aspect_methods):
 
     defult_visit_method = "return visitor.visit(this, data);"
 
-    accept_objects = ["ASTNode"] + list_objects
+    accept_objects = list_objects
 
     for element in accept_objects:
         format_string = "public Object {}.accept({} {}, Object data) {{"
@@ -154,19 +154,14 @@ def create_msn_visitor(objects):
     abstract = False
 
     class_methods = {
-
-            }
+            "ASTNode": "return maxDepth;",
+        }
 
     class_functions = [
-            "private Object visitChildren(ASTNode node, Object data) {",
-            "   for (int i = 0; i < node.getNumChild(); ++i) {",
-            "       node.getChild(i).accept(this, data);",
-            "   }",
-            "   return data;",
-            "}",
         ]
 
-    default_class_method = "return visitChildren(node, data);"
+    #default_class_method = "return visitChildren(node, data);"
+    default_class_method = ""
 
     state_variables = [
                 'private int maxDepth = 0;'
@@ -217,6 +212,7 @@ def indent(list_lines):
 def main(args=[]):
 
     objects = [
+            "ASTNode",
             "Add",
             "Mul",
             "Div",

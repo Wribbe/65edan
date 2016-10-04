@@ -1,5 +1,6 @@
 aspect Visitor {
     public interface Visitor {
+        public Object visit(ASTNode node, Object data);
         public Object visit(Add node, Object data);
         public Object visit(Mul node, Object data);
         public Object visit(Div node, Object data);
