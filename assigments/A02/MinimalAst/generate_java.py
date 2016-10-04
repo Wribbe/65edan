@@ -50,29 +50,22 @@ def create_class(dict_data):
     inheritance = dict_data['inheritance']
     list_objects = dict_data['objects']
     methods_objects = dict_data['class_methods']
-    abstract = dict_data['abstract']
     class_functions = dict_data['class_functions']
     default_class_method = dict_data['default_class_method']
     state_variables = dict_data.get('state_variables', [])
+    preamble = dict_data.get('preamble', [])
+    object_type = dict_data.get('object_type', [])
 
-    lines = [
-             'package lang;',
-             'import lang.ast.*;',
-            ]
+    lines = [] + preamble
 
     emptyline(lines)
 
     decleration_tokens = [
-                          'public',
-                          'abstract',
-                          'class',
+                          ' '.join(object_type),
                            class_name,
                           ' '.join(inheritance),
                           '{'
                          ]
-
-    if not abstract:
-        del(decleration_tokens[1])
 
     class_declaration = ' '.join(decleration_tokens)
 
@@ -113,8 +106,8 @@ def create_class(dict_data):
 def create_traversing_visitor(objects):
 
     class_name = "TraversingVisitor"
+    object_type = ['public', 'abstract', 'class']
     inheritance = ['implements', 'lang.ast.Visitor']
-    abstract = True
 
     class_methods = {
 
@@ -131,14 +124,17 @@ def create_traversing_visitor(objects):
 
     default_class_method = "return visitChildren(node, data);"
 
+    preamble = ['package lang;', 'import lang.ast.*;']
+
     dict_data = {
             'class_name': class_name,
             'inheritance': inheritance,
             'objects': objects,
             'class_methods': class_methods,
-            'abstract': abstract,
             'class_functions': [line.strip() for line in class_functions],
             'default_class_method': default_class_method,
+            'preamble': preamble,
+            'object_type': object_type,
             }
 
     unindented_class_lines = create_class(dict_data)
@@ -150,8 +146,8 @@ def create_traversing_visitor(objects):
 def create_msn_visitor(objects):
 
     class_name = "MsnVisitor"
+    object_type = ['public', 'class']
     inheritance = ['extends', 'TraversingVisitor']
-    abstract = False
 
     increment_function = sep.join(["int givenDepth = (int) data;",
                                     "int myDepth = givenDepth+1;",
@@ -170,6 +166,8 @@ def create_msn_visitor(objects):
     class_methods = {
             "Program": "return visitChildren(node, 0);",
             }
+
+    preamble = ['package lang;', 'import lang.ast.*;']
 
     increment_dict = {name : increment_function for name in increment_types}
     class_methods.update(increment_dict)
@@ -194,10 +192,11 @@ def create_msn_visitor(objects):
             'inheritance': inheritance,
             'objects': objects,
             'class_methods': class_methods,
-            'abstract': abstract,
             'class_functions': [line.strip() for line in class_functions],
             'default_class_method': default_class_method,
             'state_variables': state_variables,
+            'preamble': preamble,
+            'object_type': object_type,
             }
 
     unindented_class_lines = create_class(dict_data)
