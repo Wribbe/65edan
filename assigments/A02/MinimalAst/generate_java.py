@@ -368,12 +368,6 @@ def main(args=[]):
             "Numeral",
             ]
 
-    aspect_methods = {
-                "ASTNode": 'throw new Error("Visitor: ' +\
-                           'accept method not available for " +'+\
-                           ' getClass().getName());'
-            }
-
     current_path = os.getcwd()
 
     visitor_jarg_tokens = ['src', 'jastadd', 'Visitor.jrag']
