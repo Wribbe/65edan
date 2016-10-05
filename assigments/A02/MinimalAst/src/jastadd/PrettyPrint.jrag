@@ -13,14 +13,6 @@ aspect PrettyPrint  {
         }
     }
 
-    public void Program.prettyPrint(PrintStream out, String indent) {
-        out.print("Program");
-    }
-
-    public void List.prettyPrint(PrintStream out, String indent) {
-        out.print("List");
-    }
-
     public void Opt.prettyPrint(PrintStream out, String indent) {
         out.print("Opt");
     }
@@ -56,7 +48,8 @@ aspect PrettyPrint  {
     }
 
     public void FunctionDeclaration.prettyPrint(PrintStream out, String indent) {
-        out.print("FunctionDeclaration");
+        out.print("int");
+        out.print(getIdDeclare());
     }
 
     public void FunctionUse.prettyPrint(PrintStream out, String indent) {

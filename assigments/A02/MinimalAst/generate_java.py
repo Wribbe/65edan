@@ -287,6 +287,8 @@ def create_pertty_print_aspect(objects):
 
     format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
 
+    child_loop = "for (int i=0; i<getNumChild(); i++) {"
+
     # Add ASTNode methods.
     diff_ast_func = "public void {}.prettyPrint(PrintStream out) {{"
     astnode_methods = [
@@ -295,7 +297,7 @@ def create_pertty_print_aspect(objects):
               'body': sep.join(["prettyPrint(out, \"\");",
                                 "out.println();",])},
 
-            sep.join(["for (int i=0; i<getNumChild(); i++) {",
+            sep.join([child_loop,
                       "   getChild(i).prettyPrint(out, indent);",
                       "}",]),
             ]
@@ -316,6 +318,16 @@ def create_pertty_print_aspect(objects):
 
     class_methods.update({ast_type : prim_expression(prim_type) for ast_type,
                           prim_type in prim_types})
+
+
+    class_methods['Program'] = ""
+    class_methods['List'] = ""
+
+    class_methods['FunctionDeclaration'] = sep.join([
+            'out.print("int");',
+            'out.print(getIdDeclare());',
+        ])
+
 
 
     dict_data = {
