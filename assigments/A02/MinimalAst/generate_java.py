@@ -257,7 +257,10 @@ def create_pertty_print_aspect(objects):
     class_method_lines = []
     class_functions = class_method_lines
 
+    fmt_defult_class = "out.print(\"{}\");"
     default_class_method = ""
+    class_methods = {element : fmt_defult_class.format(element) for
+                     element in objects}
 
     state_variables = [
             ]
@@ -281,6 +284,8 @@ def create_pertty_print_aspect(objects):
             binary_expressions}
 
     class_methods.update(binary_methods)
+
+    format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
 
     # Add ASTNode methods.
     diff_ast_func = "public void {}.prettyPrint(PrintStream out) {{"
@@ -312,7 +317,6 @@ def create_pertty_print_aspect(objects):
     class_methods.update({ast_type : prim_expression(prim_type) for ast_type,
                           prim_type in prim_types})
 
-    format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
 
     dict_data = {
             'class_name': class_name,

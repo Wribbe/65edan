@@ -13,6 +13,18 @@ aspect PrettyPrint  {
         }
     }
 
+    public void Program.prettyPrint(PrintStream out, String indent) {
+        out.print("Program");
+    }
+
+    public void List.prettyPrint(PrintStream out, String indent) {
+        out.print("List");
+    }
+
+    public void Opt.prettyPrint(PrintStream out, String indent) {
+        out.print("Opt");
+    }
+
     public void Add.prettyPrint(PrintStream out, String indent) {
         getLeft().prettyPrint(out, indent);
         out.print(" + ");
@@ -41,6 +53,66 @@ aspect PrettyPrint  {
         getLeft().prettyPrint(out, indent);
         out.print(" % ");
         getRight().prettyPrint(out, indent);
+    }
+
+    public void FunctionDeclaration.prettyPrint(PrintStream out, String indent) {
+        out.print("FunctionDeclaration");
+    }
+
+    public void FunctionUse.prettyPrint(PrintStream out, String indent) {
+        out.print("FunctionUse");
+    }
+
+    public void Assign.prettyPrint(PrintStream out, String indent) {
+        out.print("Assign");
+    }
+
+    public void Return.prettyPrint(PrintStream out, String indent) {
+        out.print("Return");
+    }
+
+    public void LogicExpression.prettyPrint(PrintStream out, String indent) {
+        out.print("LogicExpression");
+    }
+
+    public void IF.prettyPrint(PrintStream out, String indent) {
+        out.print("IF");
+    }
+
+    public void WHILE.prettyPrint(PrintStream out, String indent) {
+        out.print("WHILE");
+    }
+
+    public void ELSE.prettyPrint(PrintStream out, String indent) {
+        out.print("ELSE");
+    }
+
+    public void NOEQ.prettyPrint(PrintStream out, String indent) {
+        out.print("NOEQ");
+    }
+
+    public void EQ.prettyPrint(PrintStream out, String indent) {
+        out.print("EQ");
+    }
+
+    public void LTEQ.prettyPrint(PrintStream out, String indent) {
+        out.print("LTEQ");
+    }
+
+    public void GTEQ.prettyPrint(PrintStream out, String indent) {
+        out.print("GTEQ");
+    }
+
+    public void LT.prettyPrint(PrintStream out, String indent) {
+        out.print("LT");
+    }
+
+    public void GT.prettyPrint(PrintStream out, String indent) {
+        out.print("GT");
+    }
+
+    public void IdExpression.prettyPrint(PrintStream out, String indent) {
+        out.print("IdExpression");
     }
 
     public void IdUse.prettyPrint(PrintStream out, String indent) {
