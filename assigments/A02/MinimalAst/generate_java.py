@@ -337,6 +337,8 @@ def create_pertty_print_aspect(objects):
             return "out.println(\"{}\");".format(value)
         return "out.println({});".format(value)
 
+    newline = jprintln('')
+
     id_from_decl = 'out.print(getIdDeclare().getID());'
 
     class_methods['FunctionDeclaration'] = sep.join([
@@ -358,11 +360,17 @@ def create_pertty_print_aspect(objects):
             iter_over("getBlock().getNumChild()"),
             '}', # Iter over ends.
             '}', # If ends.
-            'getReturn().prettyPrint(out, "");'
+            'getReturn().prettyPrint(out, "");',
+            newline,
+            jprint('}'),
         ])
 
     class_methods['Return'] = sep.join([
-            jprintln('RETRUN'),
+            newline,
+            jprint('return'),
+            space,
+            'getExpression().prettyPrint(out, "");',
+            jprint(';'),
         ])
 
 

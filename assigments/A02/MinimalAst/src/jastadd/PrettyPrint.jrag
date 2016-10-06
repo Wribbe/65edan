@@ -67,6 +67,8 @@ aspect PrettyPrint  {
             }
         }
         getReturn().prettyPrint(out, "");
+        out.println("");
+        out.print("}");
     }
 
     public void FunctionUse.prettyPrint(PrintStream out, String indent) {
@@ -78,7 +80,11 @@ aspect PrettyPrint  {
     }
 
     public void Return.prettyPrint(PrintStream out, String indent) {
-        out.println("RETRUN");
+        out.println("");
+        out.print("return");
+        out.print(" ");
+        getExpression().prettyPrint(out, "");
+        out.print(";");
     }
 
     public void LogicExpression.prettyPrint(PrintStream out, String indent) {
