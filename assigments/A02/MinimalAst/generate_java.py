@@ -398,7 +398,7 @@ def indent(list_lines):
 
     for line in list_lines:
 
-        if "}" in line:
+        if line.startswith('}'):
             level -= 1
 
         indentation = indentation_step * level * ' '
@@ -408,7 +408,7 @@ def indent(list_lines):
         else:
             indented_lines.append(indented_line)
 
-        if "{" in line:
+        if line.endswith('{'):
             level += 1
 
     return indented_lines
