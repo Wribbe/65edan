@@ -287,7 +287,10 @@ def create_pertty_print_aspect(objects):
 
     format_string = "public void {}.prettyPrint(PrintStream out, String indent) {{"
 
-    child_loop = "for (int i=0; i<getNumChild(); i++) {"
+    def iter_over(length_method):
+        return "for (int i=0; i<{}; i++) {{".format(length_method)
+
+    child_loop = iter_over("getNumChild()")
 
     # Add ASTNode methods.
     diff_ast_func = "public void {}.prettyPrint(PrintStream out) {{"
@@ -319,13 +322,47 @@ def create_pertty_print_aspect(objects):
     class_methods.update({ast_type : prim_expression(prim_type) for ast_type,
                           prim_type in prim_types})
 
-
     class_methods['Program'] = ""
     class_methods['List'] = ""
 
+    space = 'out.print(" ");'
+
+    def jprint(value, quotes=True):
+        if quotes:
+            return "out.print(\"{}\");".format(value)
+        return "out.print({});".format(value)
+
+    def jprintln(value, quotes=True):
+        if quotes:
+            return "out.println(\"{}\");".format(value)
+        return "out.println({});".format(value)
+
+    id_from_decl = 'out.print(getIdDeclare().getID());'
+
     class_methods['FunctionDeclaration'] = sep.join([
-            'out.print("int");',
-            'out.print(getIdDeclare());',
+            jprint('int'),
+            space,
+            id_from_decl,
+            jprint('('),
+            "int iMax = getFunctionParameters().getNumChild();",
+            iter_over("iMax"),
+            'getFunctionParameters().getChild(i).prettyPrint(out, "");',
+            'if (iMax > 1 && i < (iMax - 1)) {',
+            jprint(', '),
+            '}',
+            '}',
+            jprint(')'),
+            space,
+            jprintln('{'),
+            'if (hasBlock()) {',
+            iter_over("getBlock().getNumChild()"),
+            '}', # Iter over ends.
+            '}', # If ends.
+            'getReturn().prettyPrint(out, "");'
+        ])
+
+    class_methods['Return'] = sep.join([
+            jprintln('RETRUN'),
         ])
 
 

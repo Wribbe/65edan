@@ -49,7 +49,24 @@ aspect PrettyPrint  {
 
     public void FunctionDeclaration.prettyPrint(PrintStream out, String indent) {
         out.print("int");
-        out.print(getIdDeclare());
+        out.print(" ");
+        out.print(getIdDeclare().getID());
+        out.print("(");
+        int iMax = getFunctionParameters().getNumChild();
+        for (int i=0; i<iMax; i++) {
+            getFunctionParameters().getChild(i).prettyPrint(out, "");
+            if (iMax > 1 && i < (iMax - 1)) {
+                out.print(", ");
+            }
+        }
+        out.print(")");
+        out.print(" ");
+        out.println("{");
+        if (hasBlock()) {
+            for (int i=0; i<getBlock().getNumChild(); i++) {
+            }
+        }
+        getReturn().prettyPrint(out, "");
     }
 
     public void FunctionUse.prettyPrint(PrintStream out, String indent) {
@@ -61,7 +78,7 @@ aspect PrettyPrint  {
     }
 
     public void Return.prettyPrint(PrintStream out, String indent) {
-        out.print("Return");
+        out.println("RETRUN");
     }
 
     public void LogicExpression.prettyPrint(PrintStream out, String indent) {
