@@ -1,7 +1,9 @@
 Program ::= FunctionDeclaration*;
 
 abstract Expression;
-Expressions ::= Expression*;
+abstract Statement;
+
+Statements ::= Statement*;
 
 BinaryExpression : Expression ::= Left:Expression Right:Expression;
 
@@ -11,26 +13,29 @@ Div : BinaryExpression;
 Minus : BinaryExpression;
 Remainder : BinaryExpression;
 
-FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions] Return;
+FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Statements] Return;
+
+FunctionStatement : Statement ::= FunctionUse;
 FunctionUse : Expression ::= IdUse [FunctionParameters:List];
 
-Assign : Expression ::= ID:IdExpression Value:Expression;
-Return : Expression ::= Expression;
+Assign : Statement ::= ID:IdUse Value:Expression;
+Return : Statement ::= Expression;
 
-LogicExpression : Expression;
-IF : Expression ::= Logic:LogicExpression [Block:Expressions] [ELSE];
-WHILE : Expression ::= Logic:LogicExpression [Block:Expressions];
-ELSE: Expression ::= [Block:Expressions];
+IF : Statement ::= Logic:BinaryLogicalExpression [Block:Statements] [ELSE];
+WHILE : Statement ::= Logic:BinaryLogicalExpression [Block:Statements];
+ELSE: Statement ::= [Block:Statements];
 
-NOEQ : LogicExpression ::= ID:Expression Expression;
-EQ : LogicExpression ::= ID:Expression Expression;
-LTEQ  : LogicExpression ::= ID:Expression Expression;
-GTEQ  : LogicExpression ::= ID:Expression Expression;
-LT : LogicExpression ::= ID:Expression Expression;
-GT : LogicExpression ::= ID:Expression Expression;
+BinaryLogicalExpression : BinaryExpression;
 
-IdExpression : Expression;
-IdUse : IdExpression ::= <ID>;
-IdDeclare : IdExpression ::= <ID>;
+NOEQ : BinaryLogicalExpression;
+EQ : BinaryLogicalExpression;
+LTEQ : BinaryLogicalExpression;
+GTEQ : BinaryLogicalExpression;
+LT : BinaryLogicalExpression;
+GT : BinaryLogicalExpression;
+
+IdUse : Expression ::= <ID>;
+IdDeclare : Statement ::= <ID>;
+VarDeclare : Statement ::= IdDeclare [Expression];
 
 Numeral : Expression ::= <NUMERAL>;

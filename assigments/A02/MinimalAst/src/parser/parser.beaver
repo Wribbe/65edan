@@ -25,7 +25,7 @@
 
 %typeof program = "Program";
 
-%typeof expression = "Expression";
+%typeof statement = "Statement";
 %typeof factor = "Expression";
 %typeof term = "Expression";
 
@@ -33,7 +33,7 @@
 %typeof function_declaration_parameters = "List";
 %typeof function_use_parameters = "List";
 
-%typeof expressions = "List";
+%typeof statements= "List";
 
 %typeof function_declaration = "FunctionDeclaration";
 %typeof block = "List";
@@ -43,13 +43,14 @@
 %typeof id_use = "IdUse";
 %typeof id_declare = "IdDeclare";
 
-%typeof control_flow_statement = "Expression";
-%typeof logic_expression = "LogicExpression";
+%typeof control_flow_statement = "Statement";
+%typeof logic_expression = "BinaryLogicalExpression";
 %typeof assignable_expression = "Expression";
 
 %typeof else_statement = "ELSE";
 
 %typeof return_statement = "Return";
+%typeof function_use = "FunctionUse";
 
 
 %goal program;
@@ -75,7 +76,7 @@ function_declaration =
     | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA block.block return_statement.retstm RBRA {:
         return new FunctionDeclaration(id, new Opt(fps), new Opt(block), retstm);
     :}
-    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA expressions.exps return_statement.retstm RBRA {:
+    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA statements.exps return_statement.retstm RBRA {:
         return new FunctionDeclaration(id, new Opt(fps), new Opt(exps), retstm);
     :}
     ;
@@ -118,7 +119,7 @@ block =
     LBRA RBRA {:
         return new List();
     :}
-    | LBRA expressions.exps RBRA {:
+    | LBRA statements.exps RBRA {:
         return exps;
     :}
     | LBRA block.block RBRA {:
@@ -127,31 +128,33 @@ block =
     ;
 
 
-expressions =
+statements =
     arithemetic_expressions
-    | control_flow_expressions
+    | control_flow_statements
     ;
 
 
 arithemetic_expressions =
-    expression.expression SEMI {:
+    statement.expression SEMI {:
         return new List().add(expression);
     :}
-    | expressions.expression_list expression.expression SEMI {:
+    | statements.expression_list statement.expression SEMI {:
         return expression_list.add(expression);
     :}
     ;
 
 
-expression =
+statement =
     id_use.id ASSIGN assignable_expression.exp {:
         return new Assign(id, exp);
     :}
     | id_declare.id ASSIGN assignable_expression.exp {:
-        return new Assign(id, exp);
+        return new VarDeclare(id, new Opt(exp));
     :}
     | id_declare.id
-    | function_use
+    | function_use.use{:
+        return new FunctionStatement(use);
+    :}
     | control_flow_statement
     ;
 
@@ -162,13 +165,13 @@ assignable_expression =
     ;
 
 
-control_flow_expressions =
+control_flow_statements =
 
     control_flow_statement.control {:
         return new List().add(control);
     :}
-    | expressions.expression_list control_flow_statement.control {:
-        return expression_list.add(control);
+    | statements.statement_list control_flow_statement.control {:
+        return statement_list.add(control);
     :}
     ;
 
