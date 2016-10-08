@@ -3,8 +3,6 @@ Program ::= FunctionDeclaration*;
 abstract Expression;
 abstract Statement;
 
-Statements ::= Statement*;
-
 BinaryExpression : Expression ::= Left:Expression Right:Expression;
 
 Add : BinaryExpression;
@@ -13,7 +11,7 @@ Div : BinaryExpression;
 Minus : BinaryExpression;
 Remainder : BinaryExpression;
 
-FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Statements] Return;
+FunctionDeclaration ::= IdDeclare FunctionParameters:IdDeclare* Block:Statement* Return;
 
 FunctionStatement : Statement ::= FunctionUse;
 FunctionUse : Expression ::= IdUse [FunctionParameters:List];

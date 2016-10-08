@@ -71,21 +71,19 @@ function_declarations =
 
 function_declaration =
     id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, new Opt(fps), new Opt(), retstm);
+        return new FunctionDeclaration(id, fps, new Opt(), retstm);
     :}
     | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA block.block return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, new Opt(fps), new Opt(block), retstm);
+        return new FunctionDeclaration(id, fps, new Opt(block), retstm);
     :}
     | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA statements.exps return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, new Opt(fps), new Opt(exps), retstm);
+        return new FunctionDeclaration(id, fps, new Opt(exps), retstm);
     :}
     ;
 
 
 function_declaration_parameters =
-    /* Epsilon */ {:
-        return new List();
-    :}
+    /* Epsilon */
     | id_declare.id {:
         return new List().add(id);
     :}
@@ -144,6 +142,16 @@ arithemetic_expressions =
     ;
 
 
+control_flow_statements =
+    control_flow_statement.control {:
+        return new List().add(control);
+    :}
+    | statements.statement_list control_flow_statement.control {:
+        return statement_list.add(control);
+    :}
+    ;
+
+
 statement =
     id_use.id ASSIGN assignable_expression.exp {:
         return new Assign(id, exp);
@@ -164,16 +172,6 @@ assignable_expression =
     | logic_expression
     ;
 
-
-control_flow_statements =
-
-    control_flow_statement.control {:
-        return new List().add(control);
-    :}
-    | statements.statement_list control_flow_statement.control {:
-        return statement_list.add(control);
-    :}
-    ;
 
 
 control_flow_statement =
