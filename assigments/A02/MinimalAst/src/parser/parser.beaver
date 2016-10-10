@@ -71,19 +71,21 @@ function_declarations =
 
 function_declaration =
     id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, fps, new Opt(), retstm);
+        return new FunctionDeclaration(id, fps, new List(), retstm);
     :}
     | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA block.block return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, fps, new Opt(block), retstm);
+        return new FunctionDeclaration(id, fps, block, retstm);
     :}
     | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA statements.exps return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, fps, new Opt(exps), retstm);
+        return new FunctionDeclaration(id, fps, exps, retstm);
     :}
     ;
 
 
 function_declaration_parameters =
-    /* Epsilon */
+    /* Epsilon */ {:
+        return new List();
+    :}
     | id_declare.id {:
         return new List().add(id);
     :}
@@ -95,7 +97,7 @@ function_declaration_parameters =
 
 function_use =
     id_use.id LPAR function_use_parameters.funcparams RPAR {:
-        return new FunctionUse(id, new Opt(funcparams));
+        return new FunctionUse(id, funcparams);
     :}
     ;
 
@@ -183,24 +185,24 @@ control_flow_statement =
 
 if_statement =
     IF LPAR logic_expression.logic RPAR block.block else_statement.elsestm {:
-        return new IF(logic, new Opt(block), new Opt(elsestm));
+        return new IF(logic, block, new Opt(elsestm));
     :}
     | IF LPAR logic_expression.logic RPAR block.block  {:
-        return new IF(logic, new Opt(block), new Opt());
+        return new IF(logic, block, new Opt());
     :}
     ;
 
 
 else_statement =
     ELSE block.block {:
-        return new ELSE(new Opt(block));
+        return new ELSE(block);
     :}
     ;
 
 
 while_statement =
     WHILE LPAR logic_expression.logic RPAR block.block {:
-        return new WHILE(logic, new Opt(block));
+        return new WHILE(logic, block);
     :}
     ;
 

@@ -14,14 +14,14 @@ Remainder : BinaryExpression;
 FunctionDeclaration ::= IdDeclare FunctionParameters:IdDeclare* Block:Statement* Return;
 
 FunctionStatement : Statement ::= FunctionUse;
-FunctionUse : Expression ::= IdUse [FunctionParameters:List];
+FunctionUse : Expression ::= IdUse Variables:Expression*;
 
 Assign : Statement ::= ID:IdUse Value:Expression;
 Return : Statement ::= Expression;
 
-IF : Statement ::= Logic:BinaryLogicalExpression [Block:Statements] [ELSE];
-WHILE : Statement ::= Logic:BinaryLogicalExpression [Block:Statements];
-ELSE: Statement ::= [Block:Statements];
+IF : Statement ::= Logic:BinaryLogicalExpression Block:Statement* [ELSE];
+WHILE : Statement ::= Logic:BinaryLogicalExpression Block:Statement*;
+ELSE: Statement ::= Block:Statement*;
 
 BinaryLogicalExpression : BinaryExpression;
 
