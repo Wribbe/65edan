@@ -351,6 +351,9 @@ def create_pertty_print_aspect(objects):
         pretty_format = '{}.prettyPrint(out, indent+"  ");'
         return pretty_format.format(str_object);
 
+    def jif(expression):
+        return "if ({}) {{".format(expression)
+
 
     newline = jprintln('')
 
@@ -384,8 +387,20 @@ def create_pertty_print_aspect(objects):
     class_methods['Return'] = sep.join([
             jinprint('return'),
             space,
-            'getExpression().prettyPrint(out, "");',
+            pretty_print('getExpression()'),
             jprint(';'),
+        ])
+
+    class_methods['VarDeclare'] = sep.join([
+            jinprint('int'),
+            space,
+            id_from_decl,
+            jif('hasExpression()'),
+            jprint(" = "),
+            pretty_print('getExpression()'),
+            '}',
+            jprint(';'),
+            newline,
         ])
 
     dict_data = {

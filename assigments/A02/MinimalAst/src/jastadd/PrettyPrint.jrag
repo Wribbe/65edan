@@ -83,7 +83,7 @@ aspect PrettyPrint  {
     public void Return.prettyPrint(PrintStream out, String indent) {
         out.print(indent+"return");
         out.print(" ");
-        getExpression().prettyPrint(out, "");
+        getExpression().prettyPrint(out, indent+"  ");
         out.print(";");
     }
 
@@ -136,7 +136,15 @@ aspect PrettyPrint  {
     }
 
     public void VarDeclare.prettyPrint(PrintStream out, String indent) {
-        out.print("VarDeclare");
+        out.print(indent+"int");
+        out.print(" ");
+        out.print(getIdDeclare().getID());
+        if (hasExpression()) {
+            out.print(" = ");
+            getExpression().prettyPrint(out, indent+"  ");
+        }
+        out.print(";");
+        out.println("");
     }
 
     public void Numeral.prettyPrint(PrintStream out, String indent) {
