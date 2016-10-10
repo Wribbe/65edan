@@ -351,6 +351,13 @@ def create_pertty_print_aspect(objects):
         pretty_format = '{}.prettyPrint(out, indent+"  ");'
         return pretty_format.format(str_object);
 
+    def pretty_print(str_object, indent=True):
+        if indent:
+            pretty_format = '{}.prettyPrint(out, indent+"  ");'
+        else:
+            pretty_format = '{}.prettyPrint(out, "");'
+        return pretty_format.format(str_object);
+
     def jif(expression):
         return "if ({}) {{".format(expression)
 
@@ -411,6 +418,15 @@ def create_pertty_print_aspect(objects):
             pretty_print('getExpression()'),
             jprint(';'),
             newline,
+        ])
+
+    class_methods['FunctionUse'] = sep.join([
+            id_from_use,
+            jprint('('),
+            iter_over('getNumExpression()'),
+            pretty_print('getExpression(i)', False),
+            '}',
+            jprint(')'),
         ])
 
     dict_data = {

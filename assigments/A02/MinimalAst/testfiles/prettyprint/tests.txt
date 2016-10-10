@@ -17,3 +17,9 @@ int f() {
   c = 2 + 5 / 4 % 3 - 4;
   return 0;
 }
+-- function_with_body_reassignment_to_function_call
+int f() {
+  int c = 1 + 2 * 3;
+  c = g(2 + 5 / 4 % 3 - 4);
+  return 0;
+}
