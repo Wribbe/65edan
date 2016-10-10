@@ -1,0 +1,8 @@
+-- empty_function
+int f() {
+  return 0;
+}
+-- empty_function_with_vars
+int f(int a, int b) {
+  return 0;
+}

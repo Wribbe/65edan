@@ -348,13 +348,13 @@ def create_pertty_print_aspect(objects):
         return "out.println({});".format(value)
 
     def pretty_print(str_object):
-        pretty_format = '{}.prettyPrint(out, indent+"    ");'
+        pretty_format = '{}.prettyPrint(out, indent+"  ");'
         return pretty_format.format(str_object);
 
 
     newline = jprintln('')
 
-    id_from_decl = 'out.print(getIdDeclare().getID());'
+    id_from_decl = jprint('getIdDeclare().getID()', False)
 
     class_methods['FunctionDeclaration'] = sep.join([
             jinprint('int'),
@@ -363,6 +363,8 @@ def create_pertty_print_aspect(objects):
             jprint('('),
             "int iMax = getNumFunctionParameters();",
             iter_over("iMax"),
+            jprint("int"),
+            space,
             pretty_print('getFunctionParameters(i)'),
             'if (iMax > 1 && i < (iMax - 1)) {',
             jprint(', '),
@@ -385,8 +387,6 @@ def create_pertty_print_aspect(objects):
             'getExpression().prettyPrint(out, "");',
             jprint(';'),
         ])
-
-
 
     dict_data = {
             'class_name': class_name,

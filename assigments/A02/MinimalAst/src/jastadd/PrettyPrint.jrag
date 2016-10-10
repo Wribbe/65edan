@@ -54,7 +54,9 @@ aspect PrettyPrint  {
         out.print("(");
         int iMax = getNumFunctionParameters();
         for (int i=0; i<iMax; i++) {
-            getFunctionParameters(i).prettyPrint(out, indent+"    ");
+            out.print("int");
+            out.print(" ");
+            getFunctionParameters(i).prettyPrint(out, indent+"  ");
             if (iMax > 1 && i < (iMax - 1)) {
                 out.print(", ");
             }
@@ -63,9 +65,9 @@ aspect PrettyPrint  {
         out.print(" ");
         out.println("{");
         for (int i=0; i<getNumBlock(); i++) {
-            getBlock(i).prettyPrint(out, indent+"    ");
+            getBlock(i).prettyPrint(out, indent+"  ");
         }
-        getReturn().prettyPrint(out, indent+"    ");
+        getReturn().prettyPrint(out, indent+"  ");
         out.println("");
         out.print(indent+"}");
     }

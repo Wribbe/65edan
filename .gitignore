@@ -21,3 +21,6 @@ material
 
 # Ignore .expected test files.
 *.expected
+
+# Ignore .lang test files.
+*.lang
