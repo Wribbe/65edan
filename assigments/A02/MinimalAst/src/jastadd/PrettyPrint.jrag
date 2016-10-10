@@ -87,8 +87,8 @@ aspect PrettyPrint  {
         out.print(";");
     }
 
-    public void LogicExpression.prettyPrint(PrintStream out, String indent) {
-        out.print("LogicExpression");
+    public void BinaryLogicalExpression.prettyPrint(PrintStream out, String indent) {
+        out.print("BinaryLogicalExpression");
     }
 
     public void IF.prettyPrint(PrintStream out, String indent) {
@@ -127,16 +127,16 @@ aspect PrettyPrint  {
         out.print("GT");
     }
 
-    public void IdExpression.prettyPrint(PrintStream out, String indent) {
-        out.print("IdExpression");
-    }
-
     public void IdUse.prettyPrint(PrintStream out, String indent) {
         out.print(getID());
     }
 
     public void IdDeclare.prettyPrint(PrintStream out, String indent) {
         out.print(getID());
+    }
+
+    public void VarDeclare.prettyPrint(PrintStream out, String indent) {
+        out.print("VarDeclare");
     }
 
     public void Numeral.prettyPrint(PrintStream out, String indent) {

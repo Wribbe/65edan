@@ -62,7 +62,7 @@ public abstract class TraversingVisitor implements lang.ast.Visitor {
         return visitChildren(node, data);
     }
 
-    public Object visit(LogicExpression node, Object data) {
+    public Object visit(BinaryLogicalExpression node, Object data) {
         return visitChildren(node, data);
     }
 
@@ -102,15 +102,15 @@ public abstract class TraversingVisitor implements lang.ast.Visitor {
         return visitChildren(node, data);
     }
 
-    public Object visit(IdExpression node, Object data) {
-        return visitChildren(node, data);
-    }
-
     public Object visit(IdUse node, Object data) {
         return visitChildren(node, data);
     }
 
     public Object visit(IdDeclare node, Object data) {
+        return visitChildren(node, data);
+    }
+
+    public Object visit(VarDeclare node, Object data) {
         return visitChildren(node, data);
     }
 

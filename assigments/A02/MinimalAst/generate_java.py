@@ -438,7 +438,7 @@ def main(args=[]):
             "FunctionUse",
             "Assign",
             "Return",
-            "LogicExpression",
+            "BinaryLogicalExpression",
             "IF",
             "WHILE",
             "ELSE",
@@ -448,9 +448,9 @@ def main(args=[]):
             "GTEQ",
             "LT",
             "GT",
-            "IdExpression",
             "IdUse",
             "IdDeclare",
+            "VarDeclare",
             "Numeral",
             ]
 

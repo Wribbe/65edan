@@ -16,7 +16,7 @@ aspect Visitor  {
         public Object visit(FunctionUse node, Object data);
         public Object visit(Assign node, Object data);
         public Object visit(Return node, Object data);
-        public Object visit(LogicExpression node, Object data);
+        public Object visit(BinaryLogicalExpression node, Object data);
         public Object visit(IF node, Object data);
         public Object visit(WHILE node, Object data);
         public Object visit(ELSE node, Object data);
@@ -26,9 +26,9 @@ aspect Visitor  {
         public Object visit(GTEQ node, Object data);
         public Object visit(LT node, Object data);
         public Object visit(GT node, Object data);
-        public Object visit(IdExpression node, Object data);
         public Object visit(IdUse node, Object data);
         public Object visit(IdDeclare node, Object data);
+        public Object visit(VarDeclare node, Object data);
         public Object visit(Numeral node, Object data);
     }
 
@@ -84,7 +84,7 @@ aspect Visitor  {
         return visitor.visit(this, data);
     }
 
-    public Object LogicExpression.accept(Visitor visitor, Object data) {
+    public Object BinaryLogicalExpression.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
@@ -124,15 +124,15 @@ aspect Visitor  {
         return visitor.visit(this, data);
     }
 
-    public Object IdExpression.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
     public Object IdUse.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
     public Object IdDeclare.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object VarDeclare.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
