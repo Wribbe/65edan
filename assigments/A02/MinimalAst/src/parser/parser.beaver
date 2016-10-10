@@ -25,30 +25,30 @@
 
 %typeof program = "Program";
 
+%typeof statement = "Statement";
+%typeof control_flow_statement = "Statement";
+
 %typeof expression = "Expression";
 %typeof factor = "Expression";
 %typeof term = "Expression";
+%typeof assignable_expression = "Expression";
 
 %typeof function_declarations = "List";
 %typeof function_declaration_parameters = "List";
 %typeof function_use_parameters = "List";
 
-%typeof expressions = "List";
-
-%typeof function_declaration = "FunctionDeclaration";
+%typeof statements= "List";
 %typeof block = "List";
 
-%typeof non_assign_expression = "Expression";
+%typeof function_use = "FunctionUse";
+
+%typeof function_declaration = "FunctionDeclaration";
+%typeof logic_expression = "BinaryLogicalExpression";
 
 %typeof id_use = "IdUse";
 %typeof id_declare = "IdDeclare";
 
-%typeof control_flow_statement = "Expression";
-%typeof logic_expression = "LogicExpression";
-%typeof assignable_expression = "Expression";
-
 %typeof else_statement = "ELSE";
-
 %typeof return_statement = "Return";
 
 
@@ -70,13 +70,13 @@ function_declarations =
 
 function_declaration =
     id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, new Opt(fps), new Opt(), retstm);
+        return new FunctionDeclaration(id, fps, new List(), retstm);
     :}
     | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA block.block return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, new Opt(fps), new Opt(block), retstm);
+        return new FunctionDeclaration(id, fps, block, retstm);
     :}
-    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA expressions.exps return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, new Opt(fps), new Opt(exps), retstm);
+    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA statements.stms return_statement.retstm RBRA {:
+        return new FunctionDeclaration(id, fps, stms, retstm);
     :}
     ;
 
@@ -96,7 +96,7 @@ function_declaration_parameters =
 
 function_use =
     id_use.id LPAR function_use_parameters.funcparams RPAR {:
-        return new FunctionUse(id, new Opt(funcparams));
+        return new FunctionUse(id, funcparams);
     :}
     ;
 
@@ -105,10 +105,10 @@ function_use_parameters =
     /* Epsilon */ {:
         return new List();
     :}
-    | non_assign_expression.expression {:
+    | expression.expression {:
         return new List().add(expression);
     :}
-    | function_use_parameters.list COMMA non_assign_expression.expression {:
+    | function_use_parameters.list COMMA expression.expression {:
         return list.add(expression);
     :}
     ;
@@ -118,8 +118,8 @@ block =
     LBRA RBRA {:
         return new List();
     :}
-    | LBRA expressions.exps RBRA {:
-        return exps;
+    | LBRA statements.stms RBRA {:
+        return stms;
     :}
     | LBRA block.block RBRA {:
         return block;
@@ -127,49 +127,45 @@ block =
     ;
 
 
-expressions =
-    arithemetic_expressions
-    | control_flow_expressions
+statements =
+    statement.statement SEMI {:
+        return new List().add(statement);
+    :}
+    | statements.statement_list statement.statement SEMI {:
+        return statement_list.add(statement);
+    :}
+    | control_flow_statements
     ;
 
 
-arithemetic_expressions =
-    expression.expression SEMI {:
-        return new List().add(expression);
+control_flow_statements =
+    control_flow_statement.control {:
+        return new List().add(control);
     :}
-    | expressions.expression_list expression.expression SEMI {:
-        return expression_list.add(expression);
+    | statements.statement_list control_flow_statement.control {:
+        return statement_list.add(control);
     :}
     ;
 
 
-expression =
+statement =
     id_use.id ASSIGN assignable_expression.exp {:
         return new Assign(id, exp);
     :}
     | id_declare.id ASSIGN assignable_expression.exp {:
-        return new Assign(id, exp);
+        return new VarDeclare(id, new Opt(exp));
     :}
     | id_declare.id
-    | function_use
+    | function_use.use {:
+        return new FunctionStatement(use);
+    :}
     | control_flow_statement
     ;
 
 
 assignable_expression =
-    non_assign_expression
+    expression
     | logic_expression
-    ;
-
-
-control_flow_expressions =
-
-    control_flow_statement.control {:
-        return new List().add(control);
-    :}
-    | expressions.expression_list control_flow_statement.control {:
-        return expression_list.add(control);
-    :}
     ;
 
 
@@ -182,63 +178,63 @@ control_flow_statement =
 
 if_statement =
     IF LPAR logic_expression.logic RPAR block.block else_statement.elsestm {:
-        return new IF(logic, new Opt(block), new Opt(elsestm));
+        return new IF(logic, block, new Opt(elsestm));
     :}
     | IF LPAR logic_expression.logic RPAR block.block  {:
-        return new IF(logic, new Opt(block), new Opt());
+        return new IF(logic, block, new Opt());
     :}
     ;
 
 
 else_statement =
     ELSE block.block {:
-        return new ELSE(new Opt(block));
+        return new ELSE(block);
     :}
     ;
 
 
 while_statement =
     WHILE LPAR logic_expression.logic RPAR block.block {:
-        return new WHILE(logic, new Opt(block));
+        return new WHILE(logic, block);
     :}
     ;
 
 
 return_statement =
-    RETURN non_assign_expression.expression SEMI {:
+    RETURN expression.expression SEMI {:
         return new Return(expression);
     :}
     ;
 
 
 logic_expression =
-    non_assign_expression.exp1 NOEQ non_assign_expression.exp2 {:
+    expression.exp1 NOEQ expression.exp2 {:
         return new NOEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 EQ non_assign_expression.exp2 {:
+    | expression.exp1 EQ expression.exp2 {:
         return new  EQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 LTEQ non_assign_expression.exp2 {:
+    | expression.exp1 LTEQ expression.exp2 {:
         return new  LTEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 GTEQ non_assign_expression.exp2 {:
+    | expression.exp1 GTEQ expression.exp2 {:
         return new  GTEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 LT non_assign_expression.exp2 {:
+    | expression.exp1 LT expression.exp2 {:
         return new  LT(exp1, exp2);
     :}
-    | non_assign_expression.exp1 GT non_assign_expression.exp2 {:
+    | expression.exp1 GT expression.exp2 {:
         return new  GT(exp1, exp2);
     :}
     ;
 
 
-non_assign_expression =
+expression =
     term
-    | non_assign_expression.expression PLUS term.term {:
+    | expression.expression PLUS term.term {:
         return new Add(expression, term);
     :}
-    | non_assign_expression.expression MINUS term.term {:
+    | expression.expression MINUS term.term {:
         return new Minus(expression, term);
     :}
     ;
@@ -261,7 +257,7 @@ term =
 factor =
     numeral
     | id_use
-    | LPAR non_assign_expression.expression RPAR {:
+    | LPAR expression.expression RPAR {:
         return expression;
     :}
     | function_use

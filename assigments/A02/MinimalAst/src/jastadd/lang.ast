@@ -1,7 +1,7 @@
 Program ::= FunctionDeclaration*;
 
 abstract Expression;
-Expressions ::= Expression*;
+abstract Statement;
 
 BinaryExpression : Expression ::= Left:Expression Right:Expression;
 
@@ -11,26 +11,29 @@ Div : BinaryExpression;
 Minus : BinaryExpression;
 Remainder : BinaryExpression;
 
-FunctionDeclaration ::= IdDeclare [FunctionParameters:List] [Block:Expressions] Return;
-FunctionUse : Expression ::= IdUse [FunctionParameters:List];
+FunctionDeclaration ::= IdDeclare FunctionParameters:IdDeclare* Block:Statement* Return;
 
-Assign : Expression ::= ID:IdExpression Value:Expression;
-Return : Expression ::= Expression;
+FunctionStatement : Statement ::= FunctionUse;
+FunctionUse : Expression ::= IdUse Variables:Expression*;
 
-LogicExpression : Expression;
-IF : Expression ::= Logic:LogicExpression [Block:Expressions] [ELSE];
-WHILE : Expression ::= Logic:LogicExpression [Block:Expressions];
-ELSE: Expression ::= [Block:Expressions];
+Assign : Statement ::= ID:IdUse Value:Expression;
+Return : Statement ::= Expression;
 
-NOEQ : LogicExpression ::= ID:Expression Expression;
-EQ : LogicExpression ::= ID:Expression Expression;
-LTEQ  : LogicExpression ::= ID:Expression Expression;
-GTEQ  : LogicExpression ::= ID:Expression Expression;
-LT : LogicExpression ::= ID:Expression Expression;
-GT : LogicExpression ::= ID:Expression Expression;
+IF : Statement ::= Logic:BinaryLogicalExpression Block:Statement* [ELSE];
+WHILE : Statement ::= Logic:BinaryLogicalExpression Block:Statement*;
+ELSE: Statement ::= Block:Statement*;
 
-IdExpression : Expression;
-IdUse : IdExpression ::= <ID>;
-IdDeclare : IdExpression ::= <ID>;
+BinaryLogicalExpression : BinaryExpression;
+
+NOEQ : BinaryLogicalExpression;
+EQ : BinaryLogicalExpression;
+LTEQ : BinaryLogicalExpression;
+GTEQ : BinaryLogicalExpression;
+LT : BinaryLogicalExpression;
+GT : BinaryLogicalExpression;
+
+IdUse : Expression ::= <ID>;
+IdDeclare : Statement ::= <ID>;
+VarDeclare : Statement ::= IdDeclare [Expression];
 
 Numeral : Expression ::= <NUMERAL>;
