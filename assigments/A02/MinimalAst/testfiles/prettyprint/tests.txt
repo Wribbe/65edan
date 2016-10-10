@@ -11,3 +11,9 @@ int f(int a, int b) {
   int c = 1 + 2 * 3;
   return 0;
 }
+-- function_with_body_reassignment
+int f() {
+  int c = 1 + 2 * 3;
+  c = 2 + 5 / 4 % 3 - 4;
+  return 0;
+}

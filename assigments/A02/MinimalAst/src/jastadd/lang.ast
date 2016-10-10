@@ -16,7 +16,7 @@ FunctionDeclaration ::= IdDeclare FunctionParameters:IdDeclare* Block:Statement*
 FunctionStatement : Statement ::= FunctionUse;
 FunctionUse : Expression ::= IdUse Variables:Expression*;
 
-Assign : Statement ::= ID:IdUse Value:Expression;
+Assign : Statement ::= IdUse Expression;
 Return : Statement ::= Expression;
 
 IF : Statement ::= Logic:BinaryLogicalExpression Block:Statement* [ELSE];

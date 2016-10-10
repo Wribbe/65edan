@@ -358,6 +358,7 @@ def create_pertty_print_aspect(objects):
     newline = jprintln('')
 
     id_from_decl = jprint('getIdDeclare().getID()', False)
+    id_from_use = jprint('getIdUse().getID()', False)
 
     class_methods['FunctionDeclaration'] = sep.join([
             jinprint('int'),
@@ -399,6 +400,15 @@ def create_pertty_print_aspect(objects):
             jprint(" = "),
             pretty_print('getExpression()'),
             '}',
+            jprint(';'),
+            newline,
+        ])
+
+    class_methods['Assign'] = sep.join([
+            jinprint(''),
+            id_from_use,
+            jprint(" = "),
+            pretty_print('getExpression()'),
             jprint(';'),
             newline,
         ])

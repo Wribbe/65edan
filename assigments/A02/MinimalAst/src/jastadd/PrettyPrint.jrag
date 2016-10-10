@@ -77,7 +77,12 @@ aspect PrettyPrint  {
     }
 
     public void Assign.prettyPrint(PrintStream out, String indent) {
-        out.print("Assign");
+        out.print(indent+"");
+        out.print(getIdUse().getID());
+        out.print(" = ");
+        getExpression().prettyPrint(out, indent+"  ");
+        out.print(";");
+        out.println("");
     }
 
     public void Return.prettyPrint(PrintStream out, String indent) {
