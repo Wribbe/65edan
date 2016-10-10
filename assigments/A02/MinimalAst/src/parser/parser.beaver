@@ -76,8 +76,8 @@ function_declaration =
     | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA block.block return_statement.retstm RBRA {:
         return new FunctionDeclaration(id, fps, block, retstm);
     :}
-    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA statements.exps return_statement.retstm RBRA {:
-        return new FunctionDeclaration(id, fps, exps, retstm);
+    | id_declare.id LPAR function_declaration_parameters.fps RPAR LBRA statements.stms return_statement.retstm RBRA {:
+        return new FunctionDeclaration(id, fps, stms, retstm);
     :}
     ;
 
@@ -106,10 +106,10 @@ function_use_parameters =
     /* Epsilon */ {:
         return new List();
     :}
-    | non_assign_expression.expression {:
+    | expression.expression {:
         return new List().add(expression);
     :}
-    | function_use_parameters.list COMMA non_assign_expression.expression {:
+    | function_use_parameters.list COMMA expression.expression {:
         return list.add(expression);
     :}
     ;
@@ -119,8 +119,8 @@ block =
     LBRA RBRA {:
         return new List();
     :}
-    | LBRA statements.exps RBRA {:
-        return exps;
+    | LBRA statements.stms RBRA {:
+        return stms;
     :}
     | LBRA block.block RBRA {:
         return block;
@@ -129,18 +129,13 @@ block =
 
 
 statements =
-    arithemetic_expressions
+    statement.statement SEMI {:
+        return new List().add(statement);
+    :}
+    | statements.statement_list statement.statement SEMI {:
+        return statement_list.add(statement);
+    :}
     | control_flow_statements
-    ;
-
-
-arithemetic_expressions =
-    statement.expression SEMI {:
-        return new List().add(expression);
-    :}
-    | statements.expression_list statement.expression SEMI {:
-        return expression_list.add(expression);
-    :}
     ;
 
 
@@ -170,7 +165,7 @@ statement =
 
 
 assignable_expression =
-    non_assign_expression
+    expression
     | logic_expression
     ;
 
@@ -208,40 +203,40 @@ while_statement =
 
 
 return_statement =
-    RETURN non_assign_expression.expression SEMI {:
+    RETURN expression.expression SEMI {:
         return new Return(expression);
     :}
     ;
 
 
 logic_expression =
-    non_assign_expression.exp1 NOEQ non_assign_expression.exp2 {:
+    expression.exp1 NOEQ expression.exp2 {:
         return new NOEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 EQ non_assign_expression.exp2 {:
+    | expression.exp1 EQ expression.exp2 {:
         return new  EQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 LTEQ non_assign_expression.exp2 {:
+    | expression.exp1 LTEQ expression.exp2 {:
         return new  LTEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 GTEQ non_assign_expression.exp2 {:
+    | expression.exp1 GTEQ expression.exp2 {:
         return new  GTEQ(exp1, exp2);
     :}
-    | non_assign_expression.exp1 LT non_assign_expression.exp2 {:
+    | expression.exp1 LT expression.exp2 {:
         return new  LT(exp1, exp2);
     :}
-    | non_assign_expression.exp1 GT non_assign_expression.exp2 {:
+    | expression.exp1 GT expression.exp2 {:
         return new  GT(exp1, exp2);
     :}
     ;
 
 
-non_assign_expression =
+expression =
     term
-    | non_assign_expression.expression PLUS term.term {:
+    | expression.expression PLUS term.term {:
         return new Add(expression, term);
     :}
-    | non_assign_expression.expression MINUS term.term {:
+    | expression.expression MINUS term.term {:
         return new Minus(expression, term);
     :}
     ;
@@ -264,7 +259,7 @@ term =
 factor =
     numeral
     | id_use
-    | LPAR non_assign_expression.expression RPAR {:
+    | LPAR expression.expression RPAR {:
         return expression;
     :}
     | function_use
