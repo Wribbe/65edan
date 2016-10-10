@@ -71,6 +71,13 @@ aspect PrettyPrint  {
         out.print(indent+"}");
     }
 
+    public void FunctionStatement.prettyPrint(PrintStream out, String indent) {
+        out.print(indent+"");
+        getFunctionUse().prettyPrint(out, "");
+        out.print(";");
+        out.println("");
+    }
+
     public void FunctionUse.prettyPrint(PrintStream out, String indent) {
         out.print(getIdUse().getID());
         out.print("(");

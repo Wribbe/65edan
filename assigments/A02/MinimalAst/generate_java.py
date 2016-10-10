@@ -429,6 +429,13 @@ def create_pertty_print_aspect(objects):
             jprint(')'),
         ])
 
+    class_methods['FunctionStatement'] = sep.join([
+            jinprint(''),
+            pretty_print('getFunctionUse()', False),
+            jprint(';'),
+            newline,
+        ])
+
     dict_data = {
             'class_name': class_name,
             'inheritance': inheritance,
@@ -490,6 +497,7 @@ def main(args=[]):
             "Remainder",
             "FunctionDeclaration",
             "FunctionUse",
+            "FunctionStatement",
             "Assign",
             "Return",
             "BinaryLogicalExpression",

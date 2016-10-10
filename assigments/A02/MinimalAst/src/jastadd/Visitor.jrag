@@ -14,6 +14,7 @@ aspect Visitor  {
         public Object visit(Remainder node, Object data);
         public Object visit(FunctionDeclaration node, Object data);
         public Object visit(FunctionUse node, Object data);
+        public Object visit(FunctionStatement node, Object data);
         public Object visit(Assign node, Object data);
         public Object visit(Return node, Object data);
         public Object visit(BinaryLogicalExpression node, Object data);
@@ -61,6 +62,10 @@ aspect Visitor  {
     }
 
     public Object FunctionDeclaration.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object FunctionStatement.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 

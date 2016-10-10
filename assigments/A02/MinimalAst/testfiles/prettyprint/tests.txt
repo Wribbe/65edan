@@ -23,3 +23,8 @@ int f() {
   c = g(2 + 5 / 4 % 3 - 4);
   return 0;
 }
+-- function_with_empty_function_call
+int f() {
+  print();
+  return 0;
+}
