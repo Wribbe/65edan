@@ -48,13 +48,13 @@ aspect PrettyPrint  {
     }
 
     public void FunctionDeclaration.prettyPrint(PrintStream out, String indent) {
-        out.print("int");
+        out.print(indent+"int");
         out.print(" ");
         out.print(getIdDeclare().getID());
         out.print("(");
-        int iMax = getFunctionParameters().getNumChild();
+        int iMax = getNumFunctionParameters();
         for (int i=0; i<iMax; i++) {
-            getFunctionParameters().getChild(i).prettyPrint(out, "");
+            getFunctionParameters(i).prettyPrint(out, indent+"    ");
             if (iMax > 1 && i < (iMax - 1)) {
                 out.print(", ");
             }
@@ -62,13 +62,12 @@ aspect PrettyPrint  {
         out.print(")");
         out.print(" ");
         out.println("{");
-        if (hasBlock()) {
-            for (int i=0; i<getBlock().getNumChild(); i++) {
-            }
+        for (int i=0; i<getNumBlock(); i++) {
+            getBlock(i).prettyPrint(out, indent+"    ");
         }
-        getReturn().prettyPrint(out, "");
+        getReturn().prettyPrint(out, indent+"    ");
         out.println("");
-        out.print("}");
+        out.print(indent+"}");
     }
 
     public void FunctionUse.prettyPrint(PrintStream out, String indent) {
@@ -80,8 +79,7 @@ aspect PrettyPrint  {
     }
 
     public void Return.prettyPrint(PrintStream out, String indent) {
-        out.println("");
-        out.print("return");
+        out.print(indent+"return");
         out.print(" ");
         getExpression().prettyPrint(out, "");
         out.print(";");

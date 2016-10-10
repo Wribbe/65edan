@@ -332,42 +332,55 @@ def create_pertty_print_aspect(objects):
             return "out.print(\"{}\");".format(value)
         return "out.print({});".format(value)
 
+    def jinprint(value, quotes=True):
+        if quotes:
+            return "out.print(indent+\"{}\");".format(value)
+        return "out.print(indent+{});".format(value)
+
+    def jinprintln(value, quotes=True):
+        if quotes:
+            return "out.println(indent+\"{}\");".format(value)
+        return "out.println(indent+{});".format(value)
+
     def jprintln(value, quotes=True):
         if quotes:
             return "out.println(\"{}\");".format(value)
         return "out.println({});".format(value)
+
+    def pretty_print(str_object):
+        pretty_format = '{}.prettyPrint(out, indent+"    ");'
+        return pretty_format.format(str_object);
+
 
     newline = jprintln('')
 
     id_from_decl = 'out.print(getIdDeclare().getID());'
 
     class_methods['FunctionDeclaration'] = sep.join([
-            jprint('int'),
+            jinprint('int'),
             space,
             id_from_decl,
             jprint('('),
-            "int iMax = getFunctionParameters().getNumChild();",
+            "int iMax = getNumFunctionParameters();",
             iter_over("iMax"),
-            'getFunctionParameters().getChild(i).prettyPrint(out, "");',
+            pretty_print('getFunctionParameters(i)'),
             'if (iMax > 1 && i < (iMax - 1)) {',
             jprint(', '),
             '}',
             '}',
             jprint(')'),
             space,
-            jprintln('{'),
-            'if (hasBlock()) {',
-            iter_over("getBlock().getNumChild()"),
+            jprintln('{'), # End of function definition.
+            iter_over("getNumBlock()"),
+            pretty_print('getBlock(i)'),
             '}', # Iter over ends.
-            '}', # If ends.
-            'getReturn().prettyPrint(out, "");',
+            pretty_print('getReturn()'),
             newline,
-            jprint('}'),
+            jinprint('}'),
         ])
 
     class_methods['Return'] = sep.join([
-            newline,
-            jprint('return'),
+            jinprint('return'),
             space,
             'getExpression().prettyPrint(out, "");',
             jprint(';'),
