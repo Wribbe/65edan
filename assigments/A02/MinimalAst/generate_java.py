@@ -395,7 +395,6 @@ def create_pertty_print_aspect(objects):
             pretty_print('getBlock(i)'),
             '}', # Iter over ends.
             pretty_print('getReturn()'),
-            newline,
             jinprint('}'),
         ])
 
@@ -404,6 +403,7 @@ def create_pertty_print_aspect(objects):
             space,
             pretty_print('getExpression()'),
             jprint(';'),
+            newline,
         ])
 
     class_methods['VarDeclare'] = sep.join([
@@ -424,14 +424,18 @@ def create_pertty_print_aspect(objects):
             jprint(" = "),
             pretty_print('getExpression()'),
             jprint(';'),
-            newline,
+            newline
         ])
 
     class_methods['FunctionUse'] = sep.join([
             id_from_use,
             jprint('('),
-            iter_over('getNumExpression()'),
+            "int iMax = getNumExpression();",
+            iter_over("iMax"),
             pretty_print('getExpression(i)', False),
+            'if (iMax > 1 && i < (iMax - 1)) {',
+            jprint(', '),
+            '}',
             '}',
             jprint(')'),
         ])
@@ -451,17 +455,16 @@ def create_pertty_print_aspect(objects):
             jprint(')'),
             space,
             jprint('{'),
+            newline,
             iter_over('getNumBlock()'),
-            newline,
             pretty_print('getBlock(i)'),
-            newline,
             '}', # end iter.
             jinprint('}'),
             'if (hasELSE())',
             '{',
             pretty_print('getELSE()'),
             jinprint('}'),
-            '}',
+            '}', # End of has ELSE.
             newline,
         ])
 
@@ -470,11 +473,36 @@ def create_pertty_print_aspect(objects):
             jprint('else'),
             space,
             jprint('{'),
+            newline,
             iter_over('getNumBlock()'),
-            newline,
             pretty_print('getBlock(i)', 'indent'),
-            newline,
             '}', # end iter.
+        ])
+
+    class_methods['WHILE'] = sep.join([
+            jinprint('while'),
+            space,
+            jprint('('),
+            pretty_print('getLogic()', False),
+            jprint(')'),
+            space,
+            jprint('{'),
+            newline,
+            iter_over('getNumBlock()'),
+            pretty_print('getBlock(i)'),
+            '}', # end iter.
+            jinprint('}'),
+            newline,
+        ])
+
+    class_methods['Program'] = sep.join([
+            "int iMax = getNumFunctionDeclaration();",
+            iter_over("iMax"),
+            pretty_print('getFunctionDeclaration(i)', False),
+            'if (iMax > 1 && i < (iMax - 1)) {',
+            newline,
+            '}',
+            '}', # End iter.
         ])
 
     dict_data = {
