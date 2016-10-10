@@ -28,10 +28,6 @@ aspect PrettyPrint  {
         out.println("");
     }
 
-    public void BinaryLogicalExpression.prettyPrint(PrintStream out, String indent) {
-        out.print("BinaryLogicalExpression");
-    }
-
     public void Div.prettyPrint(PrintStream out, String indent) {
         getLeft().prettyPrint(out, indent);
         out.print(" / ");
@@ -39,11 +35,21 @@ aspect PrettyPrint  {
     }
 
     public void ELSE.prettyPrint(PrintStream out, String indent) {
-        out.print("ELSE");
+        out.print(" ");
+        out.print("else");
+        out.print(" ");
+        out.print("{");
+        for (int i=0; i<getNumBlock(); i++) {
+            out.println("");
+            getBlock(i).prettyPrint(out, indent);
+            out.println("");
+        }
     }
 
     public void EQ.prettyPrint(PrintStream out, String indent) {
-        out.print("EQ");
+        getLeft().prettyPrint(out, indent);
+        out.print(" == ");
+        getRight().prettyPrint(out, indent);
     }
 
     public void FunctionDeclaration.prettyPrint(PrintStream out, String indent) {
@@ -88,15 +94,37 @@ aspect PrettyPrint  {
     }
 
     public void GT.prettyPrint(PrintStream out, String indent) {
-        out.print("GT");
+        getLeft().prettyPrint(out, indent);
+        out.print(" > ");
+        getRight().prettyPrint(out, indent);
     }
 
     public void GTEQ.prettyPrint(PrintStream out, String indent) {
-        out.print("GTEQ");
+        getLeft().prettyPrint(out, indent);
+        out.print(" >= ");
+        getRight().prettyPrint(out, indent);
     }
 
     public void IF.prettyPrint(PrintStream out, String indent) {
-        out.print("IF");
+        out.print(indent+"if");
+        out.print(" ");
+        out.print("(");
+        getLogic().prettyPrint(out, "");
+        out.print(")");
+        out.print(" ");
+        out.print("{");
+        for (int i=0; i<getNumBlock(); i++) {
+            out.println("");
+            getBlock(i).prettyPrint(out, indent+"  ");
+            out.println("");
+        }
+        out.print(indent+"}");
+        if (hasELSE())
+        {
+            getELSE().prettyPrint(out, indent+"  ");
+            out.print(indent+"}");
+        }
+        out.println("");
     }
 
     public void IdDeclare.prettyPrint(PrintStream out, String indent) {
@@ -108,11 +136,15 @@ aspect PrettyPrint  {
     }
 
     public void LT.prettyPrint(PrintStream out, String indent) {
-        out.print("LT");
+        getLeft().prettyPrint(out, indent);
+        out.print(" < ");
+        getRight().prettyPrint(out, indent);
     }
 
     public void LTEQ.prettyPrint(PrintStream out, String indent) {
-        out.print("LTEQ");
+        getLeft().prettyPrint(out, indent);
+        out.print(" <= ");
+        getRight().prettyPrint(out, indent);
     }
 
     public void Minus.prettyPrint(PrintStream out, String indent) {
@@ -128,15 +160,13 @@ aspect PrettyPrint  {
     }
 
     public void NOEQ.prettyPrint(PrintStream out, String indent) {
-        out.print("NOEQ");
+        getLeft().prettyPrint(out, indent);
+        out.print(" != ");
+        getRight().prettyPrint(out, indent);
     }
 
     public void Numeral.prettyPrint(PrintStream out, String indent) {
         out.print(getNUMERAL());
-    }
-
-    public void Opt.prettyPrint(PrintStream out, String indent) {
-        out.print("Opt");
     }
 
     public void Remainder.prettyPrint(PrintStream out, String indent) {

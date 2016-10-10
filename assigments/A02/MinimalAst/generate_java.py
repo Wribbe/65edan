@@ -278,6 +278,12 @@ def create_pertty_print_aspect(objects):
                 ('Div', '/'),
                 ('Minus', '-'),
                 ('Remainder', '%'),
+                ('NOEQ', '!='),
+                ('EQ', '=='),
+                ('LTEQ', '<='),
+                ('GTEQ', '>='),
+                ('LT', '<'),
+                ('GT', '>'),
             ]
 
     binary_methods = {name : binary_expression(operand) for (name, operand) in
@@ -347,16 +353,17 @@ def create_pertty_print_aspect(objects):
             return "out.println(\"{}\");".format(value)
         return "out.println({});".format(value)
 
-    def pretty_print(str_object):
-        pretty_format = '{}.prettyPrint(out, indent+"  ");'
-        return pretty_format.format(str_object);
-
     def pretty_print(str_object, indent=True):
-        if indent:
+        if hasattr(indent, "split"): # Custom indent.
+            pretty_format = '{}.prettyPrint(out, {});'
+        elif indent:
             pretty_format = '{}.prettyPrint(out, indent+"  ");'
         else:
             pretty_format = '{}.prettyPrint(out, "");'
-        return pretty_format.format(str_object);
+        try:
+            return pretty_format.format(str_object, indent);
+        except:
+            return pretty_format.format(str_object);
 
     def jif(expression):
         return "if ({}) {{".format(expression)
@@ -436,6 +443,40 @@ def create_pertty_print_aspect(objects):
             newline,
         ])
 
+    class_methods['IF'] = sep.join([
+            jinprint('if'),
+            space,
+            jprint('('),
+            pretty_print('getLogic()', False),
+            jprint(')'),
+            space,
+            jprint('{'),
+            iter_over('getNumBlock()'),
+            newline,
+            pretty_print('getBlock(i)'),
+            newline,
+            '}', # end iter.
+            jinprint('}'),
+            'if (hasELSE())',
+            '{',
+            pretty_print('getELSE()'),
+            jinprint('}'),
+            '}',
+            newline,
+        ])
+
+    class_methods['ELSE'] = sep.join([
+            space,
+            jprint('else'),
+            space,
+            jprint('{'),
+            iter_over('getNumBlock()'),
+            newline,
+            pretty_print('getBlock(i)', 'indent'),
+            newline,
+            '}', # end iter.
+        ])
+
     dict_data = {
             'class_name': class_name,
             'inheritance': inheritance,
@@ -489,7 +530,6 @@ def main(args=[]):
             "ASTNode",
             "Program",
             "List",
-            "Opt",
             "Add",
             "Mul",
             "Div",
@@ -500,7 +540,6 @@ def main(args=[]):
             "FunctionStatement",
             "Assign",
             "Return",
-            "BinaryLogicalExpression",
             "IF",
             "WHILE",
             "ELSE",
