@@ -36,23 +36,15 @@ aspect Visitor  {
         return visitor.visit(this, data);
     }
 
-    public Object Program.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object List.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object Opt.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
     public Object Add.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
-    public Object Mul.accept(Visitor visitor, Object data) {
+    public Object Assign.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object BinaryLogicalExpression.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
@@ -60,11 +52,11 @@ aspect Visitor  {
         return visitor.visit(this, data);
     }
 
-    public Object Minus.accept(Visitor visitor, Object data) {
+    public Object ELSE.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
-    public Object Remainder.accept(Visitor visitor, Object data) {
+    public Object EQ.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
@@ -76,39 +68,7 @@ aspect Visitor  {
         return visitor.visit(this, data);
     }
 
-    public Object Assign.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object Return.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object BinaryLogicalExpression.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object IF.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object WHILE.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object ELSE.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object NOEQ.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object EQ.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object LTEQ.accept(Visitor visitor, Object data) {
+    public Object GT.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
@@ -116,15 +76,7 @@ aspect Visitor  {
         return visitor.visit(this, data);
     }
 
-    public Object LT.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object GT.accept(Visitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-
-    public Object IdUse.accept(Visitor visitor, Object data) {
+    public Object IF.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
@@ -132,11 +84,59 @@ aspect Visitor  {
         return visitor.visit(this, data);
     }
 
-    public Object VarDeclare.accept(Visitor visitor, Object data) {
+    public Object IdUse.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object LT.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object LTEQ.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object List.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Minus.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Mul.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object NOEQ.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 
     public Object Numeral.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Opt.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Program.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Remainder.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Return.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object VarDeclare.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object WHILE.accept(Visitor visitor, Object data) {
         return visitor.visit(this, data);
     }
 

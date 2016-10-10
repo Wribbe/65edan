@@ -12,10 +12,6 @@ public class MsnVisitor extends TraversingVisitor {
     //state variables
     private int maxDepth = 0;
 
-    public Object visit(Program node, Object data) {
-        return visitChildren(node, 0);
-    }
-
     public Object visit(FunctionDeclaration node, Object data) {
         int givenDepth = (int) data;
         int myDepth = givenDepth+1;
@@ -32,6 +28,10 @@ public class MsnVisitor extends TraversingVisitor {
             maxDepth = myDepth;
         }
         return visitChildren(node, (Object)myDepth);
+    }
+
+    public Object visit(Program node, Object data) {
+        return visitChildren(node, 0);
     }
 
     public Object visit(WHILE node, Object data) {

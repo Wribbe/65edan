@@ -58,7 +58,7 @@ def create_class(dict_data):
         lines.append(state_variable)
     emptyline(lines)
 
-    for element in list_objects:
+    for element in sorted(list_objects):
 
         element_methods = methods_objects.get(element)
         if not element_methods:

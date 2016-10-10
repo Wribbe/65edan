@@ -13,20 +13,23 @@ aspect PrettyPrint  {
         }
     }
 
-    public void Opt.prettyPrint(PrintStream out, String indent) {
-        out.print("Opt");
-    }
-
     public void Add.prettyPrint(PrintStream out, String indent) {
         getLeft().prettyPrint(out, indent);
         out.print(" + ");
         getRight().prettyPrint(out, indent);
     }
 
-    public void Mul.prettyPrint(PrintStream out, String indent) {
-        getLeft().prettyPrint(out, indent);
-        out.print(" * ");
-        getRight().prettyPrint(out, indent);
+    public void Assign.prettyPrint(PrintStream out, String indent) {
+        out.print(indent+"");
+        out.print(getIdUse().getID());
+        out.print(" = ");
+        getExpression().prettyPrint(out, indent+"  ");
+        out.print(";");
+        out.println("");
+    }
+
+    public void BinaryLogicalExpression.prettyPrint(PrintStream out, String indent) {
+        out.print("BinaryLogicalExpression");
     }
 
     public void Div.prettyPrint(PrintStream out, String indent) {
@@ -35,16 +38,12 @@ aspect PrettyPrint  {
         getRight().prettyPrint(out, indent);
     }
 
-    public void Minus.prettyPrint(PrintStream out, String indent) {
-        getLeft().prettyPrint(out, indent);
-        out.print(" - ");
-        getRight().prettyPrint(out, indent);
+    public void ELSE.prettyPrint(PrintStream out, String indent) {
+        out.print("ELSE");
     }
 
-    public void Remainder.prettyPrint(PrintStream out, String indent) {
-        getLeft().prettyPrint(out, indent);
-        out.print(" % ");
-        getRight().prettyPrint(out, indent);
+    public void EQ.prettyPrint(PrintStream out, String indent) {
+        out.print("EQ");
     }
 
     public void FunctionDeclaration.prettyPrint(PrintStream out, String indent) {
@@ -73,16 +72,70 @@ aspect PrettyPrint  {
     }
 
     public void FunctionUse.prettyPrint(PrintStream out, String indent) {
-        out.print("FunctionUse");
+        out.print(getIdUse().getID());
+        out.print("(");
+        for (int i=0; i<getNumExpression(); i++) {
+            getExpression(i).prettyPrint(out, "");
+        }
+        out.print(")");
     }
 
-    public void Assign.prettyPrint(PrintStream out, String indent) {
-        out.print(indent+"");
-        out.print(getIdUse().getID());
-        out.print(" = ");
-        getExpression().prettyPrint(out, indent+"  ");
-        out.print(";");
-        out.println("");
+    public void GT.prettyPrint(PrintStream out, String indent) {
+        out.print("GT");
+    }
+
+    public void GTEQ.prettyPrint(PrintStream out, String indent) {
+        out.print("GTEQ");
+    }
+
+    public void IF.prettyPrint(PrintStream out, String indent) {
+        out.print("IF");
+    }
+
+    public void IdDeclare.prettyPrint(PrintStream out, String indent) {
+        out.print(getID());
+    }
+
+    public void IdUse.prettyPrint(PrintStream out, String indent) {
+        out.print(getID());
+    }
+
+    public void LT.prettyPrint(PrintStream out, String indent) {
+        out.print("LT");
+    }
+
+    public void LTEQ.prettyPrint(PrintStream out, String indent) {
+        out.print("LTEQ");
+    }
+
+    public void Minus.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" - ");
+        getRight().prettyPrint(out, indent);
+    }
+
+    public void Mul.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" * ");
+        getRight().prettyPrint(out, indent);
+    }
+
+    public void NOEQ.prettyPrint(PrintStream out, String indent) {
+        out.print("NOEQ");
+    }
+
+    public void Numeral.prettyPrint(PrintStream out, String indent) {
+        out.print(getNUMERAL());
+    }
+
+    public void Opt.prettyPrint(PrintStream out, String indent) {
+        out.print("Opt");
+    }
+
+    public void Remainder.prettyPrint(PrintStream out, String indent) {
+        getLeft().prettyPrint(out, indent);
+        out.print(" % ");
+        getRight().prettyPrint(out, indent);
     }
 
     public void Return.prettyPrint(PrintStream out, String indent) {
@@ -90,54 +143,6 @@ aspect PrettyPrint  {
         out.print(" ");
         getExpression().prettyPrint(out, indent+"  ");
         out.print(";");
-    }
-
-    public void BinaryLogicalExpression.prettyPrint(PrintStream out, String indent) {
-        out.print("BinaryLogicalExpression");
-    }
-
-    public void IF.prettyPrint(PrintStream out, String indent) {
-        out.print("IF");
-    }
-
-    public void WHILE.prettyPrint(PrintStream out, String indent) {
-        out.print("WHILE");
-    }
-
-    public void ELSE.prettyPrint(PrintStream out, String indent) {
-        out.print("ELSE");
-    }
-
-    public void NOEQ.prettyPrint(PrintStream out, String indent) {
-        out.print("NOEQ");
-    }
-
-    public void EQ.prettyPrint(PrintStream out, String indent) {
-        out.print("EQ");
-    }
-
-    public void LTEQ.prettyPrint(PrintStream out, String indent) {
-        out.print("LTEQ");
-    }
-
-    public void GTEQ.prettyPrint(PrintStream out, String indent) {
-        out.print("GTEQ");
-    }
-
-    public void LT.prettyPrint(PrintStream out, String indent) {
-        out.print("LT");
-    }
-
-    public void GT.prettyPrint(PrintStream out, String indent) {
-        out.print("GT");
-    }
-
-    public void IdUse.prettyPrint(PrintStream out, String indent) {
-        out.print(getID());
-    }
-
-    public void IdDeclare.prettyPrint(PrintStream out, String indent) {
-        out.print(getID());
     }
 
     public void VarDeclare.prettyPrint(PrintStream out, String indent) {
@@ -152,8 +157,8 @@ aspect PrettyPrint  {
         out.println("");
     }
 
-    public void Numeral.prettyPrint(PrintStream out, String indent) {
-        out.print(getNUMERAL());
+    public void WHILE.prettyPrint(PrintStream out, String indent) {
+        out.print("WHILE");
     }
 
 }
