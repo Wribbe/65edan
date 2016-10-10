@@ -1,4 +1,10 @@
 #!/bin/sh
 
+TEST_DIR="testfiles/prettyprint"
+CURRENT_DIR=`pwd`
+
 ./generate_java.py
+cd $TEST_DIR
+./create_tests.py
+cd $CURRENT_DIR
 ant test
