@@ -80,6 +80,9 @@ aspect NameAnalysis {
         for (int i=0; i<getNumBlock(); i++) {
             getBlock(i).checkNames(err, newSymbols);
         }
+        if (hasELSE()) {
+            getELSE().checkNames(err, symbols);
+        }
 	}
 
 	public void IdUse.checkNames(PrintStream err, SymbolTable symbols) {

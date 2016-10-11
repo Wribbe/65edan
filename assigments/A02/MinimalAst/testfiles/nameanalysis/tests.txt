@@ -31,3 +31,17 @@ int f(int a, int b) {
 }
 ==
 // Empty file.
+-- no_error_when_parameter_redeclared_in_else
+int f(int a, int b) {
+  int c = a + b;
+  int d;
+  if (a < b) {
+    int c = 5;
+    return c;
+  } else {
+    int d = 4;
+  }
+  return c;
+}
+==
+// Empty file.
