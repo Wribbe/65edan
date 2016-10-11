@@ -12,12 +12,12 @@ aspect PrettyPrint {
 			getChild(i).prettyPrint(out, ind);
 		}
 	}
-	
-	
+
+
 	public void Program.prettyPrint(PrintStream out, String ind) {
 		getNode().prettyPrint(out, ind);
 	}
-	
+
 	public void Pair.prettyPrint(PrintStream out, String ind) {
 		out.print(ind);
 		out.println("Pair");
