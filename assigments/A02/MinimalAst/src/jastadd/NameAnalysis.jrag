@@ -92,6 +92,18 @@ aspect NameAnalysis {
         }
 	}
 
+	public void FunctionDeclaration.checkNames(PrintStream err, SymbolTable symbols) {
+        SymbolTable newSymbols = symbols.push();
+        // Add FunctionDeclaration parameters to new symbol table.
+        for (int i=0; i<getNumFunctionParameters(); i++) {
+            getFunctionParameters(i).checkNames(err, newSymbols);
+        }
+        for (int i=0; i<getNumBlock(); i++) {
+            getBlock(i).checkNames(err, newSymbols);
+        }
+        getReturn().checkNames(err, newSymbols);
+	}
+
 	public void IdUse.checkNames(PrintStream err, SymbolTable symbols) {
 		if (!symbols.lookup(getID())) {
 			err.format("Error at line %d: symbol \'%s\' has not been declared before this use!", getLine(), getID());
