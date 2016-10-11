@@ -524,6 +524,66 @@ def create_pertty_print_aspect(objects):
     return sep.join(class_lines)
 
 
+def create_name_analysis_aspect(objects):
+
+    class_name = "NameAnalysis"
+    object_type = ['aspect']
+    inheritance = []
+
+    class_methods = {
+            }
+
+    preamble = [
+            'import java.util.Set;',
+            'import java.util.HashSet;'
+            ]
+
+    class_method_lines = []
+    class_functions = class_method_lines
+
+    fmt_defult_class = 'err.format(\"Inside {}\");'
+    default_class_method = ""
+    class_methods = {element : fmt_defult_class.format(element) for
+                     element in objects}
+
+    state_variables = [
+            ]
+
+
+    format_string = "public void {}.checkNames(PrintStream err, SymbolTable "+\
+                    "symbols) {{"
+
+    diff_prog_func =  "public void {}.checkNames(PrintStream err) {{"
+    program_method = [
+
+            { 'function_format': diff_prog_func,
+              'body': sep.join(["SymbolTable symbols = new SymbolTable();",
+                                "checkNames(err, symbols);"])},
+
+            sep.join([fmt_defult_class.format("Program")]),
+            ]
+
+    class_methods['Program'] = program_method
+
+    dict_data = {
+            'class_name': class_name,
+            'inheritance': inheritance,
+            'objects': objects,
+            'class_methods': class_methods,
+            'class_functions': [line.strip() for line in class_functions],
+            'default_class_method': default_class_method,
+            'state_variables': state_variables,
+            'preamble': preamble,
+            'object_type': object_type,
+            'format_string': format_string,
+            }
+
+    unindented_class_lines = create_class(dict_data)
+
+    class_lines = indent(unindented_class_lines)
+    return sep.join(class_lines)
+
+
 def indent(list_lines):
 
     text = sep.join(list_lines)
@@ -589,10 +649,12 @@ def main(args=[]):
     prettyp_aspect_tokens = ['src', 'jastadd', 'PrettyPrint.jrag']
     visitor_class_tokens = ['src', 'java', 'lang', 'TraversingVisitor.java']
     msn_class_tokens = ['src', 'java', 'lang', 'MsnVisitor.java']
+    name_analysis_tokens = ['src', 'jastadd', 'NameAnalysis.jrag']
 
     # Aspects.
     jarg_path = os.path.join(*visitor_jarg_tokens)
     pretty_print_path = os.path.join(*prettyp_aspect_tokens)
+    name_analysis_path = os.path.join(*name_analysis_tokens)
 
     # Classes.
     class_path = os.path.join(*visitor_class_tokens)
@@ -603,6 +665,7 @@ def main(args=[]):
                 class_path : create_traversing_visitor(objects),
                 msn_class_path: create_msn_visitor(objects),
                 pretty_print_path: create_pertty_print_aspect(objects),
+                # name_analysis_path: create_name_analysis_aspect(objects),
             }
 
     for path, data in file_objects.items():
