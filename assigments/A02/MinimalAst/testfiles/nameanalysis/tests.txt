@@ -45,3 +45,23 @@ int f(int a, int b) {
 }
 ==
 // Empty file.
+-- error_on_non_declared_function
+int f() {
+  return g();
+}
+int g() {
+  return 5;
+}
+==
+Error at line 2: symbol 'g' has not been declared before this use!
+-- no_error_when_parameter_redeclared_in_while
+int f() {
+  int a = 5;
+  int b = 4;
+  while(a < 5) {
+    int b = 3;
+  }
+  return a;
+}
+==
+// Empty file.
