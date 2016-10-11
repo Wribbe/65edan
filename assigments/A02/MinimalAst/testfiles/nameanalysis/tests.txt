@@ -1,0 +1,15 @@
+-- Error_not_declared
+int f() {
+  a = 5;
+  return 0;
+}
+==
+Error at line 2: symbol 'a' has not been declared before this use!
+-- no_error_when_declared
+int f() {
+  int a;
+  a = 5;
+  return 0;
+}
+==
+// Empty file.
