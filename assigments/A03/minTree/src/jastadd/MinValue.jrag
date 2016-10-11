@@ -21,6 +21,14 @@ aspect MinValue {
 	syn boolean Leaf.isMinValue() = getNumber() == globalMin();
 	
 	// Exercise 4
-	syn int Program.nbrOfMinValues() = 0;
-	syn int Node.nbrOfMinValues() = 0;
+	syn int Program.nbrOfMinValues() = getNode().nbrOfMinValues();
+	syn int Node.nbrOfMinValues()  = 0;
+
+        eq Leaf.nbrOfMinValues() = isMinValue() ? 1 : 0;
+
+        eq Pair.nbrOfMinValues() {
+          int right = getRight().nbrOfMinValues();
+          int left = getLeft().nbrOfMinValues();
+          return right+left;
+        }
 }
