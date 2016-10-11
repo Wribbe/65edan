@@ -13,3 +13,21 @@ int f() {
 }
 ==
 // Empty file.
+-- no_error_when_declared_as_parameter
+int f(int a, int b) {
+  int c = a + b;
+  return c;
+}
+==
+// Empty file.
+-- no_error_when_parameter_redeclared_in_if
+int f(int a, int b) {
+  int c = a + b;
+  if (a < b) {
+    int c = 5;
+    return c;
+  }
+  return c;
+}
+==
+// Empty file.
