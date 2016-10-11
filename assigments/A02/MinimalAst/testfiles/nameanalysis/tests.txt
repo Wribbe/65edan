@@ -65,3 +65,14 @@ int f() {
 }
 ==
 // Empty file.
+-- no_error_when_parameter_redeclared_in_different_functions
+int f() {
+  int a = 5;
+  return a;
+}
+int g() {
+  int a = 5;
+  return a;
+}
+==
+// Empty file.
