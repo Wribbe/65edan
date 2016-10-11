@@ -80,6 +80,7 @@ function_declaration =
     :}
     ;
 
+// Func param opt.
 
 function_declaration_parameters =
     /* Epsilon */ {:
