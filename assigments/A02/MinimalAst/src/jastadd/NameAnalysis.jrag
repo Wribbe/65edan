@@ -81,7 +81,14 @@ aspect NameAnalysis {
             getBlock(i).checkNames(err, newSymbols);
         }
         if (hasELSE()) {
-            getELSE().checkNames(err, symbols);
+            getELSE().checkNames(err, newSymbols);
+        }
+	}
+
+	public void WHILE.checkNames(PrintStream err, SymbolTable symbols) {
+        SymbolTable newSymbols = symbols.push();
+        for (int i=0; i<getNumBlock(); i++) {
+            getBlock(i).checkNames(err, newSymbols);
         }
 	}
 
