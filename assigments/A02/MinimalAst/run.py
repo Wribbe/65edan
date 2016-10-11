@@ -23,7 +23,15 @@ def run(command):
     output = raw_output.decode('utf-8')
     error = raw_error.decode('utf-8')
 
+    if not returncode == 0: # Run failed.
+        print(output)
+        print(error)
+        raise RunException
+
     return output, error, returncode
+
+class RunException(Exception):
+    pass
 
 
 def indent(text):
@@ -67,8 +75,12 @@ def main(args):
         'mv compiler.jar {}'.format(JAR_NAME),
     ]
 
+    errors = 0
     for command in commands:
-        run(command)
+        try:
+            run(command)
+        except RunException:
+            errors += 1
 
     paths_ok = []
     paths_error = []
@@ -89,7 +101,18 @@ def main(args):
         testfiles = paths_ok
 
     for filepath in testfiles:
-        run_in_compiler(filepath)
+        try:
+            run_in_compiler(filepath)
+        except RunException:
+            errors += 1
+
+    print("#####")
+    if errors:
+        format_string = "##### Result: {0} errors ({0}/{1} error-files). ######"
+        print(format_string.format(errors, len(paths_error)))
+    else:
+        print("##### Result: NO ERRORS. ######")
+    print("#####")
 
 if __name__ == "__main__":
     main(sys.argv[1:])

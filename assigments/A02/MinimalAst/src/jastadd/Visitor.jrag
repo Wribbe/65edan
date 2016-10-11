@@ -1,0 +1,138 @@
+import java.io.PrintStream;
+
+aspect Visitor  {
+
+    public interface Visitor {
+        public Object visit(ASTNode node, Object data);
+        public Object visit(Program node, Object data);
+        public Object visit(List node, Object data);
+        public Object visit(Add node, Object data);
+        public Object visit(Mul node, Object data);
+        public Object visit(Div node, Object data);
+        public Object visit(Minus node, Object data);
+        public Object visit(Remainder node, Object data);
+        public Object visit(FunctionDeclaration node, Object data);
+        public Object visit(FunctionUse node, Object data);
+        public Object visit(FunctionStatement node, Object data);
+        public Object visit(Assign node, Object data);
+        public Object visit(Return node, Object data);
+        public Object visit(IF node, Object data);
+        public Object visit(WHILE node, Object data);
+        public Object visit(ELSE node, Object data);
+        public Object visit(NOEQ node, Object data);
+        public Object visit(EQ node, Object data);
+        public Object visit(LTEQ node, Object data);
+        public Object visit(GTEQ node, Object data);
+        public Object visit(LT node, Object data);
+        public Object visit(GT node, Object data);
+        public Object visit(IdUse node, Object data);
+        public Object visit(IdDeclare node, Object data);
+        public Object visit(VarDeclare node, Object data);
+        public Object visit(Numeral node, Object data);
+    }
+
+    public Object ASTNode.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Add.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Assign.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Div.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object ELSE.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object EQ.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object FunctionDeclaration.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object FunctionStatement.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object FunctionUse.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object GT.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object GTEQ.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object IF.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object IdDeclare.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object IdUse.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object LT.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object LTEQ.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object List.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Minus.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Mul.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object NOEQ.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Numeral.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Program.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Remainder.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object Return.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object VarDeclare.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public Object WHILE.accept(Visitor visitor, Object data) {
+        return visitor.visit(this, data);
+    }
+
+}

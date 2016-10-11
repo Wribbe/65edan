@@ -1,0 +1,6 @@
+int main() {
+    if (2 == 3) {
+    } else {
+    }
+    return 0;
+}

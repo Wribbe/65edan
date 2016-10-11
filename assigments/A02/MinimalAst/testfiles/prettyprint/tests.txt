@@ -1,0 +1,74 @@
+-- empty_function
+int f() {
+  return 0;
+}
+-- empty_function_with_vars
+int f(int a, int b) {
+  return 0;
+}
+-- function_with_vars_and_body_expression
+int f(int a, int b) {
+  int c = 1 + 2 * 3;
+  return 0;
+}
+-- function_with_body_reassignment
+int f() {
+  int c = 1 + 2 * 3;
+  c = 2 + 5 / 4 % 3 - 4;
+  return 0;
+}
+-- function_with_body_reassignment_to_function_call
+int f() {
+  int c = 1 + 2 * 3;
+  c = g(2 + 5 / 4 % 3 - 4);
+  return 0;
+}
+-- function_with_empty_function_call
+int f() {
+  print();
+  return 0;
+}
+-- control_flow_statements
+int f() {
+  if (a < b) {
+    return 0;
+  }
+  if (a == b) {
+    return a;
+  } else {
+    return c;
+  }
+  while (a <= 4) {
+    a = a + 1;
+    b = a + 1;
+  }
+  return b;
+}
+-- test_program
+int gcd1(int a, int b) {
+  while (a != b) {
+    if (a > b) {
+      a = a - b;
+    } else {
+      b = b - a;
+    }
+  }
+  return a;
+}
+int gcd2(int a, int b) {
+  if (b == 0) {
+    return a;
+  }
+  return gcd2(b, a % b);
+}
+int main() {
+  int a;
+  int b;
+  a = read();
+  b = read();
+  print(gcd1(a, b));
+  print(gcd2(a, b));
+  int diff = gcd1(a, b) - gcd2(a, b);
+  print(diff);
+  return 0;
+}

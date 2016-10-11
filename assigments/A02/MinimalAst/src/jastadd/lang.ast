@@ -14,9 +14,9 @@ Remainder : BinaryExpression;
 FunctionDeclaration ::= IdDeclare FunctionParameters:IdDeclare* Block:Statement* Return;
 
 FunctionStatement : Statement ::= FunctionUse;
-FunctionUse : Expression ::= IdUse Variables:Expression*;
+FunctionUse : Expression ::= IdUse Expression*;
 
-Assign : Statement ::= ID:IdUse Value:Expression;
+Assign : Statement ::= IdUse Expression;
 Return : Statement ::= Expression;
 
 IF : Statement ::= Logic:BinaryLogicalExpression Block:Statement* [ELSE];

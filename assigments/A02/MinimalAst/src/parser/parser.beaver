@@ -155,7 +155,9 @@ statement =
     | id_declare.id ASSIGN assignable_expression.exp {:
         return new VarDeclare(id, new Opt(exp));
     :}
-    | id_declare.id
+    | id_declare.id {:
+        return new VarDeclare(id, new Opt());
+    :}
     | function_use.use {:
         return new FunctionStatement(use);
     :}

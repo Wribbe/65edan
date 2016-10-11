@@ -18,3 +18,9 @@ material
 
 # Ignore intellij IDEA folder.
 .idea/
+
+# Ignore .expected test files.
+*.expected
+
+# Ignore .lang test files.
+*.lang

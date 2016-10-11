@@ -1,0 +1,90 @@
+-- Error_not_declared
+int f() {
+  a = 5;
+  return 0;
+}
+==
+Error at line 2: symbol 'a' has not been declared before this use!
+-- no_error_when_declared
+int f() {
+  int a;
+  a = 5;
+  return 0;
+}
+==
+// Empty file.
+-- no_error_when_declared_as_parameter
+int f(int a, int b) {
+  int c = a + b;
+  return c;
+}
+==
+// Empty file.
+-- no_error_when_parameter_redeclared_in_if
+int f(int a, int b) {
+  int c = a + b;
+  if (a < b) {
+    int c = 5;
+    return c;
+  }
+  return c;
+}
+==
+// Empty file.
+-- no_error_when_parameter_redeclared_in_else
+int f(int a, int b) {
+  int c = a + b;
+  int d;
+  if (a < b) {
+    int c = 5;
+    return c;
+  } else {
+    int d = 4;
+  }
+  return c;
+}
+==
+// Empty file.
+-- error_on_non_declared_function
+int f() {
+  return g();
+}
+int g() {
+  return 5;
+}
+==
+Error at line 2: symbol 'g' has not been declared before this use!
+-- no_error_when_parameter_redeclared_in_while
+int f() {
+  int a = 5;
+  int b = 4;
+  while(a < 5) {
+    int b = 3;
+  }
+  return a;
+}
+==
+// Empty file.
+-- no_error_when_parameter_redeclared_in_different_functions
+int f() {
+  int a = 5;
+  return a;
+}
+int g() {
+  int a = 5;
+  return a;
+}
+==
+// Empty file.
+-- error_on_redeclration_outside_of_if
+int f() {
+  int a = 5;
+  int b = 0;
+  if (a < 6) {
+    int b = 3;
+  }
+  int b = 2;
+  return a;
+}
+==
+Error at line 7: symbol 'b' is already declared!
