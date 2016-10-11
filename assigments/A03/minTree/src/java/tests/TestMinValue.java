@@ -67,4 +67,20 @@ public class TestMinValue {
 		assertEquals(1, p.nbrOfMinValues());
 	}
 
+        @Test
+	public void nbrOfMinValues2() {
+		Leaf l1 = new Leaf(1);
+		Leaf l2 = new Leaf(2);
+		Leaf l3 = new Leaf(3);
+		Leaf l4 = new Leaf(1);
+
+                Pair p3 = new Pair(l3, l4);
+		Pair p1 = new Pair(l2, p3);
+		Pair p2 = new Pair(l1, p1);
+
+		Program p = new Program(p2);
+
+		assertEquals(2, p.nbrOfMinValues());
+	}
+
 }
