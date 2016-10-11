@@ -27,6 +27,9 @@ def main():
             continue
         line_buffer.append(line)
 
+    if line_buffer:
+        line_segments.append(line_buffer)
+
     objects = []
     for segment in line_segments:
         ans_part = False
@@ -55,11 +58,14 @@ def main():
         filename = object.filename
         with open(fmt_lang.format(filename), 'w') as source_handle:
             with open(fmt_expected.format(filename), 'w') as result_handle:
-                source_handle.write(object.source)
+                source_handle.write(object.source+'\n')
                 if not object.result:
-                    result_handle.write(object.source)
+                    result_handle.write(object.source+'\n')
                 else:
-                    result_handle.write(object.result)
+                    result_data = '\n'.join([line for line in
+                        object.result.splitlines() if not
+                        line.startswith('//')])
+                    result_handle.write(result_data+'\n')
 
 
 if __name__ == "__main__":
