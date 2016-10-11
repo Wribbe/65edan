@@ -75,6 +75,13 @@ aspect NameAnalysis {
 		}
 	}
 
+	public void IF.checkNames(PrintStream err, SymbolTable symbols) {
+        SymbolTable newSymbols = symbols.push();
+        for (int i=0; i<getNumBlock(); i++) {
+            getBlock(i).checkNames(err, newSymbols);
+        }
+	}
+
 	public void IdUse.checkNames(PrintStream err, SymbolTable symbols) {
 		if (!symbols.lookup(getID())) {
 			err.format("Error at line %d: symbol \'%s\' has not been declared before this use!", getLine(), getID());
