@@ -1,10 +1,14 @@
 #!/bin/sh
 
-TEST_DIR="testfiles/prettyprint"
+TEST_DIR_PRETTY="testfiles/prettyprint"
+TEST_DIR_NAME="testfiles/nameanalysis"
 CURRENT_DIR=`pwd`
 
 ./generate_java.py
-cd $TEST_DIR
+cd $TEST_DIR_PRETTY
+./create_tests.py
+cd $CURRENT_DIR
+cd $TEST_DIR_NAME
 ./create_tests.py
 cd $CURRENT_DIR
 ant test
