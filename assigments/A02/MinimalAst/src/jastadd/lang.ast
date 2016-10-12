@@ -34,6 +34,7 @@ GT : BinaryLogicalExpression;
 
 IdUse : Expression ::= <ID>;
 IdDeclare : Statement ::= <ID>;
+UnknownDeclare : IdDeclare;
 VarDeclare : Statement ::= IdDeclare [Expression];
 
 Numeral : Expression ::= <NUMERAL>;

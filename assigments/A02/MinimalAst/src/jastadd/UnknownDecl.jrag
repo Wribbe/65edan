@@ -1,0 +1,9 @@
+aspect UnknownDeclare {
+	syn nta UnknownDeclare Program.unknownDeclare() = new UnknownDeclare("<unknown>");
+
+	inh UnknownDeclare ASTNode.unknownDeclare();
+	eq Program.getChild().unknownDeclare() = unknownDeclare();
+
+	syn boolean IdDeclare.isUnknown() = false;
+	eq UnknownDeclare.isUnknown() = true;
+}

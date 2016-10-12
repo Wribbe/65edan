@@ -2,13 +2,12 @@ package tests;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import lang.ast.ErrorMessage;
 import lang.ast.Program;
 
 /**
@@ -35,10 +34,11 @@ public class TestNameAnalysis extends AbstractParameterizedTest {
 	@Test
 	public void runTest() throws Exception {
 		Program program = (Program) parse(inFile);
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		program.checkNames(new PrintStream(bytes));
-		String actual = bytes.toString();
-		compareOutput(actual, outFile, expectedFile);
+		StringBuilder sb = new StringBuilder();
+		for (ErrorMessage m: program.errors()) {
+			sb.append(m).append("\n");
+		}
+		compareOutput(sb.toString(), outFile, expectedFile);
 	}
 
 	@SuppressWarnings("javadoc")
