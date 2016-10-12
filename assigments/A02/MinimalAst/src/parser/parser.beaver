@@ -35,6 +35,7 @@
 
 %typeof function_declarations = "List";
 %typeof function_declaration_parameters = "List";
+%typeof populated_function_parameter_list = "List";
 %typeof function_use_parameters = "List";
 
 %typeof statements= "List";
@@ -82,16 +83,21 @@ function_declaration =
 
 // Func param opt.
 
+populated_function_parameter_list =
+    id_declare.id {:
+        return new List().add(id);
+    :}
+    | populated_function_parameter_list.list COMMA id_declare.id {:
+        return list.add(id);
+    :}
+    ;
+
+
 function_declaration_parameters =
     /* Epsilon */ {:
         return new List();
     :}
-    | id_declare.id {:
-        return new List().add(id);
-    :}
-    | function_declaration_parameters.list COMMA id_declare.id {:
-        return list.add(id);
-    :}
+    | populated_function_parameter_list
     ;
 
 
