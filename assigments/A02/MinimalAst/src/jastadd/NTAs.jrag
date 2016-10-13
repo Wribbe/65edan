@@ -1,5 +1,5 @@
 aspect UnknownDeclaration {
-	syn nta UnknownDeclaration Program.unknownDeclaration() = new UnknownDeclaration(new UnknownType(), "<unknown>");
+	syn nta UnknownDeclaration Program.unknownDeclaration() = new UnknownDeclaration("<unknown>");
 
 	inh UnknownDeclaration ASTNode.unknownDeclaration();
 	eq Program.getChild().unknownDeclaration() = unknownDeclaration();
@@ -13,8 +13,8 @@ aspect PredefinedFunctions {
 
     syn nta List<FunctionDeclaration> Program.predefinedFunctions() {
         List<FunctionDeclaration> list = new List<FunctionDeclaration>();
-        FunctionDeclaration read = new FunctionDeclaration(new IdDeclare(new IntType(), "read"), new List(),  new List(), new Return(new Numeral("0")));
-        FunctionDeclaration print = new FunctionDeclaration(new IdDeclare(new IntType(), "print"), new List(),  new List(), new Return(new Numeral("0")));
+        FunctionDeclaration read = new FunctionDeclaration(new IdDeclare("read"), new List(),  new List(), new Return(new Numeral("0")));
+        FunctionDeclaration print = new FunctionDeclaration(new IdDeclare("print"), new List(),  new List(), new Return(new Numeral("0")));
         list.add(read);
         list.add(print);
         return list;

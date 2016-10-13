@@ -37,7 +37,6 @@ NUMERAL = [0-9]+
 {WhiteSpace}  { }
 
 // token definitions
-"boolean"     { return sym(Terminals.BOOLEAN); }
 "return"      { return sym(Terminals.RETURN); }
 "while"       { return sym(Terminals.WHILE); }
 "else"        { return sym(Terminals.ELSE); }

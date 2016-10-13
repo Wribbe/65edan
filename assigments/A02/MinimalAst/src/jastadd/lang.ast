@@ -38,7 +38,7 @@ LT : BinaryLogicalExpression;
 GT : BinaryLogicalExpression;
 
 IdUse : Expression ::= <ID>;
-IdDeclare ::= Type <ID>;
+IdDeclare ::= <ID>;
 UnknownDeclaration : IdDeclare;
 VarDeclare : Statement ::= IdDeclare [Expression];
 
