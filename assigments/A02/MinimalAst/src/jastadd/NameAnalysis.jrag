@@ -3,20 +3,82 @@ import java.util.HashSet;
 
 aspect NameAnalysis {
 
-    // All classes that need the lookup function.
+
+    /** Lookup */
+    /*---------*/
+
+    // All classes inherit the lookup function.
     inh IdDeclare ASTNode.lookup(String name);
 
-    syn IdDeclare ASTNode.getChildDeclaration(String name) {
-        return unknownDeclaration();
-    }
-
-    // Access declaration() attribute through lookup(String) method.
+    // IdUse uses declaration to locate IdDeclare for the used variable.
     syn IdDeclare IdUse.declaration() {
         return lookup(getID());
     }
 
     // Program knows lookup(), default to unknown.
     eq Program.getChild().lookup(String name) = unknownDeclaration();
+
+    // Lookup equation for Block class in FunctionDeclaration.
+    eq FunctionDeclaration.getBlock(int index).lookup(String name) {
+
+        IdDeclare id = checkParameters(name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
+
+    // Lookup equation for Return class in FunctionDeclaration.
+    eq FunctionDeclaration.getReturn().lookup(String name) {
+        return checkScope(name);
+    }
+
+
+    /** getChildDeclaration */
+    /*----------------------*/
+
+    // Make sure that all nodes have a getChildDeclaration(String) function.
+    syn IdDeclare ASTNode.getChildDeclaration(String name) {
+        return unknownDeclaration();
+    }
+
+    // Specify equation for VarDeclare.getChildDeclaration(String).
+    eq VarDeclare.getChildDeclaration(String name) {
+        if (getIdDeclare().getID().equals(name)) {
+            return getIdDeclare();
+        }
+        return lookup(name);
+    }
+}
+
+
+aspect FunctionDeclarationHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare FunctionDeclaration.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare FunctionDeclaration.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Wrapper method for scope iteration helper functions.
+    syn IdDeclare FunctionDeclaration.scopeIteration(int index, String name) {
+        IdDeclare id = checkParameters(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        id = checkStatements(index, name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        return unknownDeclaration();
+    }
 
     // Check FunctionDeclaration parameters.
     syn IdDeclare FunctionDeclaration.checkParameters(String name) {
@@ -35,6 +97,7 @@ aspect NameAnalysis {
         return unknownDeclaration();
     }
 
+    // Check FunctionDeclaration block statements.
     syn IdDeclare FunctionDeclaration.checkStatements(int index, String name) {
         Statement currentStatement = null;
         IdDeclare idDeclaration = null;
@@ -46,46 +109,5 @@ aspect NameAnalysis {
             }
         }
         return unknownDeclaration();
-    }
-
-    syn IdDeclare FunctionDeclaration.scopeIteration(int index, String name) {
-        IdDeclare id = checkParameters(name);
-        if (id.getID().equals(name)) {
-            return id;
-        }
-        id = checkStatements(index, name);
-        if (id.getID().equals(name)) {
-            return id;
-        }
-        return unknownDeclaration();
-    }
-
-    syn IdDeclare FunctionDeclaration.checkScope(int index, String name) {
-        return scopeIteration(index, name);
-    }
-
-    syn IdDeclare FunctionDeclaration.checkScope(String name) {
-        return scopeIteration(getNumBlock(), name);
-    }
-
-    eq VarDeclare.getChildDeclaration(String name) {
-        if (getIdDeclare().getID().equals(name)) {
-            return getIdDeclare();
-        }
-        return lookup(name);
-    }
-
-    eq FunctionDeclaration.getBlock(int index).lookup(String name) {
-
-        IdDeclare id = checkParameters(name);
-        if (!id.isUnknown()) {
-            return id;
-        }
-
-        return lookup(name);
-    }
-
-    eq FunctionDeclaration.getReturn().lookup(String name) {
-        return checkScope(name);
     }
 }
