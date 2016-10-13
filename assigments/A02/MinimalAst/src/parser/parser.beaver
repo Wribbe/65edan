@@ -13,7 +13,7 @@
 :};
 
 // Type terminals.
-%terminals ID, NUMERAL, INT;
+%terminals ID, NUMERAL, INT, BOOLEAN;
 // Arithmetic terminals.
 %terminals PLUS, MUL, ASSIGN, DIV, MINUS, REM;
 // Structural terminals.
@@ -52,6 +52,8 @@
 
 %typeof else_statement = "ELSE";
 %typeof return_statement = "Return";
+
+%typeof type = "Type";
 
 
 %goal program;
@@ -284,10 +286,18 @@ numeral =
     :}
     ;
 
+type =
+  INT {:
+    return new IntType();
+  :}
+  | BOOLEAN {:
+    return new BoolType();
+  :}
+  ;
 
 id_declare =
-    INT ID.id {:
-        return new IdDeclare(id);
+    type.type ID.id {:
+        return new IdDeclare(type, id);
     :}
     ;
 
