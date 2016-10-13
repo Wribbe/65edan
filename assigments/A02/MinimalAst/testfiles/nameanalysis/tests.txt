@@ -244,3 +244,9 @@ int f() {
 }
 ==
 // Empty File.
+-- error_on_redeclaring_print
+int print() {
+  return 0;
+}
+==
+Error at line 1: symbol 'print' is already declared!
