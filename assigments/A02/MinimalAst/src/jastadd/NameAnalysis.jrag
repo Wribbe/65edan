@@ -64,8 +64,7 @@ aspect NameAnalysis {
 
     // Specify equation for VarDeclare.getChildDeclaration(String).
     eq VarDeclare.getChildDeclaration(String name) {
-        if (getIdDeclare().getID().equals(name)) {
-            return getIdDeclare();
+        return getIdDeclare();
     }
 
     /** isMultiplyDeclared */
