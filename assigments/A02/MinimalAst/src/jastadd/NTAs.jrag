@@ -51,4 +51,9 @@ aspect Types {
       }
       return other == this;
     }
+
+    // Declare print statments for Type classes.
+    syn String IntType.toString() = "Int";
+    syn String BooleanType.toString() = "Boolean";
+    syn String UnknownType.toString() = "Unknown";
 }
