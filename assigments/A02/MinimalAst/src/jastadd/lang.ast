@@ -24,8 +24,8 @@ FunctionUse : Expression ::= IdUse Expression*;
 Assign : Statement ::= IdUse Expression;
 Return : Statement ::= Expression;
 
-IF : Statement ::= Logic:BinaryLogicalExpression Block:Statement* [ELSE];
-WHILE : Statement ::= Logic:BinaryLogicalExpression Block:Statement*;
+IF : Statement ::= Logic:Expression Block:Statement* [ELSE];
+WHILE : Statement ::= Logic:Expression Block:Statement*;
 ELSE: Statement ::= Block:Statement*;
 
 BinaryLogicalExpression : BinaryExpression;
