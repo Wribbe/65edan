@@ -7,9 +7,11 @@ aspect NameAnalysis {
     // scope.
 
     // All classes that need the lookup function.
-    inh IdDeclare FunctionDeclaration.lookup(String name);
-    inh IdDeclare IdUse.lookup(String name);
-    inh IdDeclare VarDeclare.lookup(String name);
+    inh IdDeclare ASTNode.lookup(String name);
+
+    syn IdDeclare ASTNode.getChildDeclaration(String name) {
+        return unknownDeclaration();
+    }
 
     // Access declaration() attribute through lookup(String) method.
     syn IdDeclare IdUse.declaration() {
@@ -47,8 +49,37 @@ aspect NameAnalysis {
         return unknownDeclaration();
     }
 
-    syn IdDeclare ASTNode.getChildDeclaration(String name) {
+    syn IdDeclare FunctionDeclaration.checkStatements(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
         return unknownDeclaration();
+    }
+
+    syn IdDeclare FunctionDeclaration.scopeIteration(int index, String name) {
+        IdDeclare id = checkParameters(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        id = checkStatements(index, name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        return unknownDeclaration();
+    }
+
+    syn IdDeclare FunctionDeclaration.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    syn IdDeclare FunctionDeclaration.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
     }
 
     eq VarDeclare.getChildDeclaration(String name) {
@@ -59,22 +90,17 @@ aspect NameAnalysis {
     }
 
     eq FunctionDeclaration.getBlock(int index).lookup(String name) {
-        Statement currentStatement = null;
-        IdDeclare idDeclaration = null;
-        for (int i=0; i<index; i++) {
-            currentStatement = getBlock(i);
-            idDeclaration = currentStatement.getChildDeclaration(name);
-            if (idDeclaration.getID().equals(name)) {
-                return idDeclaration;
-            }
-        }
 
-        idDeclaration = checkParameters(name);
-        if (!idDeclaration.isUnknown()) {
-            return idDeclaration;
+        IdDeclare id = checkParameters(name);
+        if (!id.isUnknown()) {
+            return id;
         }
 
         return lookup(name);
+    }
+
+    eq FunctionDeclaration.getReturn().lookup(String name) {
+        return checkScope(name);
     }
 
 //    syn IdDeclare VarDeclare.lookup(String name) {

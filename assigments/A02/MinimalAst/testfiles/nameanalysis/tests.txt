@@ -20,3 +20,9 @@ int f() {
 }
 ==
 //Empty file.
+-- no_error_on_return_use
+int f(int a) {
+  return a;
+}
+==
+//Empty file.
