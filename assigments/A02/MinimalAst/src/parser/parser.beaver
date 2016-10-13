@@ -45,7 +45,8 @@
 %typeof function_use = "FunctionUse";
 
 %typeof function_declaration = "FunctionDeclaration";
-%typeof logic_expression = "BinaryLogicalExpression";
+//%typeof logic_expression = "BinaryLogicalExpression";
+%typeof logic_expression = "Expression";
 
 %typeof id_use = "IdUse";
 %typeof id_declare = "IdDeclare";
@@ -191,10 +192,10 @@ control_flow_statement =
 
 
 if_statement =
-    IF LPAR logic_expression.logic RPAR block.block else_statement.elsestm {:
+    IF LPAR assignable_expression.logic RPAR block.block else_statement.elsestm {:
         return new IF(logic, block, new Opt(elsestm));
     :}
-    | IF LPAR logic_expression.logic RPAR block.block  {:
+    | IF LPAR assignable_expression.logic RPAR block.block  {:
         return new IF(logic, block, new Opt());
     :}
     ;

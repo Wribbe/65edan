@@ -250,3 +250,13 @@ int print() {
 }
 ==
 Error at line 1: function declaration of 'print' collides with predefined function with same name.
+-- error_on_non_logic_in_if
+int f() {
+  int a;
+  if(1) {
+    a = 5;
+  }
+  return 2;
+}
+==
+// Empty file.
