@@ -104,6 +104,55 @@ aspect NameAnalysis {
         }
         return false;
     }
+
+    /** Expression types */
+    /*-------------------*/
+
+    // Default to unknown type.
+    syn Type ASTNode.getType() = unknownType();
+
+    // Start with defininig all expressions as int.
+    syn Type Expression.getType() = intType();
+
+    // Single out all logical expressions.
+    syn Type NOEQ.getType() = booleanType();
+    syn Type EQ.getType() = booleanType();
+    syn Type LTEQ.getType() = booleanType();
+    syn Type GTEQ.getType() = booleanType();
+    syn Type LT.getType() = booleanType();
+    syn Type GT.getType() = booleanType();
+
+    // Define getType for nested structures.
+
+    // VarDeclare.
+    syn Type VarDeclare.getType() {
+      if(hasExpression()) {
+        return getExpression().getType();
+      }
+      return unknownType();
+    }
+
+    // Assign expectedType() for differnet expression uses.
+    syn Type IF.expectedType() = booleanType();
+    syn Type WHILE.expectedType() = booleanType();
+    syn Type Assign.expectedType() = intType();
+    syn Type FunctionUse.expectedType() = intType();
+
+    // Create sythesized booleans for if expressions matches usage.
+    syn boolean IF.expressionTypeMatched() = expectedType().compatible(getLogic().getType());
+    syn boolean WHILE.expressionTypeMatched() = expectedType().compatible(getLogic().getType());
+    syn boolean Assign.expressionTypeMatched() = expectedType().compatible(getExpression().getType());
+    syn boolean FunctionUse.expressionTypeMatched() {
+      Type expected = expectedType();
+      Expression expression = null;
+      for (int i=0; i < getNumExpression(); i++) {
+        expression = getExpression(i);
+        if (!expected.compatible(expression.getType())) {
+          return false;
+        }
+      }
+      return true;
+    }
 }
 
 
