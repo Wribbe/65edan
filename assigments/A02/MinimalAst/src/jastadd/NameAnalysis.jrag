@@ -47,8 +47,18 @@ aspect NameAnalysis {
     eq VarDeclare.getChildDeclaration(String name) {
         if (getIdDeclare().getID().equals(name)) {
             return getIdDeclare();
+    }
+
+    /** isMultiplyDeclared */
+    /*---------------------*/
+
+    // IdDeclare detects if there are other declarations besides itself.
+    syn boolean IdDeclare.isMultiplyDeclared() {
+        IdDeclare id = lookup(getID());
+        if (!id.isUnknown() && id != this) {
+            return true;
         }
-        return lookup(name);
+        return false;
     }
 }
 

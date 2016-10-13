@@ -34,12 +34,12 @@ aspect ErrorContributions {
 	IdUse contributes error("symbol '" + getID() + "' is not declared")
 		when declaration().isUnknown()
 		to Program.errors() for program();
+
+
+	IdDeclare contributes error("symbol '" + getID() + "' is already declared!")
+		when isMultiplyDeclared()
+		to Program.errors() for program();
 }
-//
-//	IdDecl contributes error("symbol '" + getID() + "' is already declared!")
-//		when isMultiplyDeclared()
-//		to Program.errors() for program();
-//
 //	IdUse contributes error("the definition of symbol '" + getID() + "' is circular")
 //		when isCircular()
 //		to Program.errors() for program();
