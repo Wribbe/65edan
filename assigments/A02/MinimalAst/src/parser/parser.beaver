@@ -209,7 +209,7 @@ else_statement =
 
 
 while_statement =
-    WHILE LPAR logic_expression.logic RPAR block.block {:
+    WHILE LPAR assignable_expression.logic RPAR block.block {:
         return new WHILE(logic, block);
     :}
     ;
