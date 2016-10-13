@@ -3,8 +3,95 @@ import java.util.HashSet;
 
 aspect NameAnalysis {
 
-    // Static synthetic attribute that returns isUnknown()for idUse.decl().
-    syn IdDeclare IdUse.decl() = unknownDeclare();
+    // Make it work for simple function with one declared variable in its
+    // scope.
+
+    // All classes that need the lookup function.
+    inh IdDeclare FunctionDeclaration.lookup(String name);
+    inh IdDeclare IdUse.lookup(String name);
+    inh IdDeclare VarDeclare.lookup(String name);
+
+    // Access declaration() attribute through lookup(String) method.
+    syn IdDeclare IdUse.declaration() {
+        return lookup(getID());
+    }
+
+//    syn IdDeclare Statement.searchChildren(String name) {
+//        System.out.println("Inside: "+this);
+//        for (int i=0; i<numChildren(); i++) {
+//            getChild(i).searchChildren(name);
+//        }
+//        return unknownDeclaration();
+//    }
+
+//    // All nodes should inherit lookup.
+//    inh IdDeclare ASTNode.lookup(String name);
+
+    // Program knows lookup(), default to unknown.
+    eq Program.getChild().lookup(String name) = unknownDeclaration();
+
+    // Check FunctionDeclaration parameters.
+    syn IdDeclare FunctionDeclaration.checkParameters(String name) {
+
+        String parameterName = "";
+        IdDeclare currentDeclaration = null;
+
+        // Check function parameters.
+        for (int i=0; i<getNumFunctionParameters(); i++) {
+            currentDeclaration = getFunctionParameters(i);
+            parameterName = currentDeclaration.getID();
+            if (parameterName.equals(name)) {
+                return currentDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+
+    syn IdDeclare ASTNode.getChildDeclaration(String name) {
+        return unknownDeclaration();
+    }
+
+    eq VarDeclare.getChildDeclaration(String name) {
+        if (getIdDeclare().getID().equals(name)) {
+            return getIdDeclare();
+        }
+        return lookup(name);
+    }
+
+    eq FunctionDeclaration.getBlock(int index).lookup(String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+
+        idDeclaration = checkParameters(name);
+        if (!idDeclaration.isUnknown()) {
+            return idDeclaration;
+        }
+
+        return lookup(name);
+    }
+
+//    syn IdDeclare VarDeclare.lookup(String name) {
+//        System.out.println("Inside VarDeclare");
+//        if (getIdDeclare().getID().equals(name)) {
+//            System.out.println("Returned from VarDeclare");
+//            return getIdDeclare();
+//        }
+//        System.out.println("Exiting VarDeclare, nothing found");
+//        return lookup(name);
+//    }
+
+//    eq Expression.getChild().lookup(String name) {
+//        System.out.println("Inside Expression.lookup()");
+//        return unknownDeclaration();
+//    }
+
 
 //    // All nodes inherit lookup.
 //    inh IdDecl ASTNode.lookup();

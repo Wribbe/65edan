@@ -32,7 +32,7 @@ aspect Errors {
 
 aspect ErrorContributions {
 	IdUse contributes error("symbol '" + getID() + "' is not declared")
-		when decl().isUnknown()
+		when declaration().isUnknown()
 		to Program.errors() for program();
 }
 //
