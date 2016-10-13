@@ -20,4 +20,8 @@ aspect PredefinedFunctions {
         return list;
     }
 
+    // Make all ASTNodes inherit predefinedFunctions().
+    inh List<FunctionDeclaration> ASTNode.predefinedFunctions();
+    eq Program.getChild().predefinedFunctions() = predefinedFunctions();
+
 }

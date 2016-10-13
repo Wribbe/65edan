@@ -54,6 +54,16 @@ aspect NameAnalysis {
         return lookup(name);
     }
 
+    // Function use checks predefined functions before doing a lookup.
+    eq FunctionUse.getIdUse().lookup(String name) {
+        for (FunctionDeclaration function : predefinedFunctions()) {
+            if (function.getIdDeclare().getID().equals(name)) {
+                return function.getIdDeclare();
+            }
+        }
+        return lookup(name);
+    }
+
     /** getChildDeclaration */
     /*----------------------*/
 
