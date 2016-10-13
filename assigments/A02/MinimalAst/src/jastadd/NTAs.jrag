@@ -46,6 +46,9 @@ aspect Types {
 
     // Type comparison function.
     syn boolean Type.compatible(Type other) {
+      if (other == unknownType()) {
+        return true;
+      }
       return other == this;
     }
 }
