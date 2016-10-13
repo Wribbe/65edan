@@ -13,10 +13,18 @@ int f(int b) {
 ==
 Error at line 2: symbol 'a' is not declared
 Error at line 3: symbol 'a' is not declared
--- no_error_variable_in_function_scope
+-- no_error_variable_returned_from_function_scope
+int f() {
+  int a;
+  a = 5;
+  return a;
+}
+==
+//Empty file.
+-- no_error_variable_returned_from_function_scope_varDeclare
 int f() {
   int a = 5;
-  return 4;
+  return a;
 }
 ==
 //Empty file.
