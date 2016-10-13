@@ -3,9 +3,6 @@ import java.util.HashSet;
 
 aspect NameAnalysis {
 
-    // Make it work for simple function with one declared variable in its
-    // scope.
-
     // All classes that need the lookup function.
     inh IdDeclare ASTNode.lookup(String name);
 
@@ -17,17 +14,6 @@ aspect NameAnalysis {
     syn IdDeclare IdUse.declaration() {
         return lookup(getID());
     }
-
-//    syn IdDeclare Statement.searchChildren(String name) {
-//        System.out.println("Inside: "+this);
-//        for (int i=0; i<numChildren(); i++) {
-//            getChild(i).searchChildren(name);
-//        }
-//        return unknownDeclaration();
-//    }
-
-//    // All nodes should inherit lookup.
-//    inh IdDeclare ASTNode.lookup(String name);
 
     // Program knows lookup(), default to unknown.
     eq Program.getChild().lookup(String name) = unknownDeclaration();
@@ -102,26 +88,4 @@ aspect NameAnalysis {
     eq FunctionDeclaration.getReturn().lookup(String name) {
         return checkScope(name);
     }
-
-//    syn IdDeclare VarDeclare.lookup(String name) {
-//        System.out.println("Inside VarDeclare");
-//        if (getIdDeclare().getID().equals(name)) {
-//            System.out.println("Returned from VarDeclare");
-//            return getIdDeclare();
-//        }
-//        System.out.println("Exiting VarDeclare, nothing found");
-//        return lookup(name);
-//    }
-
-//    eq Expression.getChild().lookup(String name) {
-//        System.out.println("Inside Expression.lookup()");
-//        return unknownDeclaration();
-//    }
-
-
-//    // All nodes inherit lookup.
-//    inh IdDecl ASTNode.lookup();
-//
-//    // All Programs child nodes uses programs lookup() method.
-//    eq Program.childNode().lookup() = lookup();
 }
