@@ -205,7 +205,7 @@ int f(int c) {
 }
 ==
 // Empty file.
--- no_error_multiple_nested_if_declarations_and_reads
+-- error_multiple_nested_if_declarations_and_reads
 int f() {
   int a = 4;
   if (4 > 2) {
@@ -230,3 +230,17 @@ int f() {
 }
 ==
 Error at line 18: symbol 'b' is not declared
+-- no_error_on_print
+int f() {
+  print();
+  return 0;
+}
+==
+// Empty File.
+-- no_error_on_read
+int f() {
+  read();
+  return 0;
+}
+==
+// Empty File.
