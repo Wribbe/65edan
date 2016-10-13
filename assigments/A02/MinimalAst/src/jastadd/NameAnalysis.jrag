@@ -34,6 +34,25 @@ aspect NameAnalysis {
         return checkScope(name);
     }
 
+    // Lookup equation for Block class in IF.
+    eq IF.getBlock(int index).lookup(String name) {
+        IdDeclare id = checkScope(index+1, name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
+
+    // Lookup equation for Block class in ELSE.
+    eq ELSE.getBlock(int index).lookup(String name) {
+        IdDeclare id = checkScope(index+1, name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
 
     /** getChildDeclaration */
     /*----------------------*/
@@ -109,6 +128,66 @@ aspect FunctionDeclarationHelperMethods {
 
     // Check FunctionDeclaration block statements.
     syn IdDeclare FunctionDeclaration.checkStatements(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+
+aspect IFHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare IF.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare IF.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Check IF block statements.
+    syn IdDeclare IF.scopeIteration(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+
+aspect ELSEHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare ELSE.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare ELSE.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Check ELSE block statements.
+    syn IdDeclare ELSE.scopeIteration(int index, String name) {
         Statement currentStatement = null;
         IdDeclare idDeclaration = null;
         for (int i=0; i<index; i++) {
