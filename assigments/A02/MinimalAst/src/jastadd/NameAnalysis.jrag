@@ -54,6 +54,16 @@ aspect NameAnalysis {
         return lookup(name);
     }
 
+    // Lookup equation for Block class in WHILE.
+    eq WHILE.getBlock(int index).lookup(String name) {
+        IdDeclare id = checkScope(index+1, name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
+
     // Function use checks predefined functions before doing a lookup.
     eq FunctionUse.getIdUse().lookup(String name) {
         for (FunctionDeclaration function : predefinedFunctions()) {
@@ -262,6 +272,35 @@ aspect ELSEHelperMethods {
 
     // Check ELSE block statements.
     syn IdDeclare ELSE.scopeIteration(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+aspect WHILEHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare WHILE.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare WHILE.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Check WHILE block statements.
+    syn IdDeclare WHILE.scopeIteration(int index, String name) {
         Statement currentStatement = null;
         IdDeclare idDeclaration = null;
         for (int i=0; i<index; i++) {
