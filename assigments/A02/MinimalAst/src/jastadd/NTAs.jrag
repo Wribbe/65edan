@@ -39,6 +39,12 @@ aspect Types {
     inh BooleanType ASTNode.booleanType();
     eq Program.getChild().booleanType() = booleanType();
 
+    // Declare and propegate Unknown type.
+    syn nta UnknownType Program.unknownType() = new UnknownType();
+    inh UnknownType ASTNode.unknownType();
+    eq Program.getChild().unknownType() = unknownType();
+
+    // Type comparison function.
     syn boolean Type.compatible(Type other) {
       return other == this;
     }
