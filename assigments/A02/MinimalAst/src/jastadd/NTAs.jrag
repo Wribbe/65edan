@@ -7,3 +7,17 @@ aspect UnknownDeclaration {
 	syn boolean IdDeclare.isUnknown() = false;
 	eq UnknownDeclaration.isUnknown() = true;
 }
+
+
+aspect PredefinedFunctions {
+
+    syn nta List<FunctionDeclaration> Program.predefinedFunctions() {
+        List<FunctionDeclaration> list = new List<FunctionDeclaration>();
+        FunctionDeclaration read = new FunctionDeclaration(new IdDeclare("read"), new List(),  new List(), new Return(new Numeral("0")));
+        FunctionDeclaration print = new FunctionDeclaration(new IdDeclare("print"), new List(),  new List(), new Return(new Numeral("0")));
+        list.add(read);
+        list.add(print);
+        return list;
+    }
+
+}
