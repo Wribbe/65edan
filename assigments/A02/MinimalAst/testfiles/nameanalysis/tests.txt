@@ -249,4 +249,4 @@ int print() {
   return 0;
 }
 ==
-Error at line 1: symbol 'print' is already declared!
+Error at line 1: function declaration of 'print' collides with predefined function with same name.

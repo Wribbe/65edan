@@ -82,9 +82,25 @@ aspect NameAnalysis {
 
     // IdDeclare detects if there are other declarations besides itself.
     syn boolean IdDeclare.isMultiplyDeclared() {
+
+        // Check name-collision for all IdDeclare in higher scope.
         IdDeclare id = lookup(getID());
         if (!id.isUnknown() && id != this) {
             return true;
+        }
+        return false;
+    }
+
+    /** isPredefinedFunction */
+    /*-----------------------*/
+
+    syn boolean FunctionDeclaration.collisionWithPredefined() {
+        // Check name-collision for all predefined functions.
+        String functionID = this.getIdDeclare().getID();
+        for (FunctionDeclaration function : predefinedFunctions()) {
+            if (function.getIdDeclare().getID().equals(functionID)) {
+                return true;
+            }
         }
         return false;
     }

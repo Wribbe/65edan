@@ -35,10 +35,13 @@ aspect ErrorContributions {
 		when declaration().isUnknown()
 		to Program.errors() for program();
 
-
 	IdDeclare contributes error("symbol '" + getID() + "' is already declared!")
 		when isMultiplyDeclared()
 		to Program.errors() for program();
+
+    FunctionDeclaration contributes error("function declaration of '" + getIdDeclare().getID() + "' collides with predefined function with same name.")
+        when collisionWithPredefined()
+        to Program.errors() for program();
 }
 //	IdUse contributes error("the definition of symbol '" + getID() + "' is circular")
 //		when isCircular()
