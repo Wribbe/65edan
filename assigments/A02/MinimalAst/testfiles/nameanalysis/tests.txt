@@ -34,3 +34,74 @@ int f(int a) {
 }
 ==
 //Empty file.
+-- no_error_in_if_scope
+int f(int a, int b) {
+  if (4 < 3) {
+    b = 4;
+  }
+  return a;
+}
+==
+//Empty file.
+-- error_in_if_scope
+int f(int a) {
+  if (4 < 3) {
+    b = 4;
+  }
+  return a;
+}
+==
+Error at line 3: symbol 'b' is not declared
+-- error_in_else_scope
+int f(int a) {
+  if (4 < 3) {
+    a = 4;
+  } else {
+    b = 5;
+  }
+  return a;
+}
+==
+Error at line 5: symbol 'b' is not declared
+-- no_error_in_nested_ifs_parameter
+int f(int a) {
+  if (4 < 3) {
+    if (3 > 2) {
+      a = 4;
+    }
+  } else {
+    a = 5;
+  }
+  return a;
+}
+==
+//Empty file.
+-- no_error_in_nested_ifs_declaration
+int f() {
+  int a;
+  if (4 < 3) {
+    if (3 > 2) {
+      a = 4;
+    }
+  } else {
+    a = 5;
+  }
+  return a;
+}
+==
+//Empty file.
+-- error_in_nested_ifs_declaration_wrong_declaration_order
+int f() {
+  if (4 < 3) {
+    if (3 > 2) {
+      a = 4;
+    }
+  } else {
+    a = 5;
+  }
+  int a;
+  return a;
+}
+==
+Error at line 4: symbol 'a' is not declared
+Error at line 7: symbol 'a' is not declared
