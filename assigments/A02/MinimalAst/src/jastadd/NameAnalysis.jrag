@@ -21,7 +21,7 @@ aspect NameAnalysis {
     // Lookup equation for Block class in FunctionDeclaration.
     eq FunctionDeclaration.getBlock(int index).lookup(String name) {
 
-        IdDeclare id = checkParameters(name);
+        IdDeclare id = checkScope(index, name);
         if (!id.isUnknown()) {
             return id;
         }
