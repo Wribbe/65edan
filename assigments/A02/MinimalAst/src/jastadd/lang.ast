@@ -5,7 +5,7 @@ abstract Statement;
 abstract Type;
 
 IntType : Type;
-BoolType : Type;
+BooleanType : Type;
 UnknownType : Type;
 
 BinaryExpression : Expression ::= Left:Expression Right:Expression;

@@ -25,3 +25,21 @@ aspect PredefinedFunctions {
     eq Program.getChild().predefinedFunctions() = predefinedFunctions();
 
 }
+
+
+aspect Types {
+
+    // Declare and propegate the Int type.
+    syn nta IntType Program.intType() = new IntType();
+    inh IntType ASTNode.intType();
+    eq Program.getChild().intType() = intType();
+
+    // Declare and propegate Boolean type.
+    syn nta BooleanType Program.booleanType() = new BooleanType();
+    inh BooleanType ASTNode.booleanType();
+    eq Program.getChild().booleanType() = booleanType();
+
+    syn boolean Type.compatible(Type other) {
+      return other == this;
+    }
+}
