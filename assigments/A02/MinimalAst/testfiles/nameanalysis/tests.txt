@@ -259,4 +259,34 @@ int f() {
   return 2;
 }
 ==
+Error at line 3: if statement needs expression of type: 'Boolean', but got expression of type: 'Int'.
+-- no_error_on_logic_in_if
+int f() {
+  if (3 > 4) {
+    int a = 5;
+    return a;
+  }
+  return 0;
+}
+==
+// Empty file.
+-- error_on_non_logic_in_while
+int f() {
+  int a;
+  while(1) {
+    a = 5;
+  }
+  return 2;
+}
+==
+Error at line 3: while statement needs expression of type: 'Boolean', but got expression of type: 'Int'.
+-- no_error_on_logic_in_while
+int f() {
+  while (3 > 4) {
+    int a = 5;
+    return a;
+  }
+  return 0;
+}
+==
 // Empty file.
