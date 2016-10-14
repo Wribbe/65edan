@@ -42,7 +42,16 @@ aspect interpreter {
         if (!main.getIdDeclare().getID().equals("main")) {
             throw new RuntimeException("No main function declared, aborting.");
         }
-        main.eval(new ActivationRecord());
+        ActivationRecord programScope = new ActivationRecord();
+        // Add all declared functions to the programScope.
+        for (FunctionDeclaration function : getFunctionDeclarationList()) {
+            programScope.put(function.getIdDeclare(), 0);
+        }
+        // Add predefined function  to programScope.
+        for (FunctionDeclaration function : predefinedFunctions()) {
+            programScope.put(function.getIdDeclare(), 0);
+        }
+        main.eval(programScope);
     }
 
     public int FunctionDeclaration.eval(ActivationRecord record) {
