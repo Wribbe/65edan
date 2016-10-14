@@ -1,0 +1,22 @@
+
+aspect interpreter {
+
+    class ActivationRecord {
+    }
+
+    public void Program.eval() {
+        System.out.println("Program");
+    }
+    public int FunctionDeclaration.eval(ActivationRecord record) {
+        System.out.println("FunctionDeclaration");
+        return 0;
+    }
+    public void Statement.eval(ActivationRecord record) {
+        System.out.println("Statement");
+    }
+    public int Expression.eval(ActivationRecord record) {
+        System.out.println("Expression");
+        return 0;
+    }
+
+}
