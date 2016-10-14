@@ -1,3 +1,4 @@
+
 -- no_error_variable_defined_as_parameter
 int f(int a) {
   a = 5;
@@ -5,6 +6,7 @@ int f(int a) {
 }
 ==
 //Empty file.
+
 -- error_other_variable_defined_as_parameter
 int f(int b) {
   a = 5;
@@ -13,6 +15,7 @@ int f(int b) {
 ==
 Error at line 2: symbol 'a' is not declared
 Error at line 3: symbol 'a' is not declared
+
 -- no_error_variable_returned_from_function_scope
 int f() {
   int a;
@@ -21,6 +24,7 @@ int f() {
 }
 ==
 //Empty file.
+
 -- no_error_variable_returned_from_function_scope_varDeclare
 int f() {
   int a = 5;
@@ -28,12 +32,14 @@ int f() {
 }
 ==
 //Empty file.
+
 -- no_error_on_return_use
 int f(int a) {
   return a;
 }
 ==
 //Empty file.
+
 -- no_error_in_if_scope
 int f(int a, int b) {
   if (4 < 3) {
@@ -43,6 +49,7 @@ int f(int a, int b) {
 }
 ==
 //Empty file.
+
 -- error_in_if_scope
 int f(int a) {
   if (4 < 3) {
@@ -52,6 +59,7 @@ int f(int a) {
 }
 ==
 Error at line 3: symbol 'b' is not declared
+
 -- error_in_else_scope
 int f(int a) {
   if (4 < 3) {
@@ -63,6 +71,7 @@ int f(int a) {
 }
 ==
 Error at line 5: symbol 'b' is not declared
+
 -- no_error_in_nested_ifs_parameter
 int f(int a) {
   if (4 < 3) {
@@ -76,6 +85,7 @@ int f(int a) {
 }
 ==
 //Empty file.
+
 -- no_error_in_nested_ifs_declaration
 int f() {
   int a;
@@ -90,6 +100,7 @@ int f() {
 }
 ==
 //Empty file.
+
 -- error_in_nested_ifs_declaration_wrong_declaration_order
 int f() {
   if (4 < 3) {
@@ -105,6 +116,7 @@ int f() {
 ==
 Error at line 4: symbol 'a' is not declared
 Error at line 7: symbol 'a' is not declared
+
 -- error_at_multiple_declarations_function_body
 int f() {
   int a;
@@ -113,6 +125,7 @@ int f() {
 }
 ==
 Error at line 3: symbol 'a' is already declared!
+
 -- error_at_multiple_declarations_with_parameters
 int f(int a) {
   int a;
@@ -120,6 +133,7 @@ int f(int a) {
 }
 ==
 Error at line 2: symbol 'a' is already declared!
+
 -- no_error_at_multiple_declarations_with_parameters_in_if
 int f(int a) {
   if (4 < 3) {
@@ -131,6 +145,7 @@ int f(int a) {
 }
 ==
 // Empty file.
+
 -- no_error_at_declaration_and_assign_in_else
 int f() {
   if (4 < 3) {
@@ -143,6 +158,7 @@ int f() {
 }
 ==
 // Empty file.
+
 -- error_at_declaration_in_if_and_assign_in_else
 int f() {
   if (4 < 3) {
@@ -154,6 +170,7 @@ int f() {
 }
 ==
 Error at line 5: symbol 'a' is not declared
+
 -- no_error_at_nested_if_eleses
 int f() {
   if (4 < 3) {
@@ -170,6 +187,7 @@ int f() {
 }
 ==
 // Empty file.
+
 -- error_at_undeclared_logical_expression
 int f() {
   if (a < 3) {
@@ -179,6 +197,7 @@ int f() {
 }
 ==
 Error at line 2: symbol 'a' is not declared
+
 -- no_error_multiple_nested_if_declarations_and_reads
 int f(int c) {
   int a = 4;
@@ -205,6 +224,7 @@ int f(int c) {
 }
 ==
 // Empty file.
+
 -- error_multiple_nested_if_declarations_and_reads
 int f() {
   int a = 4;
@@ -230,6 +250,7 @@ int f() {
 }
 ==
 Error at line 18: symbol 'b' is not declared
+
 -- no_error_on_print
 int f() {
   print();
@@ -237,6 +258,7 @@ int f() {
 }
 ==
 // Empty File.
+
 -- no_error_on_read
 int f() {
   read();
@@ -244,12 +266,15 @@ int f() {
 }
 ==
 // Empty File.
+
 -- error_on_redeclaring_print
 int print() {
   return 0;
 }
 ==
 Error at line 1: function declaration of 'print' collides with predefined function with same name.
+Error at line 1: symbol 'print' is already declared!
+
 -- error_on_non_logic_in_if
 int f() {
   int a;
@@ -260,6 +285,7 @@ int f() {
 }
 ==
 Error at line 3: if statement needs expression of type: 'Boolean', but got expression of type: 'Int'.
+
 -- no_error_on_logic_in_if
 int f() {
   if (3 > 4) {
@@ -270,6 +296,7 @@ int f() {
 }
 ==
 // Empty file.
+
 -- error_on_non_logic_in_while
 int f() {
   int a;
@@ -280,6 +307,7 @@ int f() {
 }
 ==
 Error at line 3: while statement needs expression of type: 'Boolean', but got expression of type: 'Int'.
+
 -- no_error_on_logic_in_while
 int f() {
   while (3 > 4) {
@@ -290,3 +318,31 @@ int f() {
 }
 ==
 // Empty file.
+
+-- error_when_calling_a_variable
+int f() {
+  int a;
+  a();
+  return 0;
+}
+==
+Error at line 3: symbol 'a' does not refer to a function.
+
+-- no_error_when_calling_a_function
+int g() {
+  return 0;
+}
+int f() {
+  g();
+  return 0;
+}
+==
+// Empty file.
+
+-- error_when_assigning
+int f() {
+  f = 5;
+  return 0;
+}
+==
+Error at line 2: symbol 'f' does not refer to a variable, can't assign.

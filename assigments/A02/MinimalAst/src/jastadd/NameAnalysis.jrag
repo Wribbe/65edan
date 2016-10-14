@@ -18,6 +18,11 @@ aspect NameAnalysis {
     // Program knows lookup(), default to unknown.
     eq Program.getChild().lookup(String name) = unknownDeclaration();
 
+    // Program checks scope when queried from a FunctionDeclaration.
+    eq Program.getFunctionDeclaration().lookup(String name) {
+        return checkScope(name);
+    }
+
     // Lookup equation for Block class in FunctionDeclaration.
     eq FunctionDeclaration.getBlock(int index).lookup(String name) {
 
@@ -132,6 +137,9 @@ aspect NameAnalysis {
     syn Type LT.getType() = booleanType();
     syn Type GT.getType() = booleanType();
 
+    // Define type for FunctionDeclarations
+    syn Type FunctionDeclaration.getType() = intType();
+
     // Define getType for nested structures.
 
     // VarDeclare.
@@ -139,7 +147,7 @@ aspect NameAnalysis {
       if(hasExpression()) {
         return getExpression().getType();
       }
-      return unknownType();
+      return intType();
     }
 
     // Assign expectedType() for differnet expression uses.
@@ -162,6 +170,56 @@ aspect NameAnalysis {
         }
       }
       return true;
+    }
+
+    /** Function vs variable use */
+    /*--------------------------*/
+
+    // IdDeclare inherits isVariable and isFunction attributes.
+    inh boolean IdDeclare.isVariable(String name);
+    inh boolean IdDeclare.isFunction(String name);
+
+    // Hitting a VarDeclar identifies IdDeclare as variable.
+    eq VarDeclare.getIdDeclare().isVariable(String name) = true;
+    eq VarDeclare.getIdDeclare().isFunction(String name) = false;
+
+    // Return true on hitting a UnknownDeclaration to not propagate errors.
+    eq Program.unknownDeclaration().isFunction(String name) = true;
+    eq Program.unknownDeclaration().isVariable(String name) = true;
+
+    // Hitting a FunctionDeclaration and not finding idDeclare in the
+    // declaration parameters disqualifies it from being a variable.
+    eq FunctionDeclaration.getChild().isVariable(String name) {
+        for (int i=0; i<getNumFunctionParameters(); i++) {
+            IdDeclare id = getFunctionParameters(i);
+            if (id.getID().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Hitting the Program with isVariable disqualifies the declaration to be a
+    // value declaration.
+    eq Program.getFunctionDeclaration().isVariable(String name) = false;
+
+    // Hitting a Program with isFunction means that the name was not defined by
+    // a VarDeclare in the function body. If no match is found among the
+    // FunctionDeclerations or predefined functions, it's not a function.
+    eq Program.getFunctionDeclaration().isFunction(String name) {
+        IdDeclare id = checkScope(name);
+        return id.getID().equals(name);
+    }
+
+    // Anything hitting the predefined functions is a function.
+    eq Program.predefinedFunctions().isFunction(String name) = true;
+
+    // IdUse uses declaration to locate IdDeclare for the used variable.
+    syn boolean IdUse.isVariable() {
+        return lookup(getID()).isVariable(getID());
+    }
+    syn boolean IdUse.isFunction() {
+        return lookup(getID()).isFunction(getID());
     }
 }
 
@@ -308,6 +366,52 @@ aspect WHILEHelperMethods {
             idDeclaration = currentStatement.getChildDeclaration(name);
             if (idDeclaration.getID().equals(name)) {
                 return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+aspect ProgramHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare Program.checkScope(String name) {
+        return scopeIteration(name);
+    }
+
+    // Wrapper method for scope iteration helper functions.
+    syn IdDeclare Program.scopeIteration(String name) {
+        IdDeclare id = checkPredefined(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        id = checkFunctionDeclarations(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        return unknownDeclaration();
+    }
+
+    // Check Program functionDeclarations.
+    syn IdDeclare Program.checkFunctionDeclarations(String name) {
+        IdDeclare id = null;
+        for (int i=0; i<getNumFunctionDeclaration(); i++) {
+            id = getFunctionDeclaration(i).getIdDeclare();
+            if (id.getID().equals(name)) {
+                return id;
+            }
+        }
+        return unknownDeclaration();
+    }
+
+    // Check Program predefined functions.
+    syn IdDeclare Program.checkPredefined(String name) {
+        IdDeclare id = null;
+        for (FunctionDeclaration function : predefinedFunctions()) {
+            id = function.getIdDeclare();
+            if (id.getID().equals(name)) {
+                return id;
             }
         }
         return unknownDeclaration();

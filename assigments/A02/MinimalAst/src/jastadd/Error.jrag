@@ -50,6 +50,14 @@ aspect ErrorContributions {
     IF contributes error("if statement needs expression of type: '" + expectedType() +"', but got expression of type: '" + getLogic().getType() + "'.")
       when !expressionTypeMatched()
       to Program.errors() for program();
+
+    FunctionUse contributes error("symbol '" + getIdUse().getID() +"' does not refer to a function.")
+      when !getIdUse().isFunction()
+      to Program.errors() for program();
+
+    Assign contributes error("symbol '" + getIdUse().getID() +"' does not refer to a variable, can't assign.")
+      when !getIdUse().isVariable()
+      to Program.errors() for program();
 }
 //	IdUse contributes error("the definition of symbol '" + getID() + "' is circular")
 //		when isCircular()

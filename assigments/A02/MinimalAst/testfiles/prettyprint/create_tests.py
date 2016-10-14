@@ -34,7 +34,8 @@ def main():
     remove_all_tests()
 
     with open(TEST_FILE, 'r') as source_handle:
-        lines = [line.strip('\n') for line in source_handle.readlines()]
+        lines = [line.strip('\n') for line in source_handle.readlines() if
+                line.strip()]
 
     line_buffer = []
     line_segments = []
