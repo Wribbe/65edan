@@ -1,7 +1,20 @@
+import java.util.Map;
+import java.util.HashMap;
 
 aspect interpreter {
 
     class ActivationRecord {
+
+        private Map<String, Integer> record = new HashMap<String, Integer>();
+
+        public void put(IdDeclare id, int value) {
+            System.out.println(value);
+            record.put(id.getID(), value);
+        }
+
+        public void put(IdDeclare id) {
+            record.put(id.getID(), null);
+        }
     }
 
     public void Program.eval() {
@@ -11,16 +24,24 @@ aspect interpreter {
         }
         main.eval(new ActivationRecord());
     }
+
     public int FunctionDeclaration.eval(ActivationRecord record) {
-        System.out.println("FunctionDeclaration");
-        return 0;
-    }
-    public void Statement.eval(ActivationRecord record) {
-        System.out.println("Statement");
-    }
-    public int Expression.eval(ActivationRecord record) {
-        System.out.println("Expression");
-        return 0;
+        // Evaluate all statements in the function.
+        for (Statement statement : getBlockList()) {
+            statement.eval(record);
+        }
+        return getReturn().getExpression().eval(record);
     }
 
+    // Placeholder functions for Statement and Expression.
+    public void Statement.eval(ActivationRecord record) {}
+    public int Expression.eval(ActivationRecord record) { return 0; }
+
+    public void VarDeclare.eval(ActivationRecord record) {
+        if (!hasExpression()) {
+            record.put(getIdDeclare());
+        } else {
+            record.put(getIdDeclare(), getExpression().eval(record));
+        }
+    }
 }
