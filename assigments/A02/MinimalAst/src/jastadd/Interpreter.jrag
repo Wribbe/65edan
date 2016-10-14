@@ -58,9 +58,7 @@ aspect interpreter {
     public int Expression.eval(ActivationRecord record) { return 0; }
 
     public void VarDeclare.eval(ActivationRecord record) {
-        if (!hasExpression()) {
-            record.put(getIdDeclare());
-        } else {
+        if (hasExpression()) {
             record.put(getIdDeclare(), getExpression().eval(record));
         }
     }
