@@ -8,7 +8,6 @@ aspect interpreter {
         private Map<String, Integer> record = new HashMap<String, Integer>();
 
         public void put(IdDeclare id, int value) {
-            System.out.println(value);
             record.put(id.getID(), value);
         }
 
@@ -83,5 +82,21 @@ aspect interpreter {
 
     public int Numeral.eval(ActivationRecord record) {
         return Integer.parseInt(getNUMERAL());
+    }
+
+    /** Function usage */
+    /*-----------------*/
+
+    public void FunctionStatement.eval(ActivationRecord record) {
+        getFunctionUse().eval(record);
+    }
+
+    public int FunctionUse.eval(ActivationRecord record) {
+        String functionName = getIdUse().getID();
+        if (functionName.equals("print")) {
+            System.out.println(getExpression(0).eval(record));
+            return 0;
+        }
+        return 0;
     }
 }

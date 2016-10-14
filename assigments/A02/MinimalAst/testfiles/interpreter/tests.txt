@@ -5,5 +5,14 @@ int main() {
   return 0;
 }
 ==
+// Empty file
+
+-- correct_printout_with_print
+int main() {
+  print(1+2*3);
+  print(4*5);
+  return 0;
+}
+==
 7
 20
