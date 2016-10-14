@@ -5,7 +5,11 @@ aspect interpreter {
     }
 
     public void Program.eval() {
-        System.out.println("Program");
+        FunctionDeclaration main = function("main");
+        if (!main.getIdDeclare().getID().equals("main")) {
+            throw new RuntimeException("No main function declared, aborting.");
+        }
+        main.eval(new ActivationRecord());
     }
     public int FunctionDeclaration.eval(ActivationRecord record) {
         System.out.println("FunctionDeclaration");

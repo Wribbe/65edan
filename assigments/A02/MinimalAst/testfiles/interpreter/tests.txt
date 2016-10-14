@@ -1,6 +1,6 @@
 -- no_error_simple_program
-int f() {
+int main() {
   return 0;
 }
 ==
-Program
+FunctionDeclaration
