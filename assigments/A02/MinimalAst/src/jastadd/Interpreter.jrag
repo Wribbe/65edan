@@ -1,18 +1,39 @@
 import java.util.Map;
 import java.util.HashMap;
 
+
 aspect interpreter {
 
     class ActivationRecord {
 
-        private Map<String, Integer> record = new HashMap<String, Integer>();
+        private Map<String, Integer> record;
+
+        public ActivationRecord() {
+            record = new HashMap<String, Integer>();
+        }
 
         public void put(IdDeclare id, int value) {
             record.put(id.getID(), value);
         }
 
-        public void put(IdDeclare id) {
-            record.put(id.getID(), null);
+        public void put(IdUse id, int value) {
+            record.put(id.getID(), value);
+        }
+
+        public void put(String id, int value) {
+            record.put(id, value);
+        }
+
+        public int get(IdDeclare id) {
+            return record.get(id.getID());
+        }
+
+        public int get(String id) {
+            return record.get(id);
+        }
+
+        public boolean has(String key) {
+            return record.containsKey(key);
         }
     }
 
