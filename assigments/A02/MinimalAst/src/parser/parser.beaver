@@ -35,7 +35,9 @@
 
 %typeof function_declarations = "List";
 %typeof function_declaration_parameters = "List";
+%typeof populated_function_parameter_list = "List";
 %typeof function_use_parameters = "List";
+%typeof populated_function_use_parameters = "List";
 
 %typeof statements= "List";
 %typeof block = "List";
@@ -43,7 +45,8 @@
 %typeof function_use = "FunctionUse";
 
 %typeof function_declaration = "FunctionDeclaration";
-%typeof logic_expression = "BinaryLogicalExpression";
+//%typeof logic_expression = "BinaryLogicalExpression";
+%typeof logic_expression = "Expression";
 
 %typeof id_use = "IdUse";
 %typeof id_declare = "IdDeclare";
@@ -80,18 +83,22 @@ function_declaration =
     :}
     ;
 
-// Func param opt.
+
+populated_function_parameter_list =
+    id_declare.id {:
+        return new List().add(id);
+    :}
+    | populated_function_parameter_list.list COMMA id_declare.id {:
+        return list.add(id);
+    :}
+    ;
+
 
 function_declaration_parameters =
     /* Epsilon */ {:
         return new List();
     :}
-    | id_declare.id {:
-        return new List().add(id);
-    :}
-    | function_declaration_parameters.list COMMA id_declare.id {:
-        return list.add(id);
-    :}
+    | populated_function_parameter_list
     ;
 
 
@@ -102,16 +109,21 @@ function_use =
     ;
 
 
-function_use_parameters =
-    /* Epsilon */ {:
-        return new List();
-    :}
-    | expression.expression {:
+populated_function_use_parameters =
+    expression.expression {:
         return new List().add(expression);
     :}
     | function_use_parameters.list COMMA expression.expression {:
         return list.add(expression);
     :}
+    ;
+
+
+function_use_parameters =
+    /* Epsilon */ {:
+        return new List();
+    :}
+    | populated_function_use_parameters
     ;
 
 
@@ -180,10 +192,10 @@ control_flow_statement =
 
 
 if_statement =
-    IF LPAR logic_expression.logic RPAR block.block else_statement.elsestm {:
+    IF LPAR assignable_expression.logic RPAR block.block else_statement.elsestm {:
         return new IF(logic, block, new Opt(elsestm));
     :}
-    | IF LPAR logic_expression.logic RPAR block.block  {:
+    | IF LPAR assignable_expression.logic RPAR block.block  {:
         return new IF(logic, block, new Opt());
     :}
     ;
@@ -197,7 +209,7 @@ else_statement =
 
 
 while_statement =
-    WHILE LPAR logic_expression.logic RPAR block.block {:
+    WHILE LPAR assignable_expression.logic RPAR block.block {:
         return new WHILE(logic, block);
     :}
     ;

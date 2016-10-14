@@ -1,0 +1,171 @@
+1.2.2.)
+
+  Let.getBinding(int index).lookup(String name) is called and nothing is
+  found in the local scope. The next lookup() function that is called depends
+  on what the parent node is, but the parent-nodes lookup() function is called.
+  In this case Program.
+
+
+1.2.3.)
+
+  IdDecl.isMultiplydeclared():
+  ----------------------------
+    IdDecl inherits the .lookup() method. The lookup method returns a IdDecl
+    object, the current IdDecl compares if the returned object is it self.
+    A boolean representing the result of the comparison is returned.
+
+
+1.2.4.)
+
+  aspect CircularDefintinos:
+  --------------------------
+
+    Want to find out if a IdUse for a variable is used in the declaration
+    (IdDecl) for the same variable.
+
+    IdUse:
+      - Synthetic boolean: syn boolean IdUse.isCircualr() = inExprOf(decl());
+      - Inherited boolean: inh boolean IdUse.inExprOf(IdDecl decl);
+    Binding:
+      - Inherited boolean: inh boolean Binding.inExprOf(IdDecl decl);
+      - Equation: eq Binding.getExpr().inExprOf(IdDecl decl)
+          = getIdDecl() == decl || inExprOf(decl);
+    Program:
+      - Equation: eq Program.getChild().inExprOf(IdDecl decl) = false;
+
+    From the top (here):
+
+      IdUse is given a synthetic (unique to node) attribute for detecting if it
+      is circularly defined. This synthetic attribute uses the inExprOf()
+      method. The inExprOf() method is inherited (somebody else knows how to do
+      it above us) and does not need to be defined here.
+
+      Binding inherits inExprOf(IdDecl decl) so it can reference its parent
+      node if Binding doesn't know what to do about a call coming from below.
+      Additionally Binding gets a equation (eq) that is applicable if any of
+      the objects that matches the type returned by getExpr() calls Binding for
+      answers lower down.
+      The Binding equation <= getIdDecl() == decl || inExprOf(decl);> will
+      return true if the immediate id of the binding matches the variable decl.
+      Otherwise the inExprOf that was inherited will be called with the same
+      decl.
+
+      Program receives an equation for <.inExprOf(IdDecl decl)> based on
+      getChild() of Program, which matches all nodes. This equation always
+      returns false, which means, that if we've got this far (root node) then
+      the attribute is not circularly defined.
+
+
+1.3)
+
+  UnknownDecl.jrag
+  ----------------
+
+    Program:
+      - Synthetic nta UnknownDecl: syn nta UnknownDecl Program.unknownDecl() =
+        new UnknownDecl("<unknown>");
+      - Equation: eq Program.getChild().unknownDecl() = unkonwnDecl();
+    ASTNode:
+      - Inherited UnknownDecl: inh UnknownDecl ASTNode.unknownDecl();
+    IdDecl:
+      - Synthetic boolean: syn boolan IdDecl.isUnknown() = false;
+    UnknownDecl:
+      - Equation: eq UnknownDecl.isUnknown() = true;
+
+    From the top:
+
+      Program gets a synthetic non terminal attribute (nta) that represent a
+      UnkonwnDecl object that is used as a Null-object. This object is accessed
+      when a Program-node is called with the unkonwnDecl() method.
+      Program also gets an equation that triggers when any of its children
+      (getChild()) calls the unknownDecl() method on it. This call returns the
+      synthetic method unkonwnDecl() defined earlier.
+
+      ASTNode inherits a unknownDecl() with the <inh UnkonwnDecl
+      ASTNode.unknownDecl();> declaration. This means that if any node that
+      doesn't have a specifically defined unknownDecl() method will ask its
+      parent instead.
+
+      IdDecl gets a synthetic (unique for each node) boolean attribute that
+      binds the call isUnknown() to return the false boolean. This is done
+      through the <syn boolean IdDecl.isUnknown() = false;> line.
+
+      UnknownDecl gets a equation to override the synthetic boolean declared
+      for IdDeclare above (UnknownDecl is a variant of IdDecl). This equation
+      returns true. Added with the <eq UnknownDecl.isUnknown() = true;> line.
+
+
+1.4)
+
+  Errors.jrag
+  -----------
+
+    aspect Errors
+    -------------
+
+    Creates a public class ErrorMessage that implements
+    Comparable<ErrorMessage>. Class has two public methods:
+      - public int compareTo(ErrorMessage other).
+      - public String toString().
+
+    Program:
+      - Collector: coll Set<ErrorMessage> Program.errors() [new
+        TreeSet<ErrorMessage>()] with add root Program.
+      - Equation: eq Program.getChild().program() = this;
+    ASTNode:
+      - Inherits: inh Program ASTNode.program();
+
+    Also creates a protected ErrorMessage error(String message) method for the
+    ASTNode class, which makes the error() method applicable to all nodes.
+
+    Program has a collector for ErrorMessage and define the Program as root:
+    <coll Set<ErrorMessage> Program.errors() [new TreeSet<ErrorMessage>()] with
+    add root Program;>. Observer that it is not the <.error()> method being
+    used it's a new <.errors()> method. The collector is addressed by using the
+    syntax <to Program.errors() for program();>, more on this later.
+    Program also gets an equation; <eq Program.getChild().program() = this>
+    that specifies that any child (getChild()) of Program that calls .program()
+    and can't resolve it on their own will call Program for a solution.
+
+    The ASTNode gets a inherited attribute <inh Program ASTNode.program()>
+    which makes sure that all the nodes in this language (?) has access to the
+    <.program()> method.
+
+
+    aspect ErrorContributions
+    -------------------------
+
+    Another aspect in the same file. Defines error contributions for the IdUse,
+    and IdDecl classes. This functionality is access by the following syntax:
+      <class> contributes <error_func()>
+        when <conditional>
+        to <collector object method> for <object with collector>.
+    Example from file is:
+      IdUse contributes error("...")
+        when decl().isUnknown() // <-- note there is no semi-colon ';'.
+        to Program.errors() for program();
+
+    How does the invocation of Program.errors() function?
+    Uses the same declaration that was used when coll was created, <coll
+    Set<ErrorMessage> Program.errors() [...]>, seems to be globally shared?
+
+
+1.6)
+
+  Generated Java code:
+  --------------------
+
+  IdUse.java
+  ----------
+
+  The <public IdDecl decl()> method in the generated java code has the snippet:
+    <if (decl_computed) {
+      return decl_value;
+    }>
+  which works as a cache mechanism for the value if it has already been
+  computed.
+
+  Adding a circular reference to program by:
+    <syn int Program.fail() = fail();>
+  Throws "Circular definition of attribute Program.fail()." error when calling
+  program.fail() inside one of the test runners.

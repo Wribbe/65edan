@@ -2,6 +2,11 @@ Program ::= FunctionDeclaration*;
 
 abstract Expression;
 abstract Statement;
+abstract Type;
+
+IntType : Type;
+BooleanType : Type;
+UnknownType : Type;
 
 BinaryExpression : Expression ::= Left:Expression Right:Expression;
 
@@ -12,6 +17,7 @@ Minus : BinaryExpression;
 Remainder : BinaryExpression;
 
 FunctionDeclaration ::= IdDeclare FunctionParameters:IdDeclare* Block:Statement* Return;
+UnknownFunctionDeclaration : FunctionDeclaration;
 
 FunctionStatement : Statement ::= FunctionUse;
 FunctionUse : Expression ::= IdUse Expression*;
@@ -19,8 +25,8 @@ FunctionUse : Expression ::= IdUse Expression*;
 Assign : Statement ::= IdUse Expression;
 Return : Statement ::= Expression;
 
-IF : Statement ::= Logic:BinaryLogicalExpression Block:Statement* [ELSE];
-WHILE : Statement ::= Logic:BinaryLogicalExpression Block:Statement*;
+IF : Statement ::= Logic:Expression Block:Statement* [ELSE];
+WHILE : Statement ::= Logic:Expression Block:Statement*;
 ELSE: Statement ::= Block:Statement*;
 
 BinaryLogicalExpression : BinaryExpression;
@@ -33,7 +39,8 @@ LT : BinaryLogicalExpression;
 GT : BinaryLogicalExpression;
 
 IdUse : Expression ::= <ID>;
-IdDeclare : Statement ::= <ID>;
+IdDeclare ::= <ID>;
+UnknownDeclaration : IdDeclare;
 VarDeclare : Statement ::= IdDeclare [Expression];
 
 Numeral : Expression ::= <NUMERAL>;

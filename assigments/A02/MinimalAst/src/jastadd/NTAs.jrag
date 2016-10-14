@@ -1,0 +1,68 @@
+aspect UnknownDeclaration {
+	syn nta UnknownDeclaration Program.unknownDeclaration() = new UnknownDeclaration("<unknown>");
+
+	inh UnknownDeclaration ASTNode.unknownDeclaration();
+	eq Program.getChild().unknownDeclaration() = unknownDeclaration();
+
+	syn boolean IdDeclare.isUnknown() = false;
+	eq UnknownDeclaration.isUnknown() = true;
+}
+
+aspect UnknownFunctionDeclaration {
+    syn nta UnknownFunctionDeclaration Program.unknownFunctionDeclaration() = new UnknownFunctionDeclaration(new IdDeclare("<unknown>"), new List(), new List(), new Return(new Numeral("0")));
+
+    inh UnknownFunctionDeclaration ASTNode.unknownFunctionDeclaration();
+    eq Program.getChild().unknownFunctionDeclaration() = unknownFunctionDeclaration();
+
+    eq UnknownFunctionDeclaration.correctNumParameters(int numParameters) = true;
+}
+
+
+aspect PredefinedFunctions {
+
+    syn nta List<FunctionDeclaration> Program.predefinedFunctions() {
+        List<FunctionDeclaration> list = new List<FunctionDeclaration>();
+        FunctionDeclaration read = new FunctionDeclaration(new IdDeclare("read"), new List(),  new List(), new Return(new Numeral("0")));
+        FunctionDeclaration print = new FunctionDeclaration(new IdDeclare("print"), new List(),  new List(), new Return(new Numeral("0")));
+        list.add(read);
+        list.add(print);
+        return list;
+    }
+
+    // Make all ASTNodes inherit predefinedFunctions().
+    inh List<FunctionDeclaration> ASTNode.predefinedFunctions();
+    eq Program.getChild().predefinedFunctions() = predefinedFunctions();
+
+}
+
+
+aspect Types {
+
+    // Declare and propegate the Int type.
+    syn nta IntType Program.intType() = new IntType();
+    inh IntType ASTNode.intType();
+    eq Program.getChild().intType() = intType();
+
+    // Declare and propegate Boolean type.
+    syn nta BooleanType Program.booleanType() = new BooleanType();
+    inh BooleanType ASTNode.booleanType();
+    eq Program.getChild().booleanType() = booleanType();
+
+    // Declare and propegate Unknown type.
+    syn nta UnknownType Program.unknownType() = new UnknownType();
+    inh UnknownType ASTNode.unknownType();
+    eq Program.getChild().unknownType() = unknownType();
+
+    // Type comparison function.
+    syn boolean Type.compatible(Type other) {
+      if (other == unknownType()) {
+        return true;
+      }
+      return other == this;
+    }
+
+    // Declare print statments for Type classes.
+    syn String IntType.toString() = "Int";
+    syn String BooleanType.toString() = "Boolean";
+    syn String UnknownType.toString() = "Unknown";
+}

@@ -2,120 +2,451 @@ import java.util.Set;
 import java.util.HashSet;
 
 aspect NameAnalysis {
-  public class SymbolTable {
-    private static final SymbolTable BOTTOM = new SymbolTable() {
-      @Override
-      public boolean declare(String name) {
-        throw new UnsupportedOperationException(
-            "can not add name to bottom of name stack");
-      }
-      @Override
-      public boolean lookup(String name) {
+
+
+    /** Lookup */
+    /*---------*/
+
+    // All classes inherit the lookup function.
+    inh IdDeclare ASTNode.lookup(String name);
+
+    // IdUse uses declaration to locate IdDeclare for the used variable.
+    syn IdDeclare IdUse.declaration() {
+        return lookup(getID());
+    }
+
+    // Program knows lookup(), default to unknown.
+    eq Program.getChild().lookup(String name) = unknownDeclaration();
+
+    // Program checks scope when queried from a FunctionDeclaration.
+    eq Program.getFunctionDeclaration().lookup(String name) {
+        return checkScope(name);
+    }
+
+    // Lookup equation for Block class in FunctionDeclaration.
+    eq FunctionDeclaration.getBlock(int index).lookup(String name) {
+
+        IdDeclare id = checkScope(index, name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
+
+    // Lookup equation for Return class in FunctionDeclaration.
+    eq FunctionDeclaration.getReturn().lookup(String name) {
+        return checkScope(name);
+    }
+
+    // Lookup equation for Block class in IF.
+    eq IF.getBlock(int index).lookup(String name) {
+        IdDeclare id = checkScope(index+1, name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
+
+    // Lookup equation for Block class in ELSE.
+    eq ELSE.getBlock(int index).lookup(String name) {
+        IdDeclare id = checkScope(index+1, name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
+
+    // Lookup equation for Block class in WHILE.
+    eq WHILE.getBlock(int index).lookup(String name) {
+        IdDeclare id = checkScope(index+1, name);
+        if (!id.isUnknown()) {
+            return id;
+        }
+
+        return lookup(name);
+    }
+
+    // Function use checks predefined functions before doing a lookup.
+    eq FunctionUse.getIdUse().lookup(String name) {
+        for (FunctionDeclaration function : predefinedFunctions()) {
+            if (function.getIdDeclare().getID().equals(name)) {
+                return function.getIdDeclare();
+            }
+        }
+        return lookup(name);
+    }
+
+    /** getChildDeclaration */
+    /*----------------------*/
+
+    // Make sure that all nodes have a getChildDeclaration(String) function.
+    syn IdDeclare ASTNode.getChildDeclaration(String name) {
+        return unknownDeclaration();
+    }
+
+    // Specify equation for VarDeclare.getChildDeclaration(String).
+    eq VarDeclare.getChildDeclaration(String name) {
+        return getIdDeclare();
+    }
+
+    /** isMultiplyDeclared */
+    /*---------------------*/
+
+    // IdDeclare detects if there are other declarations besides itself.
+    syn boolean IdDeclare.isMultiplyDeclared() {
+
+        // Check name-collision for all IdDeclare in higher scope.
+        IdDeclare id = lookup(getID());
+        if (!id.isUnknown() && id != this) {
+            return true;
+        }
         return false;
+    }
+
+    /** isPredefinedFunction */
+    /*-----------------------*/
+
+    syn boolean FunctionDeclaration.collisionWithPredefined() {
+        // Check name-collision for all predefined functions.
+        String functionID = this.getIdDeclare().getID();
+        for (FunctionDeclaration function : predefinedFunctions()) {
+            if (function.getIdDeclare().getID().equals(functionID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Expression types */
+    /*-------------------*/
+
+    // Default to unknown type.
+    syn Type ASTNode.getType() = unknownType();
+
+    // Start with defininig all expressions as int.
+    syn Type Expression.getType() = intType();
+
+    // Single out all logical expressions.
+    syn Type NOEQ.getType() = booleanType();
+    syn Type EQ.getType() = booleanType();
+    syn Type LTEQ.getType() = booleanType();
+    syn Type GTEQ.getType() = booleanType();
+    syn Type LT.getType() = booleanType();
+    syn Type GT.getType() = booleanType();
+
+    // Define type for FunctionDeclarations
+    syn Type FunctionDeclaration.getType() = intType();
+
+    // Define getType for nested structures.
+
+    // VarDeclare.
+    syn Type VarDeclare.getType() {
+      if(hasExpression()) {
+        return getExpression().getType();
       }
-    };
-
-    private final SymbolTable tail;
-    private final Set<String> names = new HashSet<String>();
-
-    public SymbolTable() {
-      tail = BOTTOM;
+      return intType();
     }
 
-    public SymbolTable(SymbolTable tail) {
-      this.tail = tail;
+    // Assign expectedType() for differnet expression uses.
+    syn Type IF.expectedType() = booleanType();
+    syn Type WHILE.expectedType() = booleanType();
+    syn Type Assign.expectedType() = intType();
+    syn Type FunctionUse.expectedType() = intType();
+
+    // Create sythesized booleans for if expressions matches usage.
+    syn boolean IF.expressionTypeMatched() = expectedType().compatible(getLogic().getType());
+    syn boolean WHILE.expressionTypeMatched() = expectedType().compatible(getLogic().getType());
+    syn boolean Assign.expressionTypeMatched() = expectedType().compatible(getExpression().getType());
+    syn boolean FunctionUse.expressionTypeMatched() {
+      Type expected = expectedType();
+      Expression expression = null;
+      for (int i=0; i < getNumExpression(); i++) {
+        expression = getExpression(i);
+        if (!expected.compatible(expression.getType())) {
+          return false;
+        }
+      }
+      return true;
     }
 
-    /**
-     * Attempt to add a new name to the symbol table.
-     * @return true if name was not already declared
-     */
-    public boolean declare(String name) {
-      return names.add(name);
+    /** Function vs variable use */
+    /*--------------------------*/
+
+    // IdDeclare inherits isVariable and isFunction attributes.
+    inh boolean IdDeclare.isVariable(String name);
+    inh boolean IdDeclare.isFunction(String name);
+
+    // Hitting a VarDeclar identifies IdDeclare as variable.
+    eq VarDeclare.getIdDeclare().isVariable(String name) = true;
+    eq VarDeclare.getIdDeclare().isFunction(String name) = false;
+
+    // Return true on hitting a UnknownDeclaration to not propagate errors.
+    eq Program.unknownDeclaration().isFunction(String name) = true;
+    eq Program.unknownDeclaration().isVariable(String name) = true;
+
+    // Hitting a FunctionDeclaration and not finding idDeclare in the
+    // declaration parameters disqualifies it from being a variable.
+    eq FunctionDeclaration.getChild().isVariable(String name) {
+        for (int i=0; i<getNumFunctionParameters(); i++) {
+            IdDeclare id = getFunctionParameters(i);
+            if (id.getID().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    /**
-     * @return true if name has been declared
-     */
-    public boolean lookup(String name) {
-      return names.contains(name) || tail.lookup(name);
+    // Hitting the Program with isVariable disqualifies the declaration to be a
+    // value declaration.
+    eq Program.getFunctionDeclaration().isVariable(String name) = false;
+
+    // Hitting a Program with isFunction means that the name was not defined by
+    // a VarDeclare in the function body. If no match is found among the
+    // FunctionDeclerations or predefined functions, it's not a function.
+    eq Program.getFunctionDeclaration().isFunction(String name) {
+        IdDeclare id = checkScope(name);
+        return id.getID().equals(name);
     }
 
-    /**
-     * Push a new table on the stack.
-     * @return the new top of the stack
-     */
-    public SymbolTable push() {
-      return new SymbolTable(this);
-    }
-  }
+    // Anything hitting the predefined functions is a function.
+    eq Program.predefinedFunctions().isFunction(String name) = true;
 
-  /**
-   * @param err where to write error messages
-   */
-  public void Program.checkNames(PrintStream err) {
-    SymbolTable symbols = new SymbolTable();
-    checkNames(err, symbols);
-  }
+    // IdUse uses declaration to locate IdDeclare for the used variable.
+    syn boolean IdUse.isVariable() {
+        return lookup(getID()).isVariable(getID());
+    }
+    syn boolean IdUse.isFunction() {
+        return lookup(getID()).isFunction(getID());
+    }
 
-  /**
-   * @param err where to write error messages
-   * @param symbols symbol table
-   */
-  public void ASTNode.checkNames(PrintStream err, SymbolTable symbols) {
-    for (int i = 0; i < getNumChild(); ++i) {
-      getChild(i).checkNames(err, symbols);
-    }
-  }
+    /** Function variable counting */
+    /*-----------------------------*/
 
-  public void IF.checkNames(PrintStream err, SymbolTable symbols) {
-    SymbolTable newSymbols = symbols.push();
-    for (int i=0; i<getNumBlock(); i++) {
-      getBlock(i).checkNames(err, newSymbols);
-    }
-    if (hasELSE()) {
-      getELSE().checkNames(err, newSymbols);
-    }
-  }
+    // Inherit attribute that links to a FunctionDeclaration.
+    inh FunctionDeclaration IdDeclare.function(String name);
 
-  public void WHILE.checkNames(PrintStream err, SymbolTable symbols) {
-    SymbolTable newSymbols = symbols.push();
-    for (int i=0; i<getNumBlock(); i++) {
-      getBlock(i).checkNames(err, newSymbols);
+    eq Program.getChild().function(String name) {
+        IdDeclare id = checkScope(name);
+        // Check that id is known and if it's a function id.
+        if (!id.isUnknown() && id.isFunction(id.getID())) {
+            return (FunctionDeclaration)id.getParent();
+        }
+        return unknownFunctionDeclaration();
     }
-  }
 
-  public void FunctionDeclaration.checkNames(PrintStream err, SymbolTable symbols) {
-    SymbolTable newSymbols = symbols.push();
-    // Add FunctionDeclaration parameters to new symbol table.
-    for (int i=0; i<getNumFunctionParameters(); i++) {
-      getFunctionParameters(i).checkNames(err, newSymbols);
-    }
-    for (int i=0; i<getNumBlock(); i++) {
-      getBlock(i).checkNames(err, newSymbols);
-    }
-    getReturn().checkNames(err, newSymbols);
-  }
+    // Avoid varning about isFunction() and unknown function.
+    eq Program.unknownFunctionDeclaration().isFunction(String name) = true;
 
-  public void IdDeclare.checkNames(PrintStream err, SymbolTable symbols) {
-    if (!symbols.declare(getID())) {
-      err.format("Error at line %d: symbol \'%s\' is already declared!", getLine(), getID());
-      err.println();
+    // Add synthetic attribute to FunctionDeclaration that checks number of
+    // parameters.
+    syn boolean FunctionDeclaration.correctNumParameters(int numParameters) {
+        return numParameters == getNumFunctionParameters();
     }
-  }
 
-  public void IdUse.checkNames(PrintStream err, SymbolTable symbols) {
-    if (!symbols.lookup(getID())) {
-      err.format("Error at line %d: symbol \'%s\' has not been declared before this use!", getLine(), getID());
-      err.println();
+    // Add Synthetic attribute to FunctionUse that can be called when
+    // collecting errors.
+    syn boolean FunctionUse.correctNumParameters() {
+        String idName = getIdUse().getID();
+        FunctionDeclaration function = lookup(idName).function(idName);
+        int numParameters = getNumExpression();
+        return function.correctNumParameters(numParameters);
     }
-  }
+}
 
-  /**
-   * Helper method
-   * @return line number of this token
-   */
-  public int ASTNode.getLine() {
-    return getLine(getStart());
-  }
+
+aspect FunctionDeclarationHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare FunctionDeclaration.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare FunctionDeclaration.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Wrapper method for scope iteration helper functions.
+    syn IdDeclare FunctionDeclaration.scopeIteration(int index, String name) {
+        IdDeclare id = checkParameters(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        id = checkStatements(index, name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        return unknownDeclaration();
+    }
+
+    // Check FunctionDeclaration parameters.
+    syn IdDeclare FunctionDeclaration.checkParameters(String name) {
+
+        String parameterName = "";
+        IdDeclare currentDeclaration = null;
+
+        // Check function parameters.
+        for (int i=0; i<getNumFunctionParameters(); i++) {
+            currentDeclaration = getFunctionParameters(i);
+            parameterName = currentDeclaration.getID();
+            if (parameterName.equals(name)) {
+                return currentDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+
+    // Check FunctionDeclaration block statements.
+    syn IdDeclare FunctionDeclaration.checkStatements(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+
+aspect IFHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare IF.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare IF.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Check IF block statements.
+    syn IdDeclare IF.scopeIteration(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+
+aspect ELSEHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare ELSE.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare ELSE.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Check ELSE block statements.
+    syn IdDeclare ELSE.scopeIteration(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+aspect WHILEHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare WHILE.checkScope(int index, String name) {
+        return scopeIteration(index, name);
+    }
+
+    // Access method for searching function declaration scope without specific
+    // line cutoff.
+    syn IdDeclare WHILE.checkScope(String name) {
+        return scopeIteration(getNumBlock(), name);
+    }
+
+    // Check WHILE block statements.
+    syn IdDeclare WHILE.scopeIteration(int index, String name) {
+        Statement currentStatement = null;
+        IdDeclare idDeclaration = null;
+        for (int i=0; i<index; i++) {
+            currentStatement = getBlock(i);
+            idDeclaration = currentStatement.getChildDeclaration(name);
+            if (idDeclaration.getID().equals(name)) {
+                return idDeclaration;
+            }
+        }
+        return unknownDeclaration();
+    }
+}
+
+aspect ProgramHelperMethods {
+
+    // Access method for searching function declaration scope white specific
+    // line cutoff.
+    syn IdDeclare Program.checkScope(String name) {
+        return scopeIteration(name);
+    }
+
+    // Wrapper method for scope iteration helper functions.
+    syn IdDeclare Program.scopeIteration(String name) {
+        IdDeclare id = checkPredefined(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        id = checkFunctionDeclarations(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        return unknownDeclaration();
+    }
+
+    // Check Program functionDeclarations.
+    syn IdDeclare Program.checkFunctionDeclarations(String name) {
+        IdDeclare id = null;
+        for (int i=0; i<getNumFunctionDeclaration(); i++) {
+            id = getFunctionDeclaration(i).getIdDeclare();
+            if (id.getID().equals(name)) {
+                return id;
+            }
+        }
+        return unknownDeclaration();
+    }
+
+    // Check Program predefined functions.
+    syn IdDeclare Program.checkPredefined(String name) {
+        IdDeclare id = null;
+        for (FunctionDeclaration function : predefinedFunctions()) {
+            id = function.getIdDeclare();
+            if (id.getID().equals(name)) {
+                return id;
+            }
+        }
+        return unknownDeclaration();
+    }
 }
