@@ -1,0 +1,6 @@
+-- no_error_simple_program
+int f() {
+  return 0;
+}
+==
+Program
