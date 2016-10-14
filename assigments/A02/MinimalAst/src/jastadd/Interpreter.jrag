@@ -44,4 +44,20 @@ aspect interpreter {
             record.put(getIdDeclare(), getExpression().eval(record));
         }
     }
+
+    public int Add.eval(ActivationRecord record) {
+        int left = getLeft().eval(record);
+        int right = getRight().eval(record);
+        return left+right;
+    }
+
+    public int Mul.eval(ActivationRecord record) {
+        int left = getLeft().eval(record);
+        int right = getRight().eval(record);
+        return left*right;
+    }
+
+    public int Numeral.eval(ActivationRecord record) {
+        return Integer.parseInt(getNUMERAL());
+    }
 }
