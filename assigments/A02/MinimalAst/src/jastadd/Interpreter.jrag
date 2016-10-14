@@ -45,6 +45,9 @@ aspect interpreter {
         }
     }
 
+    /** Arithetic operators */
+    /*----------------------*/
+
     public int Add.eval(ActivationRecord record) {
         int left = getLeft().eval(record);
         int right = getRight().eval(record);
@@ -74,6 +77,9 @@ aspect interpreter {
         int right = getRight().eval(record);
         return left%right;
     }
+
+    /** Base types */
+    /*-------------*/
 
     public int Numeral.eval(ActivationRecord record) {
         return Integer.parseInt(getNUMERAL());
