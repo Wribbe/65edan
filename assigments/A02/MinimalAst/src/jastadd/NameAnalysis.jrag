@@ -221,6 +221,39 @@ aspect NameAnalysis {
     syn boolean IdUse.isFunction() {
         return lookup(getID()).isFunction(getID());
     }
+
+    /** Function variable counting */
+    /*-----------------------------*/
+
+    // Inherit attribute that links to a FunctionDeclaration.
+    inh FunctionDeclaration IdDeclare.function(String name);
+
+    eq Program.getChild().function(String name) {
+        IdDeclare id = checkScope(name);
+        // Check that id is known and if it's a function id.
+        if (!id.isUnknown() && id.isFunction(id.getID())) {
+            return (FunctionDeclaration)id.getParent();
+        }
+        return unknownFunctionDeclaration();
+    }
+
+    // Avoid varning about isFunction() and unknown function.
+    eq Program.unknownFunctionDeclaration().isFunction(String name) = true;
+
+    // Add synthetic attribute to FunctionDeclaration that checks number of
+    // parameters.
+    syn boolean FunctionDeclaration.correctNumParameters(int numParameters) {
+        return numParameters == getNumFunctionParameters();
+    }
+
+    // Add Synthetic attribute to FunctionUse that can be called when
+    // collecting errors.
+    syn boolean FunctionUse.correctNumParameters() {
+        String idName = getIdUse().getID();
+        FunctionDeclaration function = lookup(idName).function(idName);
+        int numParameters = getNumExpression();
+        return function.correctNumParameters(numParameters);
+    }
 }
 
 

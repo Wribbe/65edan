@@ -8,6 +8,15 @@ aspect UnknownDeclaration {
 	eq UnknownDeclaration.isUnknown() = true;
 }
 
+aspect UnknownFunctionDeclaration {
+    syn nta UnknownFunctionDeclaration Program.unknownFunctionDeclaration() = new UnknownFunctionDeclaration(new IdDeclare("<unknown>"), new List(), new List(), new Return(new Numeral("0")));
+
+    inh UnknownFunctionDeclaration ASTNode.unknownFunctionDeclaration();
+    eq Program.getChild().unknownFunctionDeclaration() = unknownFunctionDeclaration();
+
+    eq UnknownFunctionDeclaration.correctNumParameters(int numParameters) = true;
+}
+
 
 aspect PredefinedFunctions {
 

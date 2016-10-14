@@ -58,6 +58,11 @@ aspect ErrorContributions {
     Assign contributes error("symbol '" + getIdUse().getID() +"' does not refer to a variable, can't assign.")
       when !getIdUse().isVariable()
       to Program.errors() for program();
+
+    FunctionUse contributes error("function '" + getIdUse().getID() +"' was called with the wrong number of parameters.")
+      when !correctNumParameters()
+      to Program.errors() for program();
+
 }
 //	IdUse contributes error("the definition of symbol '" + getID() + "' is circular")
 //		when isCircular()

@@ -17,6 +17,7 @@ Minus : BinaryExpression;
 Remainder : BinaryExpression;
 
 FunctionDeclaration ::= IdDeclare FunctionParameters:IdDeclare* Block:Statement* Return;
+UnknownFunctionDeclaration : FunctionDeclaration;
 
 FunctionStatement : Statement ::= FunctionUse;
 FunctionUse : Expression ::= IdUse Expression*;

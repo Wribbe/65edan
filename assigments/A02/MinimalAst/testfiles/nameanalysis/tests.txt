@@ -346,3 +346,14 @@ int f() {
 }
 ==
 Error at line 2: symbol 'f' does not refer to a variable, can't assign.
+
+-- error_when_calling_f_with_wrong parameters
+int g() {
+  f(5);
+  return 0;
+}
+int f() {
+  return 0;
+}
+==
+Error at line 2: function 'f' was called with the wrong number of parameters.
