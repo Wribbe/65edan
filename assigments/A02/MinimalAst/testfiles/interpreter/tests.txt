@@ -58,3 +58,15 @@ int main() {
 }
 ==
 5
+
+-- add_function_test
+int add(int a, int b) {
+  return a + b;
+}
+int main() {
+  int i = 10;
+  print(add(i, 20));
+  return 0;
+}
+==
+30

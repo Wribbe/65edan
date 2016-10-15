@@ -110,11 +110,26 @@ aspect interpreter {
     }
 
     public Integer FunctionDeclaration.eval(ActivationRecord record) {
+
+        // Create new scope for evaluation of this function.
         ActivationRecord functionScope = record.next();
+
+        // Parse and assign any function parameters stored in the record.
+        int parameterCounter = 0;
+        String parameterName = "";
+        String parameterStorageName = "";
+        for (IdDeclare parameter : getFunctionParametersList()) {
+            parameterName = parameter.getID();
+            parameterStorageName = Statement.paramStoreName(parameterCounter);
+            functionScope.put(parameterName, record.get(parameterStorageName));
+            parameterCounter += 1;
+        }
+
         // Evaluate all statements in the function.
         for (Statement statement : getBlockList()) {
             statement.eval(functionScope);
         }
+
         return getReturn().getExpression().eval(functionScope);
     }
 
@@ -175,13 +190,32 @@ aspect interpreter {
         getFunctionUse().eval(record);
     }
 
+    protected static final String Statement.parameterPrefix = "__functionParameter";
+
+    public static String Statement.paramStoreName(int i) {
+        return parameterPrefix+i;
+    }
+
     public Integer FunctionUse.eval(ActivationRecord record) {
         String functionName = getIdUse().getID();
         if (functionName.equals("print")) {
             System.out.println(getExpression(0).eval(record));
             return 0;
         }
-        return 0;
+
+        ActivationRecord functionScope = record.next();
+
+        // Parse and store the function parameters in new scope.
+        int counter = 0;
+        for (Expression expression : getExpressionList()) {
+            functionScope.put(Statement.parameterPrefix+counter,
+                              expression.eval(record));
+            counter += 1;
+        }
+
+        // Get hold of the correct FunctionDeclaration and evaluate it.
+        FunctionDeclaration currentFunction = function(functionName);
+        return currentFunction.eval(functionScope);
     }
 
     /** Variables */

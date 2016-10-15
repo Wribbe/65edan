@@ -226,7 +226,7 @@ aspect NameAnalysis {
     /*-----------------------------*/
 
     // Inherit attribute that links to a FunctionDeclaration.
-    inh FunctionDeclaration IdDeclare.function(String name);
+    inh FunctionDeclaration ASTNode.function(String name);
 
     syn FunctionDeclaration Program.function(String name) {
         IdDeclare id = checkScope(name);
