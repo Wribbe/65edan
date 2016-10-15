@@ -186,8 +186,8 @@ aspect interpreter {
     /** Boolean operators */
     /*----------------------*/
 
-    protected final static int Expression.TRUE = 1;
-    protected final static int Expression.FALSE = 0;
+    public final static int Expression.TRUE = 1;
+    public final static int Expression.FALSE = 0;
 
     public Integer NOEQ.eval(ActivationRecord record) {
         Integer left = getLeft().eval(record);
@@ -223,5 +223,25 @@ aspect interpreter {
         Integer left = getLeft().eval(record);
         Integer right = getRight().eval(record);
         return left > right ? TRUE : FALSE;
+    }
+
+    /** IF/ELSE/WHILE */
+    /*-----------*/
+
+    public void IF.eval(ActivationRecord record) {
+        int logicResult = getLogic().eval(record);
+        if (logicResult == getLogic().TRUE) {
+            ActivationRecord ifScope = record.next();
+            for (Statement statement : getBlockList()) {
+                statement.eval(ifScope);
+            }
+        } else {
+            if (hasELSE()) {
+                ActivationRecord elseScope = record.next();
+                for (Statement statement : getELSE().getBlockList()) {
+                    statement.eval(elseScope);
+                }
+            }
+        }
     }
 }

@@ -23,3 +23,23 @@ int main() {
 }
 ==
 RuntimeException: value 'a' is not initialized.
+-- logic_print_if_test
+int main() {
+  if (1 < 2) {
+    print(1);
+  }
+  return 0;
+}
+==
+1
+-- logic_print_if_else
+int main() {
+  if (1 == 2) {
+    print(1);
+  } else {
+    print(2);
+  }
+  return 0;
+}
+==
+2
