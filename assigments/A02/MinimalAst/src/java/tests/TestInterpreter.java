@@ -36,9 +36,9 @@ public class TestInterpreter extends AbstractParameterizedTest {
 	@Test
 	public void runTest() throws Exception {
         PrintStream out = System.out;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             Program program = (Program) parse(inFile);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (!program.errors().isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 System.out.println("Errors in program, aborting.");
@@ -51,11 +51,11 @@ public class TestInterpreter extends AbstractParameterizedTest {
             System.setOut(new PrintStream(baos));
             try {
                 program.eval();
-                compareOutput(baos.toString(), outFile, expectedFile);
             } catch(RuntimeException e) {
-                System.out.println("RuntimeException: "+e.toString());
+                System.out.println("RuntimeException: "+e.getMessage());
             }
         } finally {
+            compareOutput(baos.toString(), outFile, expectedFile);
             System.setOut(out);
         }
 	}
