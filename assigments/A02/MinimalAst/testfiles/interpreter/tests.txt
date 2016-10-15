@@ -70,3 +70,38 @@ int main() {
 }
 ==
 30
+
+-- while_return
+int loop() {
+  int a = 0;
+  while (a < 20) {
+    a = a + 1;
+    if ( a == 5 ) {
+      return a;
+    }
+  }
+  return a;
+}
+int main() {
+  int a = loop(); print(a);
+  return 0;
+}
+==
+5
+
+-- fac_test
+int fac(int n) {
+  if (n <= 1) { return 1; }
+  else { return fac(n-1) * n; }
+  return 0;
+}
+int f() {
+  print(fac(5));
+  return 0;
+}
+int main() {
+  f();
+  return 0;
+}
+==
+120

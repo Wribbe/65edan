@@ -7,13 +7,10 @@ aspect interpreter {
     class ActivationRecord {
 
         private Map<String, Integer> record;
-        private ActivationRecord tail;
 
         public ActivationRecord() {
             record = new HashMap<String, Integer>();
-            tail = this;
         }
-
 
         public void put(IdDeclare id, int value) {
             put(id.getID(), value);
@@ -27,72 +24,16 @@ aspect interpreter {
             record.put(key, value);
         }
 
-        public void cascadingReassignment(String key, int value) {
-            ActivationRecord current = this;
-            ActivationRecord previous;
-            while(true) {
-                if (current.record.containsKey(key)) {
-                    current.record.put(key, value);
-                    break;
-                }
-                previous = this;
-                current = tail;
-                if (current == previous) { // BOTTOM
-                    break;
-                }
-            }
-        }
-
         public Integer get(IdDeclare id) {
-            return getIteration(id.getID());
+            return get(id.getID());
         }
 
         public Integer get(String id) {
-            return getIteration(id);
-        }
-
-        private Integer getIteration(String key) {
-            ActivationRecord current = this;
-            ActivationRecord previous;
-            while(true) {
-                if (current.record.containsKey(key)) {
-                    return current.record.get(key);
-                }
-                previous = this;
-                current = tail;
-                if (current == previous) { // BOTTOM
-                    return null;
-                }
-            }
-        }
-
-        public boolean has(String key) {
-            return hasIteration(key);
-        }
-
-        private boolean hasIteration(String key) {
-            ActivationRecord current = this;
-            ActivationRecord previous;
-            while(true) {
-                if (current.record.containsKey(key)) {
-                    return true;
-                }
-                previous = current;
-                current = previous.tail;
-                if (current == previous) { // BOTTOM
-                    return false;
-                }
-            }
-        }
-
-        public ActivationRecord next() {
-            ActivationRecord newScope = new ActivationRecord();
-            newScope.tail = this;
-            return newScope;
+            return record.get(id);
         }
     }
 
-    public void Program.eval() {
+    public Integer Program.eval() {
         FunctionDeclaration main = function("main");
         if (!main.getIdDeclare().getID().equals("main")) {
             throw new RuntimeException("No main function declared, aborting.");
@@ -107,12 +48,15 @@ aspect interpreter {
             programScope.put(function.getIdDeclare(), 0);
         }
         main.eval(programScope);
+        return Statement.noReturn;
     }
 
     public Integer FunctionDeclaration.eval(ActivationRecord record) {
 
         // Create new scope for evaluation of this function.
-        ActivationRecord functionScope = record.next();
+        ActivationRecord functionScope = new ActivationRecord();
+
+        Integer returnValue = Statement.noReturn;
 
         // Parse and assign any function parameters stored in the record.
         int parameterCounter = 0;
@@ -127,20 +71,24 @@ aspect interpreter {
 
         // Evaluate all statements in the function.
         for (Statement statement : getBlockList()) {
-            statement.eval(functionScope);
+            returnValue = statement.eval(functionScope);
+            if (returnValue != Statement.noReturn) {
+                return returnValue;
+            }
         }
 
-        return getReturn().getExpression().eval(functionScope);
+        return getReturn().eval(functionScope);
     }
 
     // Placeholder functions for Statement and Expression.
-    public void Statement.eval(ActivationRecord record) {}
+    public Integer Statement.eval(ActivationRecord record) { return noReturn; }
     public Integer Expression.eval(ActivationRecord record) { return 0; }
 
-    public void VarDeclare.eval(ActivationRecord record) {
+    public Integer VarDeclare.eval(ActivationRecord record) {
         if (hasExpression()) {
             record.put(getIdDeclare(), getExpression().eval(record));
         }
+        return noReturn;
     }
 
     /** Arithmetic operators */
@@ -186,8 +134,8 @@ aspect interpreter {
     /** Function usage */
     /*-----------------*/
 
-    public void FunctionStatement.eval(ActivationRecord record) {
-        getFunctionUse().eval(record);
+    public Integer FunctionStatement.eval(ActivationRecord record) {
+        return getFunctionUse().eval(record);
     }
 
     protected static final String Statement.parameterPrefix = "__functionParameter";
@@ -200,10 +148,10 @@ aspect interpreter {
         String functionName = getIdUse().getID();
         if (functionName.equals("print")) {
             System.out.println(getExpression(0).eval(record));
-            return 0;
+            return Statement.noReturn;
         }
 
-        ActivationRecord functionScope = record.next();
+        ActivationRecord functionScope = new ActivationRecord();
 
         // Parse and store the function parameters in new scope.
         int counter = 0;
@@ -221,17 +169,18 @@ aspect interpreter {
     /** Variables */
     /*------------*/
 
-    public void Assign.eval(ActivationRecord record) {
-        record.cascadingReassignment(getIdUse().getID(),
-                                     getExpression().eval(record));
+    public Integer Assign.eval(ActivationRecord record) {
+        record.put(getIdUse().getID(), getExpression().eval(record));
+        return noReturn;
     }
 
     public Integer IdUse.eval(ActivationRecord record) {
         String id = getID();
-        if (record.has(id)) {
-            return record.get(id);
+        Integer result = record.get(id);
+        if (result == null) {
+            throw new RuntimeException("value '"+ id +"' is not initialized.");
         }
-        throw new RuntimeException("value '"+ id +"' is not initialized.");
+        return result;
     }
 
     /** Boolean operators */
@@ -279,31 +228,55 @@ aspect interpreter {
     /** IF/ELSE/WHILE */
     /*----------------*/
 
-    public void IF.eval(ActivationRecord record) {
+    public static final Integer Statement.noReturn = new Integer(100);
+
+    public Integer IF.eval(ActivationRecord record) {
+
+        Integer returnValue = noReturn;
+
         int logicResult = getLogic().eval(record);
         if (logicResult == getLogic().TRUE) {
-            ActivationRecord ifScope = record.next();
             for (Statement statement : getBlockList()) {
-                statement.eval(ifScope);
+                returnValue = statement.eval(record);
+                if (returnValue != noReturn) {
+                    return returnValue;
+                }
             }
         } else {
             if (hasELSE()) {
-                ActivationRecord elseScope = record.next();
                 for (Statement statement : getELSE().getBlockList()) {
-                    statement.eval(elseScope);
+                    returnValue = statement.eval(record);
+                    if (returnValue != noReturn) {
+                        return returnValue;
+                    }
                 }
             }
         }
+        return noReturn;
     }
 
-    public void WHILE.eval(ActivationRecord record) {
+    public Integer WHILE.eval(ActivationRecord record) {
+
         int logicResult = getLogic().eval(record);
-        ActivationRecord whileScope = record.next();
+
+        Integer returnValue = noReturn;
+
         while (logicResult == getLogic().TRUE) {
             for (Statement statement : getBlockList()) {
-                statement.eval(whileScope);
+                returnValue = statement.eval(record);
+                if (returnValue != noReturn) {
+                    return returnValue;
+                }
             }
-            logicResult = getLogic().eval(whileScope);
+            logicResult = getLogic().eval(record);
         }
+        return noReturn;
+    }
+
+    /** Return */
+    /*---------*/
+
+    public Integer Return.eval(ActivationRecord record) {
+        return getExpression().eval(record);
     }
 }
