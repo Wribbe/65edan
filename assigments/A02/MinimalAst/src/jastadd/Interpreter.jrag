@@ -59,6 +59,8 @@ aspect interpreter {
 
         // Create new scope for evaluation of this function.
         ActivationRecord functionScope = new ActivationRecord();
+        // Store ActivationRecord in .function class attribute.
+        this.record = functionScope;
 
         Integer returnValue = Statement.noReturn;
 
@@ -89,9 +91,17 @@ aspect interpreter {
     public Integer Expression.eval(ActivationRecord record) { return 0; }
 
     public Integer VarDeclare.eval(ActivationRecord record) {
+
+        IdDeclare declaration = getIdDeclare();
+        String declarationName = declaration.getID();
+        String uniqueName = declaration.uniqueName(declarationName);
+
+        Integer result = null;
+
         if (hasExpression()) {
-            record.put(getIdDeclare(), getExpression().eval(record));
+            result = getExpression().eval(record);
         }
+        record.put(uniqueName, result);
         return noReturn;
     }
 
@@ -174,16 +184,26 @@ aspect interpreter {
     /*------------*/
 
     public Integer Assign.eval(ActivationRecord record) {
-        record.put(getIdUse().getID(), getExpression().eval(record));
+
+        IdDeclare declaration = lookup(getIdUse().getID());
+        String uniqueName = getDeepestUnique(declaration);
+        record.put(uniqueName, getExpression().eval(record));
+
         return noReturn;
     }
 
     public Integer IdUse.eval(ActivationRecord record) {
-        String id = getID();
-        Integer result = record.get(id);
+
+        String useId = getID();
+
+        IdDeclare declaration = lookup(useId);
+        String uniqueName = getDeepestUnique(declaration);
+        Integer result = record.get(uniqueName);
+
         if (result == null) {
-            throw new RuntimeException("value '"+ id +"' is not initialized.");
+            throw new RuntimeException("value '"+ useId +"' is not initialized.");
         }
+
         return result;
     }
 
@@ -240,20 +260,26 @@ aspect interpreter {
 
         int logicResult = getLogic().eval(record);
         if (logicResult == getLogic().TRUE) {
+            nestingLevel += 1;
             for (Statement statement : getBlockList()) {
                 returnValue = statement.eval(record);
                 if (returnValue != noReturn) {
+                    nestingLevel -= 1;
                     return returnValue;
                 }
             }
+            nestingLevel -= 1;
         } else {
             if (hasELSE()) {
+                nestingLevel += 1;
                 for (Statement statement : getELSE().getBlockList()) {
                     returnValue = statement.eval(record);
                     if (returnValue != noReturn) {
+                        nestingLevel -= 1;
                         return returnValue;
                     }
                 }
+                nestingLevel -= 1;
             }
         }
         return noReturn;
@@ -265,15 +291,18 @@ aspect interpreter {
 
         Integer returnValue = noReturn;
 
+        nestingLevel += 1;
         while (logicResult == getLogic().TRUE) {
             for (Statement statement : getBlockList()) {
                 returnValue = statement.eval(record);
                 if (returnValue != noReturn) {
+                    nestingLevel -= 1;
                     return returnValue;
                 }
             }
             logicResult = getLogic().eval(record);
         }
+        nestingLevel -= 1;
         return noReturn;
     }
 
@@ -282,5 +311,56 @@ aspect interpreter {
 
     public Integer Return.eval(ActivationRecord record) {
         return getExpression().eval(record);
+    }
+
+    /** Shadowing */
+    /*------------*/
+
+    // Set and store initial nesting level.
+    public static int Statement.nestingLevel = 0;
+
+    // Inherit uniqueName variants in IdDeclare.
+    inh String IdDeclare.uniqueName(String name);
+    inh String IdDeclare.uniqueName(String name, Integer level);
+
+    // Avoid UnknownDeclaration jastadd warning.
+    eq Program.getChild().uniqueName(String name) = name;
+    eq Program.getChild().uniqueName(String name, Integer level) = name;
+
+    // Generate unique names depending on nesting level.
+    public String FunctionDeclaration.uniqueName(String name, Integer level) {
+        String newName = name;
+        for (int i=0; i < level; i++) {
+            newName += "_";
+        }
+        return newName;
+    }
+
+    public ActivationRecord FunctionDeclaration.record;
+
+    eq FunctionDeclaration.getChild().uniqueName(String name, Integer level) {
+        return uniqueName(name, level);
+    }
+
+    eq FunctionDeclaration.getChild().uniqueName(String name) {
+        return uniqueName(name, Statement.nestingLevel);
+    }
+
+    // Inherit getDeepestUnique in Assign and IdUse.
+    inh String Assign.getDeepestUnique(IdDeclare declaration);
+    inh String IdUse.getDeepestUnique(IdDeclare declaration);
+
+    // Iterate the nesting levels to find the latest shadowed variable.
+    eq FunctionDeclaration.getChild().getDeepestUnique(IdDeclare declaration) {
+        String declarationName = declaration.getID();
+        String uniqueName = declaration.uniqueName(declarationName);
+        // Start one level lower since the current one is generated above.
+        for(int level=Statement.nestingLevel-1; level>-1; level--) {
+            if (record.containsKey(uniqueName)) {
+                break;
+            }
+            uniqueName = declaration.uniqueName(declarationName, level);
+        }
+        return uniqueName;
     }
 }
