@@ -124,3 +124,17 @@ int main() {
 2
 1
 0
+
+-- check_scope_leakage
+int main() {
+  if (1 < 2) {
+    int a = 10;
+  }
+  if (2 < 3) {
+    int a;
+    print(a);
+  }
+  return 0;
+}
+==
+RuntimeException: value 'a' is not initialized.
