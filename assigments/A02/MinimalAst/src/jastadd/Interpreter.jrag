@@ -94,11 +94,12 @@ aspect interpreter {
     }
 
     public Integer FunctionDeclaration.eval(ActivationRecord record) {
+        ActivationRecord functionScope = record.next();
         // Evaluate all statements in the function.
         for (Statement statement : getBlockList()) {
-            statement.eval(record);
+            statement.eval(functionScope);
         }
-        return getReturn().getExpression().eval(record);
+        return getReturn().getExpression().eval(functionScope);
     }
 
     // Placeholder functions for Statement and Expression.
