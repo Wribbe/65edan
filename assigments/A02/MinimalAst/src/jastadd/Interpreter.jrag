@@ -61,8 +61,8 @@ aspect interpreter {
                 if (current.record.containsKey(key)) {
                     return true;
                 }
-                previous = this;
-                current = tail;
+                previous = current;
+                current = previous.tail;
                 if (current == previous) { // BOTTOM
                     return false;
                 }
@@ -71,7 +71,7 @@ aspect interpreter {
 
         public ActivationRecord next() {
             ActivationRecord newScope = new ActivationRecord();
-            tail = this;
+            newScope.tail = this;
             return newScope;
         }
     }
