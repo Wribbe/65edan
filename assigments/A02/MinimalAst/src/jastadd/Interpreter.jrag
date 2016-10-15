@@ -93,7 +93,7 @@ aspect interpreter {
         main.eval(programScope);
     }
 
-    public int FunctionDeclaration.eval(ActivationRecord record) {
+    public Integer FunctionDeclaration.eval(ActivationRecord record) {
         // Evaluate all statements in the function.
         for (Statement statement : getBlockList()) {
             statement.eval(record);
@@ -103,7 +103,7 @@ aspect interpreter {
 
     // Placeholder functions for Statement and Expression.
     public void Statement.eval(ActivationRecord record) {}
-    public int Expression.eval(ActivationRecord record) { return 0; }
+    public Integer Expression.eval(ActivationRecord record) { return 0; }
 
     public void VarDeclare.eval(ActivationRecord record) {
         if (hasExpression()) {
@@ -114,40 +114,40 @@ aspect interpreter {
     /** Arithetic operators */
     /*----------------------*/
 
-    public int Add.eval(ActivationRecord record) {
-        int left = getLeft().eval(record);
-        int right = getRight().eval(record);
+    public Integer Add.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
         return left+right;
     }
 
-    public int Minus.eval(ActivationRecord record) {
-        int left = getLeft().eval(record);
-        int right = getRight().eval(record);
+    public Integer Minus.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
         return left-right;
     }
 
-    public int Mul.eval(ActivationRecord record) {
-        int left = getLeft().eval(record);
-        int right = getRight().eval(record);
+    public Integer Mul.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
         return left*right;
     }
 
-    public int Div.eval(ActivationRecord record) {
-        int left = getLeft().eval(record);
-        int right = getRight().eval(record);
+    public Integer Div.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
         return left/right;
     }
 
-    public int Remainder.eval(ActivationRecord record) {
-        int left = getLeft().eval(record);
-        int right = getRight().eval(record);
+    public Integer Remainder.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
         return left%right;
     }
 
     /** Base types */
     /*-------------*/
 
-    public int Numeral.eval(ActivationRecord record) {
+    public Integer Numeral.eval(ActivationRecord record) {
         return Integer.parseInt(getNUMERAL());
     }
 
@@ -158,7 +158,7 @@ aspect interpreter {
         getFunctionUse().eval(record);
     }
 
-    public int FunctionUse.eval(ActivationRecord record) {
+    public Integer FunctionUse.eval(ActivationRecord record) {
         String functionName = getIdUse().getID();
         if (functionName.equals("print")) {
             System.out.println(getExpression(0).eval(record));
