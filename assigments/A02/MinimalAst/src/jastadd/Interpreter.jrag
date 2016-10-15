@@ -16,15 +16,31 @@ aspect interpreter {
 
 
         public void put(IdDeclare id, int value) {
-            record.put(id.getID(), value);
+            put(id.getID(), value);
         }
 
         public void put(IdUse id, int value) {
-            record.put(id.getID(), value);
+            put(id.getID(), value);
         }
 
-        public void put(String id, int value) {
-            record.put(id, value);
+        public void put(String key, int value) {
+            record.put(key, value);
+        }
+
+        public void cascadingReassignment(String key, int value) {
+            ActivationRecord current = this;
+            ActivationRecord previous;
+            while(true) {
+                if (current.record.containsKey(key)) {
+                    current.record.put(key, value);
+                    break;
+                }
+                previous = this;
+                current = tail;
+                if (current == previous) { // BOTTOM
+                    break;
+                }
+            }
         }
 
         public Integer get(IdDeclare id) {
@@ -172,7 +188,8 @@ aspect interpreter {
     /*------------*/
 
     public void Assign.eval(ActivationRecord record) {
-        record.put(getIdUse(), getExpression().eval(record));
+        record.cascadingReassignment(getIdUse().getID(),
+                                     getExpression().eval(record));
     }
 
     public Integer IdUse.eval(ActivationRecord record) {
