@@ -16,6 +16,7 @@ int main() {
 ==
 7
 20
+
 -- exception_initialized_return
 int main() {
   int a;
@@ -23,6 +24,7 @@ int main() {
 }
 ==
 RuntimeException: value 'a' is not initialized.
+
 -- logic_print_if_test
 int main() {
   if (1 < 2) {
@@ -32,6 +34,7 @@ int main() {
 }
 ==
 1
+
 -- logic_print_if_else
 int main() {
   if (1 == 2) {
@@ -43,3 +46,15 @@ int main() {
 }
 ==
 2
+
+-- logic_while
+int main() {
+  int a = 0;
+  while (a < 5) {
+    a = a + 1;
+  }
+  print(a);
+  return 0;
+}
+==
+5

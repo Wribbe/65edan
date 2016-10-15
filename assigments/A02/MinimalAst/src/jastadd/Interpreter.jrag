@@ -261,4 +261,15 @@ aspect interpreter {
             }
         }
     }
+
+    public void WHILE.eval(ActivationRecord record) {
+        int logicResult = getLogic().eval(record);
+        ActivationRecord whileScope = record.next();
+        while (logicResult == getLogic().TRUE) {
+            for (Statement statement : getBlockList()) {
+                statement.eval(whileScope);
+            }
+            logicResult = getLogic().eval(whileScope);
+        }
+    }
 }
