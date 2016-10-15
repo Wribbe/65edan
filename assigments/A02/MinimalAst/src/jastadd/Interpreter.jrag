@@ -12,15 +12,15 @@ aspect interpreter {
             record = new HashMap<String, Integer>();
         }
 
-        public void put(IdDeclare id, int value) {
+        public void put(IdDeclare id, Integer value) {
             put(id.getID(), value);
         }
 
-        public void put(IdUse id, int value) {
+        public void put(IdUse id, Integer value) {
             put(id.getID(), value);
         }
 
-        public void put(String key, int value) {
+        public void put(String key, Integer value) {
             record.put(key, value);
         }
 
