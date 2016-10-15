@@ -167,4 +167,19 @@ aspect interpreter {
         }
         return 0;
     }
+
+    /** Variables */
+    /*------------*/
+
+    public void Assign.eval(ActivationRecord record) {
+        record.put(getIdUse(), getExpression().eval(record));
+    }
+
+    public Integer IdUse.eval(ActivationRecord record) {
+        String id = getID();
+        if (record.has(id)) {
+            return record.get(id);
+        }
+        throw new RuntimeException("value '"+ id +"' is not initialized.");
+    }
 }

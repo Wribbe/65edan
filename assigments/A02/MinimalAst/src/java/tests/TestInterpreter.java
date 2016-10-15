@@ -9,7 +9,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import lang.ast.ErrorMessage;
 import lang.ast.Program;
-import lang.Interpreter;
 
 import java.io.*;
 
@@ -50,8 +49,12 @@ public class TestInterpreter extends AbstractParameterizedTest {
                 throw new RuntimeException("Error in program.");
             }
             System.setOut(new PrintStream(baos));
-            program.eval();
-            compareOutput(baos.toString(), outFile, expectedFile);
+            try {
+                program.eval();
+                compareOutput(baos.toString(), outFile, expectedFile);
+            } catch(RuntimeException e) {
+                System.out.println("RuntimeException: "+e.toString());
+            }
         } finally {
             System.setOut(out);
         }

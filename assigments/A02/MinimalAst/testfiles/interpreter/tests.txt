@@ -16,3 +16,10 @@ int main() {
 ==
 7
 20
+-- exception_initialized_return
+int main() {
+  int a;
+  return a;
+}
+==
+RuntimeException: value 'a' is not initialized.
