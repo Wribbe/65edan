@@ -31,6 +31,10 @@ aspect interpreter {
         public Integer get(String id) {
             return record.get(id);
         }
+
+        public boolean containsKey(String key) {
+            return record.containsKey(key);
+        }
     }
 
     public Integer Program.eval() {
