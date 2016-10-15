@@ -7,10 +7,13 @@ aspect interpreter {
     class ActivationRecord {
 
         private Map<String, Integer> record;
+        private ActivationRecord tail;
 
         public ActivationRecord() {
             record = new HashMap<String, Integer>();
+            tail = this;
         }
+
 
         public void put(IdDeclare id, int value) {
             record.put(id.getID(), value);
@@ -24,16 +27,52 @@ aspect interpreter {
             record.put(id, value);
         }
 
-        public int get(IdDeclare id) {
-            return record.get(id.getID());
+        public Integer get(IdDeclare id) {
+            return getIteration(id.getID());
         }
 
-        public int get(String id) {
-            return record.get(id);
+        public Integer get(String id) {
+            return getIteration(id);
+        }
+
+        private Integer getIteration(String key) {
+            ActivationRecord current = this;
+            ActivationRecord previous;
+            while(true) {
+                if (current.record.containsKey(key)) {
+                    return current.record.get(key);
+                }
+                previous = this;
+                current = tail;
+                if (current == previous) { // BOTTOM
+                    return null;
+                }
+            }
         }
 
         public boolean has(String key) {
-            return record.containsKey(key);
+            return hasIteration(key);
+        }
+
+        private boolean hasIteration(String key) {
+            ActivationRecord current = this;
+            ActivationRecord previous;
+            while(true) {
+                if (current.record.containsKey(key)) {
+                    return true;
+                }
+                previous = this;
+                current = tail;
+                if (current == previous) { // BOTTOM
+                    return false;
+                }
+            }
+        }
+
+        public ActivationRecord next() {
+            ActivationRecord newScope = new ActivationRecord();
+            tail = this;
+            return newScope;
         }
     }
 
