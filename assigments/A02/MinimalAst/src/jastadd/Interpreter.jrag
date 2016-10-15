@@ -182,4 +182,46 @@ aspect interpreter {
         }
         throw new RuntimeException("value '"+ id +"' is not initialized.");
     }
+
+    /** Boolean operators */
+    /*----------------------*/
+
+    protected final static int Expression.TRUE = 1;
+    protected final static int Expression.FALSE = 0;
+
+    public Integer NOEQ.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
+        return left != right ? TRUE : FALSE;
+    }
+
+    public Integer EQ.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
+        return left == right ? TRUE : FALSE;
+    }
+
+    public Integer LTEQ.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
+        return left <= right ? TRUE : FALSE;
+    }
+
+    public Integer GTEQ.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
+        return left >= right ? TRUE : FALSE;
+    }
+
+    public Integer LT.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
+        return left < right ? TRUE : FALSE;
+    }
+
+    public Integer GT.eval(ActivationRecord record) {
+        Integer left = getLeft().eval(record);
+        Integer right = getRight().eval(record);
+        return left > right ? TRUE : FALSE;
+    }
 }
