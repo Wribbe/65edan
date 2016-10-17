@@ -177,3 +177,39 @@ main():
   dumpTree()
   f()
   g()
+
+-- reachability_test
+int f() {
+  return 0;
+}
+int g() {
+  return 0;
+}
+int main() {
+  reach();
+  f();
+  return 0;
+}
+==
+f: true
+g: false
+
+-- circular_reachability
+int fac(int n) {
+  if (n <= 1) { return 1; }
+  else { return fac(n-1) * n; }
+  return 0;
+}
+int f() {
+  print(fac(5));
+  return 0;
+}
+int main() {
+  f();
+  reach();
+  return 0;
+}
+==
+120
+fac: true
+f: true

@@ -57,6 +57,7 @@ public class TestInterpreter extends AbstractParameterizedTest {
         } finally {
             // Print calls in call graph if present.
             program.printFunctionCalls();
+            program.printReachablity();
             compareOutput(baos.toString(), outFile, expectedFile);
             System.setOut(out);
         }

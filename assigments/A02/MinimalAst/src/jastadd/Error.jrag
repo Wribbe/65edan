@@ -73,13 +73,12 @@ aspect CallGraph {
     eq FunctionDeclaration.getChild().enclosingFunction() = this;
 
     FunctionUse contributes getIdUse().getID()
-        when dumpCallTree()
         to FunctionDeclaration.calls() for enclosingFunction();
 
     public void Program.printFunctionCalls() {
         for (FunctionDeclaration declaration : getFunctionDeclarationList()) {
             String functionName = declaration.getIdDeclare().getID();
-            if (!declaration.calls().isEmpty()) {
+            if (declaration.dumpCallTree) {
                 System.out.println(functionName+"():");
                 for (String call : declaration.calls()) {
                     System.out.println("  "+call+"()");
