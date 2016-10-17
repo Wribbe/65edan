@@ -138,3 +138,42 @@ int main() {
 }
 ==
 RuntimeException: value 'a' is not initialized.
+
+-- function_call_graph
+int main() {
+  if (1 < 2) {
+    int a = 10;
+  }
+  if (2 < 3) {
+    int a;
+    print(a);
+  }
+  return 0;
+}
+==
+RuntimeException: value 'a' is not initialized.
+
+-- dump_call_tree
+int f() {
+  return 0;
+}
+int g() {
+  print(1);
+  return 0;
+}
+int main() {
+  dumpTree();
+  f();
+  g();
+  g();
+  g();
+  return 0;
+}
+==
+1
+1
+1
+main():
+  dumpTree()
+  f()
+  g()

@@ -28,8 +28,10 @@ aspect PredefinedFunctions {
         List<FunctionDeclaration> list = new List<FunctionDeclaration>();
         FunctionDeclaration read = new FunctionDeclaration(new IdDeclare("read"), params,  new List(), new Return(new Numeral("0")));
         FunctionDeclaration print = new FunctionDeclaration(new IdDeclare("print"), params,  new List(), new Return(new Numeral("0")));
+        FunctionDeclaration dumpTree = new FunctionDeclaration(new IdDeclare("dumpTree"), new List(),  new List(), new Return(new Numeral("0")));
         list.add(read);
         list.add(print);
+        list.add(dumpTree);
         return list;
     }
 

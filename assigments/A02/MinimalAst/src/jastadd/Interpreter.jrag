@@ -1,5 +1,6 @@
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
 
 
 aspect interpreter {
@@ -164,12 +165,22 @@ aspect interpreter {
 
     public Integer FunctionUse.eval(ActivationRecord record) {
         String functionName = getIdUse().getID();
+//        System.out.println("Function name: "+functionName);
+
         if (functionName.equals("print")) {
             System.out.println(getExpression(0).eval(record));
             return Statement.noReturn;
+        } else if (functionName.equals("dumpTree")) {
+            setDumpTree();
+            return Statement.noReturn;
         }
 
+//        System.out.println("functionName: "+functionName+", dumpCallTree(): "+ dumpCallTree());
+
         ActivationRecord functionScope = new ActivationRecord();
+
+        // Get hold of the correct FunctionDeclaration and evaluate it.
+        FunctionDeclaration currentFunction = function(functionName);
 
         // Parse and store the function parameters in new scope.
         int counter = 0;
@@ -178,9 +189,6 @@ aspect interpreter {
                               expression.eval(record));
             counter += 1;
         }
-
-        // Get hold of the correct FunctionDeclaration and evaluate it.
-        FunctionDeclaration currentFunction = function(functionName);
         return currentFunction.eval(functionScope);
     }
 
@@ -367,4 +375,19 @@ aspect interpreter {
         }
         return uniqueName;
     }
+
+    /** Call graph */
+    /*-------------*/
+
+    inh boolean FunctionUse.dumpCallTree();
+    inh boolean FunctionUse.setDumpTree();
+
+    public boolean FunctionDeclaration.dumpCallTree = false;
+    public boolean FunctionDeclaration.setDumpTree() {
+        this.dumpCallTree = true;
+        return dumpCallTree;
+    }
+
+    eq FunctionDeclaration.getChild().dumpCallTree() = this.dumpCallTree;
+    eq FunctionDeclaration.getChild().setDumpTree() = setDumpTree();
 }

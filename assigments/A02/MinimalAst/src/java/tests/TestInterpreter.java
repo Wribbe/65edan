@@ -37,8 +37,8 @@ public class TestInterpreter extends AbstractParameterizedTest {
 	public void runTest() throws Exception {
         PrintStream out = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Program program = (Program) parse(inFile);
         try {
-            Program program = (Program) parse(inFile);
             if (!program.errors().isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 System.out.println("Errors in program, aborting.");
@@ -55,6 +55,8 @@ public class TestInterpreter extends AbstractParameterizedTest {
                 System.out.println("RuntimeException: "+e.getMessage());
             }
         } finally {
+            // Print calls in call graph if present.
+            program.printFunctionCalls();
             compareOutput(baos.toString(), outFile, expectedFile);
             System.setOut(out);
         }

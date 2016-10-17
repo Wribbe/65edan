@@ -64,7 +64,27 @@ aspect ErrorContributions {
       to Program.errors() for program();
 
 }
-//	IdUse contributes error("the definition of symbol '" + getID() + "' is circular")
-//		when isCircular()
-//		to Program.errors() for program();
-//}
+
+aspect CallGraph {
+
+    coll Set<String> FunctionDeclaration.calls() [new HashSet()] with add root FunctionDeclaration;
+
+    inh FunctionDeclaration FunctionUse.enclosingFunction();
+    eq FunctionDeclaration.getChild().enclosingFunction() = this;
+
+    FunctionUse contributes getIdUse().getID()
+        when dumpCallTree()
+        to FunctionDeclaration.calls() for enclosingFunction();
+
+    public void Program.printFunctionCalls() {
+        for (FunctionDeclaration declaration : getFunctionDeclarationList()) {
+            String functionName = declaration.getIdDeclare().getID();
+            if (!declaration.calls().isEmpty()) {
+                System.out.println(functionName+"():");
+                for (String call : declaration.calls()) {
+                    System.out.println("  "+call+"()");
+                }
+            }
+        }
+    }
+}
