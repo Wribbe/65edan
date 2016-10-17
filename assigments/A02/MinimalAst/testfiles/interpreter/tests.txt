@@ -1,0 +1,215 @@
+-- no_error_simple_program
+int main() {
+  int a = 1+2*3;
+  int b = 4*5;
+  return 0;
+}
+==
+// Empty file
+
+-- correct_printout_with_print
+int main() {
+  print(1+2*3);
+  print(4*5);
+  return 0;
+}
+==
+7
+20
+
+-- exception_initialized_return
+int main() {
+  int a;
+  return a;
+}
+==
+RuntimeException: value 'a' is not initialized.
+
+-- logic_print_if_test
+int main() {
+  if (1 < 2) {
+    print(1);
+  }
+  return 0;
+}
+==
+1
+
+-- logic_print_if_else
+int main() {
+  if (1 == 2) {
+    print(1);
+  } else {
+    print(2);
+  }
+  return 0;
+}
+==
+2
+
+-- logic_while
+int main() {
+  int a = 0;
+  while (a < 5) {
+    a = a + 1;
+  }
+  print(a);
+  return 0;
+}
+==
+5
+
+-- add_function_test
+int add(int a, int b) {
+  return a + b;
+}
+int main() {
+  int i = 10;
+  print(add(i, 20));
+  return 0;
+}
+==
+30
+
+-- while_return
+int loop() {
+  int a = 0;
+  while (a < 20) {
+    a = a + 1;
+    if ( a == 5 ) {
+      return a;
+    }
+  }
+  return a;
+}
+int main() {
+  int a = loop(); print(a);
+  return 0;
+}
+==
+5
+
+-- fac_test
+int fac(int n) {
+  if (n <= 1) { return 1; }
+  else { return fac(n-1) * n; }
+  return 0;
+}
+int f() {
+  print(fac(5));
+  return 0;
+}
+int main() {
+  f();
+  return 0;
+}
+==
+120
+
+-- shadowing
+int main() {
+  int i = 0;
+  if (i == 0) {
+    int i = 1;
+    if (i == 1) {
+      int i = 2;
+      print(i);
+    }
+    print(i);
+  }
+  print(i);
+  return 0;
+}
+==
+2
+1
+0
+
+-- check_scope_leakage
+int main() {
+  if (1 < 2) {
+    int a = 10;
+  }
+  if (2 < 3) {
+    int a;
+    print(a);
+  }
+  return 0;
+}
+==
+RuntimeException: value 'a' is not initialized.
+
+-- function_call_graph
+int main() {
+  if (1 < 2) {
+    int a = 10;
+  }
+  if (2 < 3) {
+    int a;
+    print(a);
+  }
+  return 0;
+}
+==
+RuntimeException: value 'a' is not initialized.
+
+-- dump_call_tree
+int f() {
+  return 0;
+}
+int g() {
+  print(1);
+  return 0;
+}
+int main() {
+  dumpTree();
+  f();
+  g();
+  g();
+  g();
+  return 0;
+}
+==
+1
+1
+1
+main():
+  dumpTree()
+  f()
+  g()
+
+-- reachability_test
+int f() {
+  return 0;
+}
+int g() {
+  return 0;
+}
+int main() {
+  reach();
+  f();
+  return 0;
+}
+==
+f: true
+g: false
+
+-- circular_reachability
+int fac(int n) {
+  if (n <= 1) { return 1; }
+  else { return fac(n-1) * n; }
+  return 0;
+}
+int f() {
+  print(fac(5));
+  return 0;
+}
+int main() {
+  f();
+  reach();
+  return 0;
+}
+==
+120
+fac: true
+f: true

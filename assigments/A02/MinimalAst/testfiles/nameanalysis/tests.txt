@@ -253,7 +253,7 @@ Error at line 18: symbol 'b' is not declared
 
 -- no_error_on_print
 int f() {
-  print();
+  print(2);
   return 0;
 }
 ==
@@ -261,7 +261,7 @@ int f() {
 
 -- no_error_on_read
 int f() {
-  read();
+  read(4);
   return 0;
 }
 ==
