@@ -78,13 +78,17 @@ aspect interpreter {
         // Evaluate all statements in the function.
         for (Statement statement : getBlockList()) {
             returnValue = statement.eval(functionScope);
-            if (returnValue != Statement.noReturn) {
+            if ((returnValue != Statement.noReturn) && !statement.functionStatement()) {
                 return returnValue;
             }
         }
 
         return getReturn().eval(functionScope);
     }
+
+    // Don't return on naked FunctionStatements.
+    public boolean Statement.functionStatement() { return false; }
+    public boolean FunctionStatement.functionStatement() { return true; }
 
     // Placeholder functions for Statement and Expression.
     public Integer Statement.eval(ActivationRecord record) { return noReturn; }
