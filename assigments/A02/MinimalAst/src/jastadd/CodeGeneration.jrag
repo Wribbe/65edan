@@ -304,6 +304,29 @@ aspect CodeGeneration {
         return sb.toString();
     }
 
+    public String WHILE.getCode() {
+        MyStringBuilder sb = new MyStringBuilder();
+
+        sb.append("    # Start of while statement.");
+        Expression logic = getLogic();
+
+        String currentLabel = uniqueLabel();
+        String start_label = "while_start_"+currentLabel;
+        String continue_label = "while_continue_"+currentLabel;
+        String end_label = "while_end_"+currentLabel;
+
+        sb.append(start_label+":");
+        sb.append(logic.generateConditionalJump(continue_label));
+        sb.append("    jmp "+end_label);
+        sb.append(continue_label+":");
+        for (Statement statement : getBlockList()) {
+            sb.append(statement.getCode());
+        }
+        sb.append("    jmp "+start_label);
+        sb.append(end_label+":");
+        return sb.toString();
+    }
+
     /**
      * Address of local variable variable in the current stack frame.
      */
