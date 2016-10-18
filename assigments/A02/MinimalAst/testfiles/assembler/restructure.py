@@ -34,9 +34,7 @@ def run_command(tokens):
 
 def check(tokens):
 
-    out, err, returncode = run_command(tokens)
     if (returncode != 0):
-        print("!!!! ERROR !!!! Exited with error status!!")
         print(out)
         print(err)
         sys.exit(0)
@@ -50,23 +48,24 @@ def run_compilations():
 
             name, _ = filename.split('.')
             executable = "{}.elf".format(name)
-            run_command = "./{}".format(executable).split()
+            command = "./{}".format(executable).split()
 
             input_tokens = [elem.strip() for elem in
                     open("{}.input".format(name)).read().split(',')]
 
-            run_command += input_tokens
+            command += input_tokens
 
-            out = check(run_command)
-            if out:
-                expected = open("{}.expected".format(name)).read()
-                if not out == expected:
-                    print("!!!! ERROR: output did not match!")
-                    print("---- expected:")
-                    print(expected)
-                    print("---- received:")
-                    print(out)
-                    sys.exit(0)
+            out, err, returncode = run_command(command)
+            expected = open("{}.expected".format(name)).read()
+            if not returncode == 0:
+                out += "!!!! Error: exited with status: {}.".format(returncode)
+            if not out.strip() == expected.strip():
+                print("!!!! Error: output did not match!")
+                print("---- expected:")
+                print(expected)
+                print("---- received:")
+                print(out)
+                sys.exit(0)
 
 
     print("#### NO ERRORS IN EXECUTION! #####")

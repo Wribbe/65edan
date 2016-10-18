@@ -1,7 +1,8 @@
 --simple-test
 int main() {
-  return 0;
+  return 2;
 }
 ==
 a, b, c
 // Empty file.
+!!!! Error: exited with status: 2.

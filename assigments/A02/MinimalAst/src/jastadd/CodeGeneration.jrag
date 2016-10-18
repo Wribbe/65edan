@@ -4,16 +4,38 @@ aspect CodeGeneration {
     public void Program.genCode(PrintStream out) {
         out.println(".global _start");
         out.println(".data");
-        out.println("message: .ascii \"Hello edan65!\\n\"");
         out.println(".text");
         out.println("_start:");
-        out.println("   movq $1, %rdi       # stdout file descriptor");
-        out.println("   movq $message, %rsi # message to print");
-        out.println("   movq $14, %rdx      # message length");
-        out.println("   movq $1, %rax       # sys write");
-        out.println("   syscall");
-        out.println("   movq $0, %rdi       # exit code = 0");
-        out.println("   movq $60, %rax      # sys_exit");
+        out.println("call main");
+
+        for(FunctionDeclaration declaration : getFunctionDeclarationList()) {
+            declaration.genCode(out);
+        }
+    }
+
+    public void FunctionDeclaration.genCode(PrintStream out) {
+        out.println("# start of "+name()+" function.");
+        out.println(name()+": # function label");
+        getReturn().genCode(out);
+    }
+
+    public String Expression.getCode() { return ""; }
+
+    public String Numeral.getCode() {
+        return getNUMERAL();
+    }
+
+    public void Numeral.genCode(PrintStream out) {
+       out.println(getCode());
+    }
+
+    public void Return.genCode(PrintStream out) {
+        out.println("   # start return statement");
+        out.println("   movq $"+getExpression().getCode()+", %rdi # set return code to result.");
+        String functionName = enclosingFunction().name();
+        if (functionName.equals("main")) {
+            out.println("   movq $60, %rax # sys_exit");
+        }
         out.println("   syscall");
     }
 }

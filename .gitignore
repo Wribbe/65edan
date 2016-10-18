@@ -33,3 +33,6 @@ material
 
 # Ignore *.elf files.
 *.elf
+
+# Ignore *.s files.
+*.s
