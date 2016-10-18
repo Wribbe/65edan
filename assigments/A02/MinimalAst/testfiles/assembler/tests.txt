@@ -37,3 +37,11 @@ int main() {
 ==
 No input
 !!!! Error: exited with status: 8.
+
+--constant-value-division
+int main() {
+  return 4/2;
+}
+==
+No input
+!!!! Error: exited with status: 2.

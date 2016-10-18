@@ -131,6 +131,23 @@ aspect CodeGeneration {
 
     }
 
+    public String Div.getCode() {
+
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var (dividend) of Div to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        // Shuffle it around a bit.
+        sb.append("    pushq %rax # Pushing right var (divisor) of Div to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack (dividend) to %rax.");
+        sb.append("    idivq (%rsp) # Operation: Divide dividend (%rsa) with divisor (first in stack), result in %rsa.");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
+        return sb.toString();
+
+    }
+
     /**
      * Address of local variable variable in the current stack frame.
      */
