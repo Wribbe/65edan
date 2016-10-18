@@ -57,7 +57,7 @@ aspect CodeGeneration {
 
 
     public String Numeral.getCode() {
-        return getNUMERAL();
+        return "    movq $"+getNUMERAL()+", %rax # Store literal number "+getNUMERAL()+" in %rax.";
     }
 
     public String FunctionStatement.getCode() {
@@ -72,7 +72,8 @@ aspect CodeGeneration {
         String functionName = getIdUse().getID();
         MyStringBuilder sb = new MyStringBuilder();
         for(Expression expression : getExpressionList()) {
-            sb.append("    pushq $"+expression.getCode());
+            sb.append(expression.getCode());
+            sb.append("    pushq %rax");
         }
         sb.append("    call "+functionName);
         int numArguments = getNumExpression();
@@ -88,8 +89,10 @@ aspect CodeGeneration {
 
     public String Return.getCode() {
         MyStringBuilder sb = new MyStringBuilder();
+        sb.append("    # Evaluate return expression.");
+        sb.append(getExpression().getCode());
         sb.append("    # start return statement");
-        sb.append("    movq $"+getExpression().getCode()+", %rdi # set return code to result.");
+        sb.append("    movq %rax, %rdi # set return code to result.");
         String functionName = enclosingFunction().name();
         if (functionName.equals("main")) {
             sb.append("    movq $60, %rax # sys_exit");
@@ -100,7 +103,19 @@ aspect CodeGeneration {
         return sb.toString();
     }
 
-//    public String Add.getCode
+    public String Add.getCode() {
+
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of Add to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    addq (%rsp), %rax # Operation: stack Add %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Popping temp variable from stack.");
+        return sb.toString();
+
+    }
 
     /**
      * Address of local variable variable in the current stack frame.

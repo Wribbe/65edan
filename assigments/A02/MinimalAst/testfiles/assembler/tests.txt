@@ -21,3 +21,12 @@ int main() {
 No input.
 22
 !!!! Error: exited with status: 1.
+
+--constant-value-addition
+
+int main() {
+  return 2+2;
+}
+==
+No input
+!!!! Error: exited with status: 4.
