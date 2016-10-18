@@ -4,6 +4,7 @@ aspect CodeGeneration {
     public void Program.genCode(PrintStream out) {
         out.println(".global _start");
         out.println(".data");
+        out.println("buf: .skip 1024");
         out.println(".text");
         out.println("_start:");
         out.println("call main");
@@ -11,18 +12,14 @@ aspect CodeGeneration {
         for(FunctionDeclaration declaration : getFunctionDeclarationList()) {
             declaration.genCode(out);
         }
+
+        out.println(getHelpers());
     }
 
     public String ASTNode.getCode() { return ""; }
 
     public void ASTNode.genCode(PrintStream out) {
-        String code = getCode();
-        if (!code.isEmpty()) {
-            out.println(getCode());
-        }
-        for(int i=0; i<getNumChild(); i++) {
-            getChild(i).genCode(out);
-        }
+        out.println(getCode());
     }
 
     public void FunctionDeclaration.genCode(PrintStream out) {
@@ -39,8 +36,31 @@ aspect CodeGeneration {
         return getNUMERAL();
     }
 
+    public String FunctionStatement.getCode() {
+        return getFunctionUse().getCode();
+    }
+
+    public int ASTNode.range(int numArguments) {
+        return 8*numArguments;
+    }
+
     public String FunctionUse.getCode() {
-        return "    call "+getIdUse().getID();
+        String functionName = getIdUse().getID();
+        StringBuilder sb = new StringBuilder();
+        for(Expression expression : getExpressionList()) {
+            sb.append("    pushq $"+expression.getCode()+"\n");
+        }
+        sb.append("    call "+functionName);
+        int numArguments = getNumExpression();
+        if (numArguments > 0) {
+            sb.append("\n");
+            sb.append("    addq $"+range(numArguments)+", %rsp # clear variables off stack.");
+        }
+        return sb.toString();
+    }
+
+    public String IdDeclare.getCode() {
+        return getID();
     }
 
     public void Return.genCode(PrintStream out) {
@@ -53,5 +73,117 @@ aspect CodeGeneration {
         } else {
             out.println("    ret");
         }
+    }
+
+    /**
+     * Address of local variable variable in the current stack frame.
+     */
+    syn String IdDeclare.address() = "-"+(localIndex()*8)+"(%rbp)";
+
+    /**
+     * Local variable counting.
+     */
+    syn int ASTNode.numLocals() = lastNode().localIndex() - localIndex();
+
+    /**
+     * Local variable numbering.
+     */
+    syn int ASTNode.localIndex() = prevNode().localIndex();
+    eq Program.localIndex() = 0;
+    eq IdDeclare.localIndex() = prevNode().localIndex() + 1;
+
+    inh ASTNode ASTNode.prevNode();
+    eq ASTNode.getChild(int i).prevNode() = prevNode(i);
+    syn ASTNode ASTNode.lastNode() = prevNode(getNumChild());
+    syn ASTNode ASTNode.prevNode(int i) = i>0 ? getChild(i-1).lastNode() : this;
+
+    public String Program.getHelpers() {
+        return "######################################\n"
+        +"####### Helper Methods ###############\n"
+        +"######################################\n"
+        +"# Procedure to print number to stdout\n"
+        +"# C signature: void print(long int)\n"
+        +"print:\n"
+           +"    pushq %rbp\n"
+           +"    movq %rsp, %rbp\n"
+           +"    ### convert integer to string\n"
+           +"    movq 16(%rbp), %rax\n"
+           +"    # parameter\n"
+           +"    movq $(buf+1023), %rsi # write ptr (start from end of buf)\n"
+           +"    movb $0x0a, (%rsi)\n"
+           +"    # insert newline\n"
+           +"    movq $1, %rcx\n"
+           +"    # string length\n"
+        +"itoa_loop:\n"
+           +"    # do.. while (at least one iteration)\n"
+           +"    movq $10, %rbx\n"
+           +"    movq $0, %rdx\n"
+           +"    idivq %rbx\n"
+           +"    # divide rdx:rax by 10\n"
+           +"    addb $0x30, %dl\n"
+           +"    # remainder + ’0’\n"
+           +"    decq %rsi\n"
+           +"    # move string pointer\n"
+           +"    movb %dl, (%rsi)\n"
+           +"    incq %rcx\n"
+           +"    # increment string length\n"
+           +"    cmpq $0, %rax\n"
+           +"    jg itoa_loop\n"
+           +"    # produce more digits\n"
+        +"itoa_done:\n"
+           +"    movq $1, %rdi\n"
+           +"    movq %rcx, %rdx\n"
+           +"    movq $1, %rax\n"
+           +"    syscall\n"
+           +"    popq %rbp\n"
+           +"    ret\n"
+        +"# Procedure to read number from stdin\n"
+        +"# C signature: long int read(void)\n"
+        +"read:\n"
+           +"    pushq %rbp\n"
+           +"    movq %rsp, %rbp\n"
+           +"    movq $0, %rdi\n"
+           +"    movq $buf, %rsi\n"
+           +"    movq $1024, %rdx\n"
+           +"    movq $0, %rax\n"
+           +"    syscall\n"
+           +"    # %rax = sys_read(0, buf, 1024)\n"
+           +"    ### convert string to integer:\n"
+           +"    ### %rax contains nchar\n"
+           +"    ### %rsi contains ptr\n"
+           +"    movq $0, %rdx\n"
+           +"    # sum = 0\n"
+        +"atoi_loop:\n"
+           +"    cmpq $0, %rax\n"
+           +"    # while (nchar > 0)\n"
+           +"    jle atoi_done\n"
+           +"    # leave loop if nchar <= 0\n"
+           +"    movzbq (%rsi), %rbx\n"
+           +"    # move byte, and sign extend to qword\n"
+           +"    cmpq $0x30, %rbx\n"
+           +"    # test if < ’0’\n"
+           +"    jl atoi_done\n"
+           +"    # character is not numeric\n"
+           +"    cmpq $0x39, %rbx\n"
+           +"    # test if > ’9’\n"
+           +"    jg atoi_done\n"
+           +"    # character is not numeric\n"
+           +"    imulq $10, %rdx\n"
+           +"    # multiply sum by 10\n"
+           +"    subq $0x30, %rbx\n"
+           +"    # value of character\n"
+           +"    addq %rbx, %rdx\n"
+           +"    # add to sum\n"
+           +"    incq %rsi\n"
+           +"    # step to next char\n"
+           +"    decq %rax\n"
+           +"    # nchar--\n"
+           +"    jmp atoi_loop\n"
+           +"    # loop back\n"
+        +"atoi_done:\n"
+           +"    movq %rdx, %rax\n"
+           +"    # return value in RAX\n"
+           +"    popq %rbp\n"
+           +"    ret\n";
     }
 }

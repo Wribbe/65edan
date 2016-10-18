@@ -56,7 +56,9 @@ def run_compilations():
             command += input_tokens
 
             out, err, returncode = run_command(command)
-            expected = open("{}.expected".format(name)).read()
+            expected = '\n'.join([line.strip() for line in
+                    open("{}.expected".format(name)).readlines() if
+                    line.strip()])
             if not returncode == 0:
                 out += "!!!! Error: exited with status: {}.".format(returncode)
             if not out.strip() == expected.strip():
