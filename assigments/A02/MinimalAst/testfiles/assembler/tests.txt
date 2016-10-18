@@ -53,3 +53,11 @@ int main() {
 ==
 No input
 !!!! Error: exited with status: 7.
+
+--constant-subtraction
+int main() {
+  return 1-2+1;
+}
+==
+No input
+// No error.

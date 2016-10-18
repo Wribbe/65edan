@@ -148,6 +148,22 @@ aspect CodeGeneration {
 
     }
 
+    public String Minus.getCode() {
+
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left positive var of Minus to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    pushq %rax # Pushing right negative var of Minus to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second/negative var to %rax.");
+        sb.append("    subq (%rsp), %rax # Operation: stack Minus %rax -> %rax.");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
+        return sb.toString();
+
+    }
+
     /**
      * Address of local variable variable in the current stack frame.
      */
