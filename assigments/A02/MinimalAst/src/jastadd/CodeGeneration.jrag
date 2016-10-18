@@ -117,6 +117,20 @@ aspect CodeGeneration {
 
     }
 
+    public String Mul.getCode() {
+
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of Mul to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    imulq (%rsp), %rax # Operation: stack Mul %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Popping temp variable from stack.");
+        return sb.toString();
+
+    }
+
     /**
      * Address of local variable variable in the current stack frame.
      */

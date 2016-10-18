@@ -23,10 +23,17 @@ No input.
 !!!! Error: exited with status: 1.
 
 --constant-value-addition
-
 int main() {
   return 2+2;
 }
 ==
 No input
 !!!! Error: exited with status: 4.
+
+--constant-value-addition-and-mul
+int main() {
+  return 2+2*3;
+}
+==
+No input
+!!!! Error: exited with status: 8.
