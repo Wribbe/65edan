@@ -11,7 +11,8 @@ executable=${fileRoot}
 mkdir -p ${dir_executable}
 mkdir -p ${dir_objects}
 
-as "${assemblyFile}" -o "${dir_objects}"/"${objectFile}"
+as --gstabs "${assemblyFile}" -o "${dir_objects}"/"${objectFile}"
+#as "${assemblyFile}" -o "${dir_objects}"/"${objectFile}"
 ld "${dir_objects}"/"${objectFile}" -o "${dir_executable}"/"$executable"
-./"${dir_executable}"/"${executable}"
-echo $?
+ddd ./"${dir_executable}"/"${executable}" &
+#echo $?

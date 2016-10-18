@@ -1,0 +1,19 @@
+
+aspect CodeGeneration {
+
+    public void Program.genCode(PrintStream out) {
+        out.println(".global _start");
+        out.println(".data");
+        out.println("message: .ascii \"Hello edan65!\\n\"");
+        out.println(".text");
+        out.println("_start:");
+        out.println("   movq $1, %rdi       # stdout file descriptor");
+        out.println("   movq $message, %rsi # message to print");
+        out.println("   movq $14, %rdx      # message length");
+        out.println("   movq $1, %rax       # sys write");
+        out.println("   syscall");
+        out.println("   movq $0, %rdi       # exit code = 0");
+        out.println("   movq $60, %rax      # sys_exit");
+        out.println("   syscall");
+    }
+}

@@ -54,6 +54,19 @@ abstract public class AbstractParameterizedTest extends AbstractTestSuite {
 		return new File(testDirectory, simpleName+EXPECTED_EXTENSION);
 	}
 
+	protected File getTestFile(String filename) {
+		return new File(testDirectory, filename);
+	}
+
+	protected File getFileReplaceExtension(File file, String extension) {
+		return getFileReplaceExtension(file.getName(), extension);
+	}
+
+	protected File getFileReplaceExtension(String filename, String extension) {
+		String simpleName = filename.substring(0, filename.lastIndexOf('.'));
+		return getTestFile(simpleName+extension);
+	}
+
 	@SuppressWarnings("javadoc")
 	public static Iterable<Object[]> getTestParameters(String testDirectory) {
 		Collection<Object[]> tests = new LinkedList<Object[]>();
