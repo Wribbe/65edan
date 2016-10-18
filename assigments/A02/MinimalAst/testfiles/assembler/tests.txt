@@ -61,3 +61,14 @@ int main() {
 ==
 No input
 // No error.
+
+--logic-non-equal
+int main() {
+  if(3 != 4) {
+    return 1;
+  }
+  return 4;
+}
+==
+No input
+!!!! Error: exited with status: 1.

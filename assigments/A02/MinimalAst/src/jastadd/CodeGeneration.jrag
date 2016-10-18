@@ -164,6 +164,37 @@ aspect CodeGeneration {
 
     }
 
+
+    /** Boolean expressions */
+    /*----------------------*/
+
+    public String NOEQ.getCode() {
+        return generateConditionalJump("default");
+    }
+
+    public String NOEQ.generateConditionalJump(String label) {
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of NOEQ to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
+        sb.append("    jne "+label+" # If true jump to "+label+".");
+        sb.append(""+label+":");
+        return sb.toString();
+    }
+
+    /** IF/ELSE/WHEN */
+    /*----------------*/
+
+    public String IF.getCode() {
+        MyStringBuilder sb = new MyStringBuilder();
+        sb.append(getLogic().getCode());
+        return sb.toString();
+    }
+
     /**
      * Address of local variable variable in the current stack frame.
      */
