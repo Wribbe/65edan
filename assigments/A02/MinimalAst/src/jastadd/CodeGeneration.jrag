@@ -169,8 +169,10 @@ aspect CodeGeneration {
     /*----------------------*/
 
     public String NOEQ.getCode() {
-        return generateConditionalJump("default");
+        return generateConditionalJump(label);
     }
+
+    public String Expression.label = "default";
 
     public String NOEQ.generateConditionalJump(String label) {
         MyStringBuilder sb = new MyStringBuilder();
@@ -182,7 +184,71 @@ aspect CodeGeneration {
         sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
         sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
         sb.append("    jne "+label+" # If true jump to "+label+".");
-        sb.append(""+label+":");
+        return sb.toString();
+    }
+
+    public String EQ.generateConditionalJump(String label) {
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of EQ to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
+        sb.append("    je "+label+" # If true jump to "+label+".");
+        return sb.toString();
+    }
+
+    public String LTEQ.generateConditionalJump(String label) {
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of LTEQ to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
+        sb.append("    jle "+label+" # If true jump to "+label+".");
+        return sb.toString();
+    }
+
+    public String GTEQ.generateConditionalJump(String label) {
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of GTEQ to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
+        sb.append("    jge "+label+" # If true jump to "+label+".");
+        return sb.toString();
+    }
+
+    public String LT.generateConditionalJump(String label) {
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of LT to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
+        sb.append("    jl "+label+" # If true jump to "+label+".");
+        return sb.toString();
+    }
+
+    public String GT.generateConditionalJump(String label) {
+        MyStringBuilder sb = new MyStringBuilder();
+        String left = getLeft().getCode();
+        sb.append(left);
+        sb.append("    pushq %rax # Pushing left var of GT to stack.");
+        String right = getRight().getCode();
+        sb.append(right);
+        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
+        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
+        sb.append("    jg "+label+" # If true jump to "+label+".");
         return sb.toString();
     }
 
@@ -191,7 +257,25 @@ aspect CodeGeneration {
 
     public String IF.getCode() {
         MyStringBuilder sb = new MyStringBuilder();
-        sb.append(getLogic().getCode());
+        sb.append("    # Start of if statement.");
+        // Set logic label.
+        Expression logic = getLogic();
+        String currentLabel = "default";
+        logic.label = "if_"+currentLabel;
+        sb.append(logic.getCode());
+        if (hasELSE()) {
+            sb.append("    # Start of else section.");
+            for (Statement statement : getELSE().getBlockList()) {
+                sb.append(statement.getCode());
+            }
+        }
+        sb.append("    # Unconditional jump to end_"+currentLabel);
+        sb.append("    jmp end_"+currentLabel);
+        sb.append(logic.label+":");
+        for (Statement statement : getBlockList()) {
+            sb.append(statement.getCode());
+        }
+        sb.append("end_"+currentLabel+":");
         return sb.toString();
     }
 
