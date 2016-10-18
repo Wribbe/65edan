@@ -45,3 +45,11 @@ int main() {
 ==
 No input
 !!!! Error: exited with status: 2.
+
+--constant-mixed-precendence
+int main() {
+  return 2*(3+1+3)/2;
+}
+==
+No input
+!!!! Error: exited with status: 7.
