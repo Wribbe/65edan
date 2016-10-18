@@ -168,11 +168,9 @@ aspect CodeGeneration {
     /** Boolean expressions */
     /*----------------------*/
 
-    public String NOEQ.getCode() {
-        return generateConditionalJump(label);
+    public String Expression.generateConditionalJump(String label) {
+        return "";
     }
-
-    public String Expression.label = "default";
 
     public String NOEQ.generateConditionalJump(String label) {
         MyStringBuilder sb = new MyStringBuilder();
@@ -181,9 +179,12 @@ aspect CodeGeneration {
         sb.append("    pushq %rax # Pushing left var of NOEQ to stack.");
         String right = getRight().getCode();
         sb.append(right);
+        sb.append("    pushq %rax # Pushing right var to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
         sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
         sb.append("    jne "+label+" # If true jump to "+label+".");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
+
         return sb.toString();
     }
 
@@ -194,9 +195,11 @@ aspect CodeGeneration {
         sb.append("    pushq %rax # Pushing left var of EQ to stack.");
         String right = getRight().getCode();
         sb.append(right);
+        sb.append("    pushq %rax # Pushing right var to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
         sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
         sb.append("    je "+label+" # If true jump to "+label+".");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
         return sb.toString();
     }
 
@@ -207,9 +210,11 @@ aspect CodeGeneration {
         sb.append("    pushq %rax # Pushing left var of LTEQ to stack.");
         String right = getRight().getCode();
         sb.append(right);
+        sb.append("    pushq %rax # Pushing right var to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
         sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
         sb.append("    jle "+label+" # If true jump to "+label+".");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
         return sb.toString();
     }
 
@@ -220,9 +225,11 @@ aspect CodeGeneration {
         sb.append("    pushq %rax # Pushing left var of GTEQ to stack.");
         String right = getRight().getCode();
         sb.append(right);
+        sb.append("    pushq %rax # Pushing right var to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
         sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
         sb.append("    jge "+label+" # If true jump to "+label+".");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
         return sb.toString();
     }
 
@@ -233,9 +240,11 @@ aspect CodeGeneration {
         sb.append("    pushq %rax # Pushing left var of LT to stack.");
         String right = getRight().getCode();
         sb.append(right);
+        sb.append("    pushq %rax # Pushing right var to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
         sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
         sb.append("    jl "+label+" # If true jump to "+label+".");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
         return sb.toString();
     }
 
@@ -246,23 +255,39 @@ aspect CodeGeneration {
         sb.append("    pushq %rax # Pushing left var of GT to stack.");
         String right = getRight().getCode();
         sb.append(right);
+        sb.append("    pushq %rax # Pushing right var to stack.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
         sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Pop the temp variable form stack.");
         sb.append("    jg "+label+" # If true jump to "+label+".");
+        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
         return sb.toString();
     }
 
     /** IF/ELSE/WHEN */
     /*----------------*/
 
+    inh String Statement.uniqueLabel();
+
+    private HashMap<String, Integer> Program.labelMap = new HashMap<String, Integer>();
+    eq Program.getFunctionDeclaration(int index).uniqueLabel() {
+        FunctionDeclaration declaration = getFunctionDeclaration(index);
+        String functionName = declaration.name();
+        if (labelMap.get(functionName) == null) {
+            labelMap.put(functionName, 0);
+        }
+        int currentIteration = labelMap.get(functionName);
+        labelMap.put(functionName, currentIteration+1);
+        return functionName+"_"+currentIteration;
+    }
+
     public String IF.getCode() {
         MyStringBuilder sb = new MyStringBuilder();
         sb.append("    # Start of if statement.");
         // Set logic label.
         Expression logic = getLogic();
-        String currentLabel = "default";
-        logic.label = "if_"+currentLabel;
-        sb.append(logic.getCode());
+        String currentLabel = uniqueLabel();
+        String if_label = "if_"+currentLabel;
+        sb.append(logic.generateConditionalJump(if_label));
         if (hasELSE()) {
             sb.append("    # Start of else section.");
             for (Statement statement : getELSE().getBlockList()) {
@@ -271,7 +296,7 @@ aspect CodeGeneration {
         }
         sb.append("    # Unconditional jump to end_"+currentLabel);
         sb.append("    jmp end_"+currentLabel);
-        sb.append(logic.label+":");
+        sb.append(if_label+":");
         for (Statement statement : getBlockList()) {
             sb.append(statement.getCode());
         }
