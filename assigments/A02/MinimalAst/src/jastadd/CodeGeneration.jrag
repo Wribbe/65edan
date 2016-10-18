@@ -71,7 +71,8 @@ aspect CodeGeneration {
     public String FunctionUse.getCode() {
         String functionName = getIdUse().getID();
         MyStringBuilder sb = new MyStringBuilder();
-        for(Expression expression : getExpressionList()) {
+        for(int i=getNumExpression()-1; i>-1; i--) {
+            Expression expression = getExpression(i);
             sb.append(expression.getCode());
             sb.append("    pushq %rax");
         }
