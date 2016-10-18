@@ -1,6 +1,29 @@
 
 aspect CodeGeneration {
 
+    class MyStringBuilder {
+
+        private StringBuilder sb;
+
+        public MyStringBuilder() {
+            sb = new StringBuilder();
+        }
+
+        public void newline() {
+            sb.append('\n');
+        }
+
+        public void append(String string) {
+            sb.append(string);
+            newline();
+        }
+
+        public String toString() {
+            sb.deleteCharAt(sb.length()-1);
+            return sb.toString();
+        }
+    }
+
     public void Program.genCode(PrintStream out) {
         out.println(".global _start");
         out.println(".data");
@@ -32,6 +55,7 @@ aspect CodeGeneration {
     }
 
 
+
     public String Numeral.getCode() {
         return getNUMERAL();
     }
@@ -46,14 +70,13 @@ aspect CodeGeneration {
 
     public String FunctionUse.getCode() {
         String functionName = getIdUse().getID();
-        StringBuilder sb = new StringBuilder();
+        MyStringBuilder sb = new MyStringBuilder();
         for(Expression expression : getExpressionList()) {
-            sb.append("    pushq $"+expression.getCode()+"\n");
+            sb.append("    pushq $"+expression.getCode());
         }
         sb.append("    call "+functionName);
         int numArguments = getNumExpression();
         if (numArguments > 0) {
-            sb.append("\n");
             sb.append("    addq $"+range(numArguments)+", %rsp # clear variables off stack.");
         }
         return sb.toString();
@@ -63,17 +86,21 @@ aspect CodeGeneration {
         return getID();
     }
 
-    public void Return.genCode(PrintStream out) {
-        out.println("    # start return statement");
-        out.println("    movq $"+getExpression().getCode()+", %rdi # set return code to result.");
+    public String Return.getCode() {
+        MyStringBuilder sb = new MyStringBuilder();
+        sb.append("    # start return statement");
+        sb.append("    movq $"+getExpression().getCode()+", %rdi # set return code to result.");
         String functionName = enclosingFunction().name();
         if (functionName.equals("main")) {
-            out.println("    movq $60, %rax # sys_exit");
-            out.println("    syscall");
+            sb.append("    movq $60, %rax # sys_exit");
+            sb.append("    syscall");
         } else {
-            out.println("    ret");
+            sb.append("    ret");
         }
+        return sb.toString();
     }
+
+//    public String Add.getCode
 
     /**
      * Address of local variable variable in the current stack frame.
