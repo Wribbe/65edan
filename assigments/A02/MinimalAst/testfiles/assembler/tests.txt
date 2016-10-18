@@ -6,3 +6,16 @@ int main() {
 a, b, c
 // Empty file.
 !!!! Error: exited with status: 2.
+
+--function-call-no-parameters
+int f() {
+  return 2;
+}
+
+int main() {
+  f();
+  return 1;
+}
+===
+No input.
+!!!! Error: exited with status: 1.

@@ -13,29 +13,45 @@ aspect CodeGeneration {
         }
     }
 
+    public String ASTNode.getCode() { return ""; }
+
+    public void ASTNode.genCode(PrintStream out) {
+        String code = getCode();
+        if (!code.isEmpty()) {
+            out.println(getCode());
+        }
+        for(int i=0; i<getNumChild(); i++) {
+            getChild(i).genCode(out);
+        }
+    }
+
     public void FunctionDeclaration.genCode(PrintStream out) {
         out.println("# start of "+name()+" function.");
         out.println(name()+": # function label");
+        for(Statement statement : getBlockList()) {
+            statement.genCode(out);
+        }
         getReturn().genCode(out);
     }
 
-    public String Expression.getCode() { return ""; }
 
     public String Numeral.getCode() {
         return getNUMERAL();
     }
 
-    public void Numeral.genCode(PrintStream out) {
-       out.println(getCode());
+    public String FunctionUse.getCode() {
+        return "    call "+getIdUse().getID();
     }
 
     public void Return.genCode(PrintStream out) {
-        out.println("   # start return statement");
-        out.println("   movq $"+getExpression().getCode()+", %rdi # set return code to result.");
+        out.println("    # start return statement");
+        out.println("    movq $"+getExpression().getCode()+", %rdi # set return code to result.");
         String functionName = enclosingFunction().name();
         if (functionName.equals("main")) {
-            out.println("   movq $60, %rax # sys_exit");
+            out.println("    movq $60, %rax # sys_exit");
+            out.println("    syscall");
+        } else {
+            out.println("    ret");
         }
-        out.println("   syscall");
     }
 }
