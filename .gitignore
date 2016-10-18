@@ -24,3 +24,12 @@ material
 
 # Ignore .lang test files.
 *.lang
+
+# Ignore .o object files.
+*.o
+
+# Ignore executables dir.
+**/executables
+
+# Ignore *.elf files.
+*.elf
