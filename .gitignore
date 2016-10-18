@@ -36,3 +36,6 @@ material
 
 # Ignore *.s files.
 *.s
+
+# Ignore *.input files:
+*.input
