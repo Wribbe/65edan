@@ -364,8 +364,8 @@ aspect CodeGeneration {
                 StringBuilder finalRowBuilder = new StringBuilder();
                 // Append substituted assembler code.
                 String assemblyCode = sectionBuffer.get(i);
-                if (assemblyCode.trim().endsWith(":")) { // Label definition, no padding.
-                    finalRowBuilder.append(assemblyCode);
+                if (assemblyCode.trim().endsWith(":")) { // Label definition, no padding in front.
+                    finalRowBuilder.append(assemblyCode+padding);
                 } else {
                     finalRowBuilder.append(padding+assemblyCode);
                 }
@@ -566,26 +566,40 @@ aspect CodeGeneration {
     }
 
     public String WHILE.getCode() {
-        NewlineStringBuilder sb = new NewlineStringBuilder();
 
-        sb.append("    # Start of while statement.");
-        Expression logic = getLogic();
+        //Set up labels.
+        String labelBase = uniqueLabel();
+        String startLabel = "while_"+labelBase+"_start";
+        String continueLabel = "while_"+labelBase+"_continue";
+        String endLabel = "while_"+labelBase+"_end";
 
-        String currentLabel = uniqueLabel();
-        String start_label = "while_start_"+currentLabel;
-        String continue_label = "while_continue_"+currentLabel;
-        String end_label = "while_end_"+currentLabel;
+        //Get statements and code.
+        List statements = getBlockList();
+        String[] statementCode = GetCode.fromList(statements);
 
-        sb.append(start_label+":");
-        sb.append(logic.generateConditionalJump(continue_label));
-        sb.append("    jmp "+end_label);
-        sb.append(continue_label+":");
-        for (Statement statement : getBlockList()) {
-            sb.append(statement.getCode());
-        }
-        sb.append("    jmp "+start_label);
-        sb.append(end_label+":");
-        return sb.toString();
+        // Set up variables.
+        String[] variables = {"",
+            "startLabel", startLabel,
+            "continueLabel", continueLabel,
+            "endLabel", endLabel,
+        };
+
+        String[] assembler = {"",
+            "# --- Start of while statement.",
+            "${startLabel}: # Label for starting execution.",
+            // Add logic for continuing.
+            getLogic().generateConditionalJump(continueLabel),
+            "jmp ${endLabel} # Unconditional jump to end of while execution.",
+            "${continueLabel}: # Label marking continued execution of while.",
+            // Add statement code.
+            GetString.fromArray(statementCode),
+            "jmp ${startLabel} # Jump back to re-evaluate loop conditions",
+            // Set up end label.
+            "${endLabel}:",
+            "# --- End of while statement.",
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
     /**
