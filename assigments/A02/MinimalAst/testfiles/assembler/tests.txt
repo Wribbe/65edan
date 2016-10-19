@@ -109,26 +109,32 @@ No input.
 --logic-all-variants-else
 int main() {
   if ( 1 == 2 ) {
+    print(12);
   } else {
     print(1);
   }
   if ( 1 !=  1 ) {
+    print(11);
   } else {
     print(2);
   }
   if ( 4 <= 1 ) {
+    print(10);
   } else {
     print(3);
   }
   if ( 1 >= 2 ) {
+    print(9);
   } else {
     print(4);
   }
   if ( 5 < 2 ) {
+    print(8);
   } else {
     print(5);
   }
   if ( 1 > 1 ) {
+    print(7);
   } else {
     print(6);
   }

@@ -201,7 +201,15 @@ aspect CodeGeneration {
             sectionBuffer = new ArrayList<String>();
             commentBuffer = new ArrayList<String>();
 
-            int maxLength = varSubInSection(rawAssembler);
+            // Make sure all text are split in lines.
+            ArrayList<String> lineList = new ArrayList<String>();
+            for (String text : rawAssembler) {
+                for (String line : text.split("[\n\r]")) {
+                    lineList.add(line.trim());
+                }
+            }
+
+            int maxLength = varSubInSection(lineList.toArray(new String[lineList.size()]));
             formattedAssembler = reassembleSectionWithPadding(maxLength);
         }
 
@@ -218,10 +226,10 @@ aspect CodeGeneration {
 
         // Var-substitution for a single word.
         private String varSub(String word) {
-            if (word.contains("!{")) {
+            if (word.contains("${")) {
                 ArrayList<String> varSubTokens = varExtraction(word);
                 for (String key : varSubTokens) {
-                    String varSubMask = "!{"+key+"}";
+                    String varSubMask = "${"+key+"}";
                     String value = variables.get(key);
                     if (value == null) {
                         value = key+" == NULL";
@@ -258,12 +266,11 @@ aspect CodeGeneration {
 
             boolean inVar = false;
 
-            String start = "!{";
+            String start = "${";
             String stop = "}";
             String window = "";
 
             int windowSize = start.length();
-
 
             int bufferSize = 0;
             for (int current=0; current<word.length(); current++) {
@@ -313,11 +320,19 @@ aspect CodeGeneration {
             // Iterate over all rows in subarray and substitute.
             for (String row : subarray) {
 
-                String subRow = varSubInRow(row);
+                String subRow = varSubInRow(row).trim();
 
-                String[] rowTokens = subRow.trim().split("#");
-                String assemblerRow = rowTokens[0].trim();
+                // Take care of comment-only lines.
+                String[] rowTokens = new String[1];
+                String assemblerRow = "";
+                if (subRow.matches("^\\s*#.*")) { // Only a comment.
+                    assemblerRow = subRow;
+                } else {
+                    rowTokens = subRow.split("#");
+                    assemblerRow = rowTokens[0].trim();
+                }
 
+                // Add comment if present.
                 String comment = "";
                 if (rowTokens.length > 1) {
                     comment = rowTokens[1].trim();
@@ -343,19 +358,26 @@ aspect CodeGeneration {
 
             NewlineStringBuilder finalSectionBuilder = new NewlineStringBuilder();
 
+            String padding = "    ";
+
             for (int i=0; i<sectionBuffer.size(); i++) {
                 StringBuilder finalRowBuilder = new StringBuilder();
                 // Append substituted assembler code.
                 String assemblyCode = sectionBuffer.get(i);
-                finalRowBuilder.append("    "+assemblyCode);
+                if (assemblyCode.trim().endsWith(":")) { // Label definition, no padding.
+                    finalRowBuilder.append(assemblyCode);
+                } else {
+                    finalRowBuilder.append(padding+assemblyCode);
+                }
 
                 // Fetch comment.
                 String comment = commentBuffer.get(i);
 
                 // Is there a comment?.
-                if (!(comment.replace(" ","").length() == 0)) {
+                if (comment.replace(" ","").length() != 0) {
+                    int padTo = maxLineLength-assemblyCode.length()+padding.length();
                     // Append appropriate whitespace.
-                    for (int j=0; j<(maxLineLength-assemblyCode.length()+4); j++) {
+                    for (int j=0; j<padTo; j++) {
                         finalRowBuilder.append(" ");
                     }
                     // Append comment.
@@ -368,6 +390,38 @@ aspect CodeGeneration {
         }
     }
 
+    // Class for static functions for getting code.
+    public class GetCode {
+
+        // Iterate over a list of expression and return evaluated strings.
+        public static String[] fromList(List<ASTNode> list) {
+            String[] array = new String[list.getNumChild()];
+            int i = 0;
+            for (ASTNode node : list) {
+                array[i++] = node.getCode();
+            }
+            return array;
+        }
+    }
+
+    // Class for static array methods.
+    class GetString {
+        public static String fromArray(String[] array) {
+            NewlineStringBuilder sb = new NewlineStringBuilder();
+            if (array.length == 1) {
+                sb.append(array[0]);
+                return sb.toString();
+            } else if (array.length > 1) {
+                String[] subArray = Arrays.copyOfRange(array, 1, array.length);
+                for (String text : array) {
+                    for (String string : text.split("[\n\r]")) {
+                        sb.append(string.trim());
+                    }
+                }
+            }
+            return sb.toString();
+        }
+    }
 
     public class ConditionalSubset {
 
@@ -380,14 +434,14 @@ aspect CodeGeneration {
 
         // Raw Assembler code with variables.
         String[] assembler = {"",
-            "!{left}",
-            "pushq %rax                     # Pushing left var of !{type} to stack.",
-            "!{right}",
+            "${left}",
+            "pushq %rax                     # Pushing left var of ${type} to stack.",
+            "${right}",
             "pushq %rax                     # Pushing right var to stack.",
-            "movq !{range1}(%rsp), %rax     # Writing second var on stack to %rax.",
+            "movq ${range1}(%rsp), %rax     # Writing second var on stack to %rax.",
             "cmpq (%rsp), %rax              # Comparing first value in stack with %rax.",
-            "!{jumpType} !{label}           # If true jump to !{label}.",
-            "addq $!{range2}, %rsp          # Pop two temp variables of the stack."};
+            "${jumpType} ${label}           # If true jump to ${label}.",
+            "addq $${range2}, %rsp          # Pop two temp variables of the stack."};
 
         // Final formatted assembler code.
         String finalAssembler = "";
@@ -448,42 +502,67 @@ aspect CodeGeneration {
     /** IF/ELSE/WHEN */
     /*----------------*/
 
+    // All statements inherit uniqueLabel().
     inh String Statement.uniqueLabel();
 
+    // Program keeps track of all jump labels.
     private HashMap<String, Integer> Program.labelMap = new HashMap<String, Integer>();
+
+    // Implementation of uniqueLabel().
     eq Program.getFunctionDeclaration(int index).uniqueLabel() {
         FunctionDeclaration declaration = getFunctionDeclaration(index);
         String functionName = declaration.name();
+        // Initialize if value not present.
         if (labelMap.get(functionName) == null) {
             labelMap.put(functionName, 0);
         }
+        // Return label and increase the number.
         int currentIteration = labelMap.get(functionName);
         labelMap.put(functionName, currentIteration+1);
         return functionName+"_"+currentIteration;
     }
 
     public String IF.getCode() {
-        NewlineStringBuilder sb = new NewlineStringBuilder();
-        sb.append("    # Start of if statement.");
-        // Set logic label.
-        Expression logic = getLogic();
-        String currentLabel = uniqueLabel();
-        String if_label = "if_"+currentLabel;
-        sb.append(logic.generateConditionalJump(if_label));
-        if (hasELSE()) {
-            sb.append("    # Start of else section.");
-            for (Statement statement : getELSE().getBlockList()) {
-                sb.append(statement.getCode());
-            }
-        }
-        sb.append("    # Unconditional jump to end_"+currentLabel);
-        sb.append("    jmp end_"+currentLabel);
-        sb.append(if_label+":");
-        for (Statement statement : getBlockList()) {
-            sb.append(statement.getCode());
-        }
-        sb.append("end_"+currentLabel+":");
-        return sb.toString();
+
+        // Set up labels.
+        String lableBase = uniqueLabel();
+        String ifLabel = lableBase+"_if_start";
+        String endLabel = lableBase+"_end_of_if";
+
+        // Set variables.
+        String variables[] = {"",
+            "ifLabel", ifLabel,
+            "endLabel", endLabel
+        };
+
+        // Get objects from statements.
+        List ifStatements = getBlockList();
+        List elseStatements = hasELSE() ? getELSE().getBlockList() : new List();
+
+        // Get assembler code from statement lists.
+        String[] ifCode = GetCode.fromList(ifStatements);
+        String[] elseCode = GetCode.fromList(elseStatements);
+
+        String[] elseAssembler = {"",
+            "# --- Start of else section.",
+            GetString.fromArray(elseCode)};
+
+        String[] assembler = {"",
+            "# --- Start of if statement.",
+            // Generate conditional jump code.
+            getLogic().generateConditionalJump(ifLabel),
+            "# End of conditional jump.",
+            // Add else section.
+            GetString.fromArray(elseAssembler),
+            "jmp ${endLabel}  # Unconditional jump to ${endLabel}, if 'else' traversed.",
+            "# If section.",
+            "${ifLabel}:",
+            // Add if section.
+            GetString.fromArray(ifCode),
+            "${endLabel}:"};
+
+        // Generate and return assembler code.
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
     public String WHILE.getCode() {
