@@ -190,6 +190,9 @@ aspect CodeGeneration {
         // Variable mappings.
         private Map<String, String> variables;
 
+        // Final string.
+        String formattedAssembler = "";
+
 
         // Public constructor.
         public AssemblyGobbler(Map<String, String> variables, String[] rawAssembler) {
@@ -200,18 +203,68 @@ aspect CodeGeneration {
             commentBuffer = new ArrayList<String>();
 
             int maxLength = varSubInSection(rawAssembler);
-            String formattedAssembler = reassembleSectionWithPadding(maxLength);
-            System.out.println(formattedAssembler);
+            formattedAssembler = reassembleSectionWithPadding(maxLength);
+        }
+
+        public String toString() {
+            return formattedAssembler;
         }
 
         // Var-substitution for a single word.
         private String varSub(String word) {
-            if (word.startsWith("!{")) {
-                word = word.replace("!{", "");
-                word = word.replace("}", "");
-                return word;
+            if (word.contains("!{")) {
+                ArrayList<String> varSubTokens = varExtraction(word);
+                for (String key : varSubTokens) {
+                    String varSubMask = "!{"+key+"}";
+                    String value = variables.get(key);
+                    if (value == null) {
+                        value = key+" == NULL";
+                    }
+                    word = word.replace(varSubMask, value);
+                }
             }
             return word;
+        }
+
+        // Extract the variable name from the word.
+        private ArrayList<String> varExtraction(String word) {
+
+            ArrayList<String> allVariables = new ArrayList<String>();
+
+            StringBuilder buffer = new StringBuilder();
+            StringBuilder var = new StringBuilder();
+
+            boolean inVar = false;
+
+            String start = "!{";
+            String stop = "}";
+            String window = "";
+
+            int windowSize = start.length();
+
+
+            int bufferSize = 0;
+            for (int current=0; current<word.length(); current++) {
+                char currentChar = word.charAt(current);
+                buffer.append(currentChar);
+                bufferSize++;
+                if (bufferSize < windowSize) {
+                    continue; // Need be at least windowSize.
+                }
+                window = buffer.substring(bufferSize-windowSize, bufferSize);
+                if (window.equals(start)) {
+                    inVar = true;
+                    continue; // Don't append the '{'.
+                } else if (window.endsWith(stop) && inVar) {
+                    inVar = false;
+                    allVariables.add(var.toString());
+                    var = new StringBuilder();
+                }
+                if (inVar) {
+                    var.append(currentChar);
+                }
+            }
+            return allVariables;
         }
 
         // Var-substitution for a row.
@@ -274,7 +327,7 @@ aspect CodeGeneration {
                 StringBuilder finalRowBuilder = new StringBuilder();
                 // Append substituted assembler code.
                 String assemblyCode = sectionBuffer.get(i);
-                finalRowBuilder.append(assemblyCode);
+                finalRowBuilder.append("    "+assemblyCode);
 
                 // Fetch comment.
                 String comment = commentBuffer.get(i);
@@ -298,44 +351,46 @@ aspect CodeGeneration {
 
     public class ConditionalSubset {
 
+        // Private subclasses.
         private Expression exp;
         private String type;
 
-        public NewlineStringBuilder sb = new NewlineStringBuilder();
+        // Variable mappings.
+        private Map<String, String> variables;
 
+        // Raw Assembler code with variables.
         String[] assembler = {"",
-            "pushq %rax                     # Pushing left var of !{type} to stack",
+            "!{left}",
+            "pushq %rax                     # Pushing left var of !{type} to stack.",
             "!{right}",
             "pushq %rax                     # Pushing right var to stack.",
             "movq !{range1}(%rsp), %rax     # Writing second var on stack to %rax.",
             "cmpq (%rsp), %rax              # Comparing first value in stack with %rax.",
             "!{jumpType} !{label}           # If true jump to !{label}.",
-            "addq $!{range2}, %rsp          # Pop two temp variables."};
+            "addq $!{range2}, %rsp          # Pop two temp variables of the stack."};
 
+        // Final formatted assembler code.
+        String finalAssembler = "";
 
+        // Constructor.
         public ConditionalSubset(BinaryExpression exp, String type, String label, String jumpType) {
+
             this.exp = exp;
 
-            new AssemblyGobbler(new HashMap<String, String>(), assembler);
+            variables = new HashMap<String, String>();
+            variables.put("type", type);
+            variables.put("left", exp.getLeft().getCode());
+            variables.put("right", exp.getRight().getCode());
+            variables.put("range1", ""+exp.range(1));
+            variables.put("range2", ""+exp.range(2));
+            variables.put("jumpType", jumpType);
+            variables.put("label", label);
 
-            String left = exp.getLeft().getCode();
-            sb.append(left);
-            sb.append("    pushq %rax # Pushing left var of "+type+" to stack.");
-            String right = exp.getRight().getCode();
-            sb.append(right);
-            sb.append("    pushq %rax # Pushing right var to stack.");
-            sb.append("    movq "+exp.range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
-            sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-            sb.append("   "+jumpType+" "+label+" # If true jump to "+label+".");
-            sb.append("    addq $"+exp.range(2)+", %rsp # Pop two temp variables.");
-        }
-
-        public void append(String string) {
-            sb.append(string);
+            finalAssembler = new AssemblyGobbler(variables, assembler).toString();
         }
 
         public String toString() {
-            return sb.toString();
+            return finalAssembler;
         }
 
     }
