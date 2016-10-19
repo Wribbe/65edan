@@ -173,95 +173,65 @@ aspect CodeGeneration {
         return "";
     }
 
-    public String NOEQ.generateConditionalJump(String label) {
-        MyStringBuilder sb = new MyStringBuilder();
-        String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of NOEQ to stack.");
-        String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    pushq %rax # Pushing right var to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
-        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    jne "+label+" # If true jump to "+label+".");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
+    public class ConditionalSubset {
 
-        return sb.toString();
+        private Expression exp;
+        private String type;
+
+        public MyStringBuilder sb = new MyStringBuilder();
+
+        public ConditionalSubset(BinaryExpression exp, String type, String label, String jumpType) {
+            this.exp = exp;
+            String left = exp.getLeft().getCode();
+            sb.append(left);
+            sb.append("    pushq %rax # Pushing left var of "+type+" to stack.");
+            String right = exp.getRight().getCode();
+            sb.append(right);
+            sb.append("    pushq %rax # Pushing right var to stack.");
+            sb.append("    movq "+exp.range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
+            sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
+            sb.append("   "+jumpType+" "+label+" # If true jump to "+label+".");
+            sb.append("    addq $"+exp.range(2)+", %rsp # Pop two temp variables.");
+        }
+
+        public void append(String string) {
+            sb.append(string);
+        }
+
+        public String toString() {
+            return sb.toString();
+        }
+
+    }
+
+    public String NOEQ.generateConditionalJump(String label) {
+        ConditionalSubset cs = new ConditionalSubset(this, "NOEQ", label, "jne");
+        return cs.toString();
     }
 
     public String EQ.generateConditionalJump(String label) {
-        MyStringBuilder sb = new MyStringBuilder();
-        String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of EQ to stack.");
-        String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    pushq %rax # Pushing right var to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
-        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    je "+label+" # If true jump to "+label+".");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
-        return sb.toString();
+        ConditionalSubset cs = new ConditionalSubset(this, "EQ", label, "je");
+        return cs.toString();
     }
 
     public String LTEQ.generateConditionalJump(String label) {
-        MyStringBuilder sb = new MyStringBuilder();
-        String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of LTEQ to stack.");
-        String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    pushq %rax # Pushing right var to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
-        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    jle "+label+" # If true jump to "+label+".");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
-        return sb.toString();
+        ConditionalSubset cs = new ConditionalSubset(this, "LTEQ", label, "jle");
+        return cs.toString();
     }
 
     public String GTEQ.generateConditionalJump(String label) {
-        MyStringBuilder sb = new MyStringBuilder();
-        String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of GTEQ to stack.");
-        String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    pushq %rax # Pushing right var to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
-        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    jge "+label+" # If true jump to "+label+".");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
-        return sb.toString();
+        ConditionalSubset cs = new ConditionalSubset(this, "GTEQ", label, "jge");
+        return cs.toString();
     }
 
     public String LT.generateConditionalJump(String label) {
-        MyStringBuilder sb = new MyStringBuilder();
-        String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of LT to stack.");
-        String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    pushq %rax # Pushing right var to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
-        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    jl "+label+" # If true jump to "+label+".");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
-        return sb.toString();
+        ConditionalSubset cs = new ConditionalSubset(this, "LT", label, "jl");
+        return cs.toString();
     }
 
     public String GT.generateConditionalJump(String label) {
-        MyStringBuilder sb = new MyStringBuilder();
-        String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of GT to stack.");
-        String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    pushq %rax # Pushing right var to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack to %rax.");
-        sb.append("    cmpq (%rsp), %rax # Comparing first value in stack with %rax.");
-        sb.append("    jg "+label+" # If true jump to "+label+".");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
-        return sb.toString();
+        ConditionalSubset cs = new ConditionalSubset(this, "GT", label, "jg");
+        return cs.toString();
     }
 
     /** IF/ELSE/WHEN */
