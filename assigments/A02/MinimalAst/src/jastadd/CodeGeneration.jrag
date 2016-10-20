@@ -37,8 +37,6 @@ aspect CodeGeneration {
         out.println("buf: .skip 1024");
         out.println(".text");
         out.println("_start:");
-        out.println("call read");
-        out.println("pushq %rax # Push read value(if any) to stack.");
         out.println("call main");
         out.println("movq $60, %rax # sys_exit");
         out.println("syscall");
@@ -54,6 +52,19 @@ aspect CodeGeneration {
 
     public void ASTNode.genCode(PrintStream out) {
         out.println(getCode());
+    }
+
+    public String Assign.getCode() {
+        NewlineStringBuilder sb = new NewlineStringBuilder();
+        String name = getIdUse().getID();
+        sb.append("# Assigning declared variable "+name);
+        // Get the correct offset.
+        int localIndex = getClosestDefinedVariableOffset(name, getScopeDepth());
+        // Evaluate expression.
+        sb.append(getExpression().getCode());
+        // Move
+        sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result to correct offset.");
+        return sb.toString();
     }
 
     public void FunctionDeclaration.genCode(PrintStream out) {
@@ -198,10 +209,12 @@ aspect CodeGeneration {
         // Generate unique path name.
         String uniqueName = uniqueVariableName(variableName);
         brodcastIndex(uniqueName, localIndex);
-        // Evaluate the expression.
-        sb.append(getExpression().getCode());
-        // Store evaluation of expression at correct offset.
-        sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result of evaluation to correct index.");
+        // Evaluate the expression if there is any.
+        if (hasExpression()) {
+            sb.append(getExpression().getCode());
+            // Store evaluation of expression at correct offset.
+            sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result of evaluation to correct index.");
+        }
         return sb.toString();
     }
 
