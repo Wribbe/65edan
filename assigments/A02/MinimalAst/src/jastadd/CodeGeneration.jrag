@@ -590,7 +590,7 @@ aspect CodeGeneration {
 
         String[] assembler = {"",
             "# --- Start of while statement.",
-            "${startLabel}: # Label for starting execution.",
+            "${startLabel}: # Label for starting while execution.",
             // Add logic for continuing.
             getLogic().generateConditionalJump(continueLabel),
             "jmp ${endLabel} # Unconditional jump to end of while execution.",
