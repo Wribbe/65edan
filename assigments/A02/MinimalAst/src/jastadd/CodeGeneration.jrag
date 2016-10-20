@@ -57,14 +57,20 @@ aspect CodeGeneration {
     public void FunctionDeclaration.genCode(PrintStream out) {
         out.println("# start of "+name()+" function.");
         out.println(name()+": # function label");
+        int numLocals = numLocals();
+        out.println("# Num of locals: "+numLocals);
         // Push base pointer to stack.
-        out.println("    pushq %rbp");
+        out.println("    pushq %rbp # Push base pointer to stack.");
         // Move adress value from %rsp -> %rbp.
-        out.println("    movq %rsp, %rbp");
+        out.println("    movq %rsp, %rbp # Write current stack pointer address to base pointe.");
+        // Generate space for local varaiables.
+        out.println("subq $"+numLocals*wordSize+", %rsp # Pushing space for "+numLocals+" local variables on stack.");
         // Evaluate and append all statements in function.
         for(Statement statement : getBlockList()) {
             statement.genCode(out);
         }
+        // Pop local varaibles.
+        out.println("addq $"+numLocals+", %rsp # Popping "+numLocals+" from stack.");
         getReturn().genCode(out);
     }
 
@@ -125,22 +131,106 @@ aspect CodeGeneration {
 
     public int ASTNode.wordSize = 8;
 
-    inh int IdUse.getVariableOffset(String name);
+    inh int ASTNode.getScopeDepth();
 
-    eq FunctionDeclaration.getChild().getVariableOffset(String name) {
-        int offset = range(2); // Initial offset for oldbase + return address.
-        // Check in normal order, since it pushed reversed the first var is on
-        // 'top'.
-        for (int i=0; i<getNumFunctionParameters(); i++) {
-            IdDeclare declaration = getFunctionParameters(i);
-            if (declaration.getID().equals(name)) {
+    eq FunctionDeclaration.getChild().getScopeDepth() {
+        return  1;
+    }
+
+    eq IF.getBlock().getScopeDepth() {
+        return getScopeDepth() + 1;
+    }
+
+    eq WHILE.getBlock().getScopeDepth() {
+        return getScopeDepth() + 1;
+    }
+
+    eq ELSE.getBlock().getScopeDepth() {
+        return getScopeDepth() + 1;
+    }
+
+    public String ASTNode.uniqueVariableName(String name) {
+        return getScopeDepth()+name;
+    }
+
+    inh int ASTNode.getClosestDefinedVariableOffset(String name, Integer depth);
+
+    eq FunctionDeclaration.getChild().getClosestDefinedVariableOffset(String name, Integer depth) {
+        Integer index = 0;
+        for(int level=depth; level>0; level--) {
+            String variableName = level+name;
+            index = localDeclarationsIndex.get(variableName);
+            if (index != null) {
+                return index;
+            }
+        }
+        int offset = range(2); // Initial offset for return address and old base pointer.
+        // Iterate over all parameters.
+        for (int current=0; current<getNumFunctionParameters(); current++) {
+            if (getFunctionParameters(current).getID().equals(name)) {
                 return offset;
             }
-            // Wasn't first one, continue with increased offset.
+            // Increase offset down into the stack.
             offset += wordSize;
         }
+        // Nothing found.
         return 0;
     }
+
+    inh String VarDeclare.brodcastIndex(String name, Integer index);
+
+    eq FunctionDeclaration.getChild().brodcastIndex(String name, Integer index) {
+        localDeclarationsIndex.put(name, index);
+        return "";
+    }
+
+
+    public Map<String, Integer> FunctionDeclaration.localDeclarationsIndex = new HashMap<String, Integer>();
+    inh String VarDeclare.brodcastIndex(String name, Integer index);
+
+    public String VarDeclare.getCode() {
+        NewlineStringBuilder sb = new NewlineStringBuilder();
+        // Get local index;
+        int localIndex = (localIndex()*-1-1)*wordSize; // Negative -> 'up'.
+        // Set index in FunctionDeclaration map.
+        String variableName = getIdDeclare().getID();
+        // Generate unique path name.
+        String uniqueName = uniqueVariableName(variableName);
+        brodcastIndex(uniqueName, localIndex);
+        // Evaluate the expression.
+        sb.append(getExpression().getCode());
+        // Store evaluation of expression at correct offset.
+        sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result of evaluation to correct index.");
+        return sb.toString();
+    }
+
+
+    inh boolean IdDeclare.varDeclare();
+    eq VarDeclare.getIdDeclare().varDeclare() = true;
+    eq FunctionDeclaration.getChild().varDeclare() = false;
+
+    syn int ASTNode.localIndex() = prevNode().localIndex();
+    eq FunctionDeclaration.localIndex() = 0;
+    eq IdDeclare.localIndex() = varDeclare() ? prevNode().localIndex() + 1 : prevNode().localIndex();
+
+    /**
+     * Address of local variable variable in the current stack frame.
+     */
+    syn String IdDeclare.address() = "-"+(localIndex()*8)+"(%rbp)";
+
+    /**
+     * Local variable counting.
+     */
+    syn int ASTNode.numLocals() = lastNode().localIndex() - localIndex();
+
+    /**
+     * Local variable numbering.
+     */
+
+    inh ASTNode ASTNode.prevNode();
+    eq ASTNode.getChild(int i).prevNode() = prevNode(i);
+    syn ASTNode ASTNode.lastNode() = prevNode(getNumChild());
+    syn ASTNode ASTNode.prevNode(int i) = i>0 ? getChild(i-1).lastNode() : this;
 
     public String IdUse.getCode() {
         // Return address to variable that should be in %rax."
@@ -148,8 +238,8 @@ aspect CodeGeneration {
         // Push value from address to stack? In reverse? I guess? <- not our
         // problem here.
         NewlineStringBuilder sb = new NewlineStringBuilder();
-        int variableOffset = getVariableOffset(getID());
-        sb.append("movq "+variableOffset+"(%rbp), %rax # Copy variable '"+getID()+"' to %rax.");
+        int variableOffset = getClosestDefinedVariableOffset(getID(), getScopeDepth());
+        sb.append("movq "+variableOffset+"(%rbp), %rax # Copy variable '"+getID()+"' at scope: "+getScopeDepth()+" to %rax.");
         return sb.toString();
     }
 
@@ -647,28 +737,6 @@ aspect CodeGeneration {
 
         return new AssemblyGobbler(variables, assembler).toString();
     }
-
-    /**
-     * Address of local variable variable in the current stack frame.
-     */
-    syn String IdDeclare.address() = "-"+(localIndex()*8)+"(%rbp)";
-
-    /**
-     * Local variable counting.
-     */
-    syn int ASTNode.numLocals() = lastNode().localIndex() - localIndex();
-
-    /**
-     * Local variable numbering.
-     */
-    syn int ASTNode.localIndex() = prevNode().localIndex();
-    eq Program.localIndex() = 0;
-    eq IdDeclare.localIndex() = prevNode().localIndex() + 1;
-
-    inh ASTNode ASTNode.prevNode();
-    eq ASTNode.getChild(int i).prevNode() = prevNode(i);
-    syn ASTNode ASTNode.lastNode() = prevNode(getNumChild());
-    syn ASTNode ASTNode.prevNode(int i) = i>0 ? getChild(i-1).lastNode() : this;
 
     public String Program.getHelpers() {
         return "######################################\n"
