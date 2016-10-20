@@ -107,6 +107,7 @@ aspect CodeGeneration {
         for(int i=getNumExpression()-1; i>-1; i--) {
             Expression expression = getExpression(i);
             sb.append(expression.getCode());
+            sb.append("pushq %rax # Push parameter from %rax to stack.");
         }
         sb.append("    call "+functionName);
         int numArguments = getNumExpression();
@@ -127,14 +128,16 @@ aspect CodeGeneration {
     inh int IdUse.getVariableOffset(String name);
 
     eq FunctionDeclaration.getChild().getVariableOffset(String name) {
-        // Iterate over formal parameters backwards.
         int offset = range(2); // Initial offset for oldbase + return address.
-        for (int i=getNumFunctionParameters(); i>-1; i--) {
-            offset += wordSize;
+        // Check in normal order, since it pushed reversed the first var is on
+        // 'top'.
+        for (int i=0; i<getNumFunctionParameters(); i++) {
             IdDeclare declaration = getFunctionParameters(i);
             if (declaration.getID().equals(name)) {
                 return offset;
             }
+            // Wasn't first one, continue with increased offset.
+            offset += wordSize;
         }
         return 0;
     }
@@ -147,7 +150,6 @@ aspect CodeGeneration {
         NewlineStringBuilder sb = new NewlineStringBuilder();
         int variableOffset = getVariableOffset(getID());
         sb.append("movq "+variableOffset+"(%rbp), %rax # Copy variable '"+getID()+"' to %rax.");
-        sb.append("pushq %rax # Push parameter '"+getID()+"' to stack.");
         return sb.toString();
     }
 

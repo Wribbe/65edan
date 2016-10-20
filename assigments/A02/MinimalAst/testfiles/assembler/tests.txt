@@ -161,16 +161,18 @@ No input.
 !!!! Error: exited with status: 1.
 
 --formal-parameters-test
-int f(int a, int b) {
-  print(b);
+int f(int a, int b, int c) {
+  print(a);
+  print(c);
   print(a);
   return 0;
 }
 int main() {
-  f(5, 10);
+  f(5, 10, 0);
   return 0;
 }
 ==
 No input.
-10
+5
+0
 5
