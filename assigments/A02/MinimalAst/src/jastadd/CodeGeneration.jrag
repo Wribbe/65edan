@@ -37,6 +37,8 @@ aspect CodeGeneration {
         out.println("buf: .skip 1024");
         out.println(".text");
         out.println("_start:");
+        out.println("call read");
+        out.println("pushq %rax # Push read value(if any) to stack.");
         out.println("call main");
         out.println("movq $60, %rax # sys_exit");
         out.println("syscall");
@@ -186,7 +188,6 @@ aspect CodeGeneration {
 
 
     public Map<String, Integer> FunctionDeclaration.localDeclarationsIndex = new HashMap<String, Integer>();
-    inh String VarDeclare.brodcastIndex(String name, Integer index);
 
     public String VarDeclare.getCode() {
         NewlineStringBuilder sb = new NewlineStringBuilder();

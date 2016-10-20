@@ -22,13 +22,21 @@ def restructure():
                 expected_handle.write('\n'.join(lines[1:]))
 
 
-def run_command(tokens):
+def run_command(tokens, input_list):
 
-    print("Running command: {}".format(' '.join(tokens)))
+    message = "Running command: {}".format(' '.join(tokens))
+    if input_list:
+        input_string = "\n".join(input_list);
+        message += " {}".format(' '.join(input_list))
+
+    print(message)
+
     process = subprocess.Popen(tokens,
+                               stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-    out, err = process.communicate()
+
+    out, err = process.communicate(input=bytes(input_string, 'utf-8'))
     return out.decode('utf-8'), err.decode('utf-8'), process.returncode
 
 
@@ -53,9 +61,7 @@ def run_compilations():
             input_tokens = [elem.strip() for elem in
                     open("{}.input".format(name)).read().split(',')]
 
-            command += input_tokens
-
-            out, err, returncode = run_command(command)
+            out, err, returncode = run_command(command, input_tokens)
             expected = '\n'.join([line.strip() for line in
                     open("{}.expected".format(name)).readlines() if
                     line.strip()])

@@ -250,3 +250,14 @@ No input.
 30
 40
 50
+
+
+
+--main-with-input
+int main(int a) {
+  print(a);
+  return 0;
+}
+==
+3
+3
