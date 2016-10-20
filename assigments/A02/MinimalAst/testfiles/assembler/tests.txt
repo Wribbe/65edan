@@ -198,3 +198,22 @@ No input.
 5
 0
 5
+
+
+
+--local-variable-shadowing
+int f(int a, int b) {
+  if (a == b) {
+    int b = 10;
+    print(b);
+  }
+  print(a);
+  return 0;
+}
+int main() {
+  f(2, 2);
+  return 0;
+}
+==
+10
+2
