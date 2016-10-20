@@ -162,8 +162,8 @@ No input.
 
 --formal-parameters-test
 int f(int a, int b) {
-  print(a);
   print(b);
+  print(a);
   return 0;
 }
 int main() {
@@ -172,5 +172,5 @@ int main() {
 }
 ==
 No input.
-5
 10
+5
