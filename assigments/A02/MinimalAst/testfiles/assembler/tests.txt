@@ -7,6 +7,8 @@ a, b, c
 // Empty file.
 !!!! Error: exited with status: 2.
 
+
+
 --function-call-no-parameters
 int f() {
   print(22);
@@ -22,6 +24,8 @@ No input.
 22
 !!!! Error: exited with status: 1.
 
+
+
 --constant-value-addition
 int main() {
   return 2+2;
@@ -29,6 +33,8 @@ int main() {
 ==
 No input
 !!!! Error: exited with status: 4.
+
+
 
 --constant-value-addition-and-mul
 int main() {
@@ -38,6 +44,8 @@ int main() {
 No input
 !!!! Error: exited with status: 8.
 
+
+
 --constant-value-division
 int main() {
   return 4/2;
@@ -45,6 +53,8 @@ int main() {
 ==
 No input
 !!!! Error: exited with status: 2.
+
+
 
 --constant-mixed-precendence
 int main() {
@@ -54,6 +64,8 @@ int main() {
 No input
 !!!! Error: exited with status: 7.
 
+
+
 --constant-subtraction
 int main() {
   return 1-2+1;
@@ -61,6 +73,8 @@ int main() {
 ==
 No input
 // No error.
+
+
 
 --logic-non-equal
 int main() {
@@ -74,6 +88,8 @@ int main() {
 ==
 No input
 !!!! Error: exited with status: 1.
+
+
 
 --logic-all-variants
 int main() {
@@ -105,6 +121,8 @@ No input.
 4
 5
 6
+
+
 
 --logic-all-variants-else
 int main() {
@@ -149,6 +167,8 @@ No input.
 5
 6
 
+
+
 --logic-while-simple-test
 int main() {
   while(1 < 2) {
@@ -159,6 +179,8 @@ int main() {
 ==
 No input.
 !!!! Error: exited with status: 1.
+
+
 
 --formal-parameters-test
 int f(int a, int b, int c) {
