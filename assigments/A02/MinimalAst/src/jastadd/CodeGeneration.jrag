@@ -62,17 +62,25 @@ aspect CodeGeneration {
     }
 
     public String Assign.getCode() {
-        NewlineStringBuilder sb = new NewlineStringBuilder();
+
+        String[] assembler = {"",
+            "                                       # Assigning declared variable ${name}.",
+            "                                       # Adding code from expression.",
+            getExpression().getCode(),
+            "                                       # Expression done.",
+            "movq %rax, ${localIndex}(%rbp)         # Moving result to correct offset for: '${name}'.",
+        };
+
         String name = getIdUse().getID();
-        sb.append("# Assigning declared variable "+name);
-        // Get the correct offset.
         int localIndex = getClosestDefinedVariableOffset(name, getScopeDepth());
-        sb.append("# Adding code from expression.");
-        sb.append(getExpression().getCode());
-        sb.append("# Expression done.");
-        // Move
-        sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result to correct offset for: '"+name+"'.");
-        return sb.toString();
+
+        String[] variables = {"",
+            "name", name,
+            "localIndex", ""+localIndex,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+
     }
 
     public String FunctionDeclaration.getCode() {
