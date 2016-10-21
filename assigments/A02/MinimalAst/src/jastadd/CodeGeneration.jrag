@@ -371,7 +371,6 @@ aspect CodeGeneration {
         String[] variables = {"",
             "left", left,
             "right", right,
-            "popSize", ""+range(2),
             "range1", ""+range(1),
             "range2", ""+range(2),
         };
@@ -393,17 +392,28 @@ aspect CodeGeneration {
 
     public String Minus.getCode() {
 
-        NewlineStringBuilder sb = new NewlineStringBuilder();
         String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left positive var of Minus to stack.");
         String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    pushq %rax # Pushing right negative var of Minus to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second/negative var from stack+"+range(1)+" to %rax.");
-        sb.append("    subq (%rsp), %rax # Operation: stack Minus %rax -> %rax.");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
-        return sb.toString();
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "range1", ""+range(1),
+            "range2", ""+range(2),
+        };
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                             # Pushing left positive var of Minus to stack.",
+            "${right}",
+            "                                       # Shuffle the variables to the correct order.",
+            "pushq %rax                             # Pushing right negative var of Minus to stack.",
+            "movq ${range1}(%rsp), %rax             # Writing second/negative var from stack+${range1} to %rax.",
+            "subq (%rsp), %rax                      # Operation: stack Minus %rax -> %rax.",
+            "addq $${range2}, %rsp                  # Pop two temp variables.",
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
 
     }
 
