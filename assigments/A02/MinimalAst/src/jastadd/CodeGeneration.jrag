@@ -113,19 +113,20 @@ aspect CodeGeneration {
 
 
     public String Return.getCode() {
-        NewlineStringBuilder sb = new NewlineStringBuilder();
-        sb.append("    # Evaluate return expression.");
-        sb.append(getExpression().getCode());
-        sb.append("    # start return statement");
-        sb.append("    movq %rax, %rdi # set return code to result.");
-        String functionName = enclosingFunction().name();
-        // Restore stack pointer to base pointer.
-        sb.append("    movq %rbp, %rsp");
-        // Pop old base pointer into %rbp.
-        sb.append("    popq %rbp");
-        // Return to calling function.
-        sb.append("    ret");
-        return sb.toString();
+
+        String[] assembler = {"",
+            "                               # Evaluate return expression.",
+            getExpression().getCode(),
+            "                               # Start return statement.",
+            "movq %rax, %rdi                # Set return code to result.",
+            "movq %rbp, %rsp                # Restore stack pointer to base pointer.",
+            "popq %rbp                      # Pop old base pointer into %rbp.",
+            "ret                            # Return to calling function.",
+        };
+
+        String[] variables = {""};
+
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
 
