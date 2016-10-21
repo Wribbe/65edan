@@ -145,22 +145,33 @@ aspect CodeGeneration {
     }
 
     public String FunctionUse.getCode() {
+
+        // Get variables.
         String functionName = getIdUse().getID();
-        NewlineStringBuilder sb = new NewlineStringBuilder();
+        int numArguments = getNumExpression();
+
         // Pushing parameters in reversed order.
+        NewlineStringBuilder parameters = new NewlineStringBuilder();
         for(int i=getNumExpression()-1; i>-1; i--) {
             Expression expression = getExpression(i);
-            sb.append(expression.getCode());
-            sb.append("pushq %rax # Push parameter from %rax to stack.");
+            parameters.append(expression.getCode());
+            parameters.append("pushq %rax # Push parameter from %rax to stack.");
         }
-        sb.append("    call "+functionName);
-        int numArguments = getNumExpression();
-        // Pop arguments from stack.
-        if (numArguments > 0) {
-            sb.append("    addq $"+range(numArguments)+", %rsp # clear variables off stack.");
-        }
-        // Restore old base pointer.
-        return sb.toString();
+
+        // Rest of assembler code.
+        String[] assembler = {"",
+            parameters.toString(),
+            "call ${functionName}",
+            "addq $${sizeArguments}, %rsp        # Pop local function variables off the stack.",
+        };
+
+        String[] variables = {"",
+            "functionName", functionName,
+            "sizeArguments", ""+range(numArguments),
+
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
     public String IdDeclare.getCode() {
