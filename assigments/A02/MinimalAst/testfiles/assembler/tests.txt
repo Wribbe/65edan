@@ -3,7 +3,7 @@ int main() {
   return 2;
 }
 ==
-a, b, c
+No input.
 // Empty file.
 !!!! Error: exited with status: 2.
 
@@ -294,4 +294,8 @@ int main() {
   print(diff);
   return 0;
 }
-
+==
+10 5
+5
+5
+0

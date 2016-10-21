@@ -25,8 +25,10 @@ def restructure():
 def run_command(tokens, input_list):
 
     message = "Running command: {}".format(' '.join(tokens))
+    if "no input" in " ".join(input_list).lower():
+        input_list = []
     if input_list:
-        input_string = "\n".join(input_list);
+        input_string = "\r".join(input_list)+"\r";
         message += " {}".format(' '.join(input_list))
 
     print(message)
@@ -34,9 +36,15 @@ def run_command(tokens, input_list):
     process = subprocess.Popen(tokens,
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stderr=subprocess.PIPE,
+                               shell=True)
 
-    out, err = process.communicate(input=bytes(input_string, 'utf-8'))
+    import time
+    for input_token in input_list:
+        process.stdin.write(bytes(input_token+'\n', 'utf-8'));
+        process.stdin.flush()
+        time.sleep(1);
+    out, err = process.communicate()
     return out.decode('utf-8'), err.decode('utf-8'), process.returncode
 
 
@@ -59,7 +67,7 @@ def run_compilations():
             command = "./{}".format(executable).split()
 
             input_tokens = [elem.strip() for elem in
-                    open("{}.input".format(name)).read().split(',')]
+                    open("{}.input".format(name)).read().split(' ')]
 
             out, err, returncode = run_command(command, input_tokens)
             expected = '\n'.join([line.strip() for line in

@@ -60,10 +60,11 @@ aspect CodeGeneration {
         sb.append("# Assigning declared variable "+name);
         // Get the correct offset.
         int localIndex = getClosestDefinedVariableOffset(name, getScopeDepth());
-        // Evaluate expression.
+        sb.append("# Adding code from expression.");
         sb.append(getExpression().getCode());
+        sb.append("# Expression done.");
         // Move
-        sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result to correct offset.");
+        sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result to correct offset for: '"+name+"'.");
         return sb.toString();
     }
 
@@ -210,6 +211,7 @@ aspect CodeGeneration {
         String uniqueName = uniqueVariableName(variableName);
         brodcastIndex(uniqueName, localIndex);
         // Evaluate the expression if there is any.
+        sb.append("# variable: '"+variableName+"' declared as: '"+uniqueName+" with offset: "+localIndex+".");
         if (hasExpression()) {
             sb.append(getExpression().getCode());
             // Store evaluation of expression at correct offset.
@@ -295,7 +297,7 @@ aspect CodeGeneration {
         sb.append(right);
         // Shuffle it around a bit.
         sb.append("    pushq %rax # Pushing right var (divisor) of Div to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second var on stack (dividend) to %rax.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing first var pushed on stack (dividend) to %rax.");
         sb.append("    idivq (%rsp) # Operation: Divide dividend (%rsa) with divisor (first in stack), result in %rsa.");
         sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
         return sb.toString();
@@ -311,7 +313,7 @@ aspect CodeGeneration {
         String right = getRight().getCode();
         sb.append(right);
         sb.append("    pushq %rax # Pushing right negative var of Minus to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second/negative var to %rax.");
+        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing second/negative var from stack+"+range(1)+" to %rax.");
         sb.append("    subq (%rsp), %rax # Operation: stack Minus %rax -> %rax.");
         sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
         return sb.toString();
@@ -580,15 +582,15 @@ aspect CodeGeneration {
 
         // Raw Assembler code with variables.
         String[] assembler = {"",
+            // cmp left, right ---> right >= left comparison.
+            // cmp right, left ---> left >= right comparison.
             "# Conditional jump statement for (x ${sign} y).",
             "${left}",
             "pushq %rax                     # Pushing left var of ${type} to stack.",
             "${right}",
-            "pushq %rax                     # Pushing right var to stack.",
-            "movq ${range1}(%rsp), %rax     # Writing second var on stack to %rax.",
-            "cmpq (%rsp), %rax              # Comparing first value in stack with %rax.",
+            "cmpq %rax, (%rsp)              # Compare left var on stack with %rax.",
             "${jumpType} ${label}           # If true jump to ${label}.",
-            "addq $${range2}, %rsp          # Pop two temp variables of the stack.",
+            "addq $${range1}, %rsp          # Pop temp variables from stack.",
             "# End of conditional jump statement."
         };
 
