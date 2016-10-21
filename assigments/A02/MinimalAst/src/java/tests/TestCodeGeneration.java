@@ -52,7 +52,7 @@ public class TestCodeGeneration extends AbstractParameterizedTest {
 		// Generate Assembly file
 		File assemblyFile = getFileReplaceExtension(inFile, ".s");
 		PrintStream out = new PrintStream(new FileOutputStream(assemblyFile));
-		program.genCode(out);
+		out.println(program.getCode());
 		out.close();
 
 		// Generate object file

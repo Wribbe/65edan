@@ -31,21 +31,28 @@ aspect CodeGeneration {
         }
     }
 
-    public void Program.genCode(PrintStream out) {
-        out.println(".global _start");
-        out.println(".data");
-        out.println("buf: .skip 1024");
-        out.println(".text");
-        out.println("_start:");
-        out.println("call main");
-        out.println("movq $60, %rax # sys_exit");
-        out.println("syscall");
+    public String Program.getCode() {
 
-        for(FunctionDeclaration declaration : getFunctionDeclarationList()) {
-            declaration.genCode(out);
-        }
+        // Get function declarations.
+        List functionDeclarations = getFunctionDeclarationList();
+        // Get code from list.
+        String[] declarationCode = GetCode.fromList(functionDeclarations);
 
-        out.println(getHelpers());
+        String[] assembler = {"",
+            ".global _start",
+            ".data",
+            "buf: .skip 1024",
+            ".text",
+            "_start:",
+            "call main",
+            "movq $60, %rax # sys_exit",
+            "syscall",
+            GetString.fromArray(declarationCode),
+            getHelpers()};
+
+        String[] variables = {""};
+
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
     public String ASTNode.getCode() { return ""; }
@@ -68,24 +75,32 @@ aspect CodeGeneration {
         return sb.toString();
     }
 
-    public void FunctionDeclaration.genCode(PrintStream out) {
-        out.println("# start of "+name()+" function.");
-        out.println(name()+": # function label");
-        int numLocals = numLocals();
-        out.println("# Num of locals: "+numLocals);
-        // Push base pointer to stack.
-        out.println("    pushq %rbp # Push base pointer to stack.");
-        // Move adress value from %rsp -> %rbp.
-        out.println("    movq %rsp, %rbp # Write current stack pointer address to base pointe.");
-        // Generate space for local varaiables.
-        out.println("subq $"+numLocals*wordSize+", %rsp # Pushing space for "+numLocals+" local variables on stack.");
-        // Evaluate and append all statements in function.
-        for(Statement statement : getBlockList()) {
-            statement.genCode(out);
-        }
-        // Pop local varaibles.
-        out.println("addq $"+numLocals+", %rsp # Popping "+numLocals+" from stack.");
-        getReturn().genCode(out);
+    public String FunctionDeclaration.getCode() {
+
+        List functionStements = getBlockList();
+        String[] statementCode = GetCode.fromList(functionStements);
+
+        String[] assembler = {"",
+            "# start of ${name} function.",
+            "${name}:                       # Function label.",
+            "# Num of locals: ${numLocals}.",
+            "pushq %rbp                     # Push base pointer onto the stack.",
+            "movq %rsp, %rbp                # Write current stack pointer address to base pointer.",
+            "subq $${localSpace}, %rsp      # Pushing space for ${numLocals} local variables on the stack.",
+            "# Function statements start.",
+            GetString.fromArray(statementCode),
+            "# Function statements end.",
+            "addq $${numLocals}, %rsp       # Popping ${numLocals} from the stack.",
+            getReturn().getCode(),
+        };
+
+        String[] variables = {"",
+            "name", name(),
+            "numLocals", ""+numLocals(),
+            "localSpace", ""+numLocals()*wordSize,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
 
