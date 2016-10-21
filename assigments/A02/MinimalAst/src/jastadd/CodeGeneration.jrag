@@ -299,14 +299,20 @@ aspect CodeGeneration {
     syn ASTNode ASTNode.prevNode(int i) = i>0 ? getChild(i-1).lastNode() : this;
 
     public String IdUse.getCode() {
-        // Return address to variable that should be in %rax."
-        // Several variables? ! Not our problem here.
-        // Push value from address to stack? In reverse? I guess? <- not our
-        // problem here.
-        NewlineStringBuilder sb = new NewlineStringBuilder();
+
         int variableOffset = getClosestDefinedVariableOffset(getID(), getScopeDepth());
-        sb.append("movq "+variableOffset+"(%rbp), %rax # Copy variable '"+getID()+"' at scope: "+getScopeDepth()+" to %rax.");
-        return sb.toString();
+
+        String[] assembler = {"",
+            "movq ${variableOffset}(%rbp), %rax         # Copying variable ${name} at scope: ${scope} to %rax.",
+        };
+
+        String[] variables = {"",
+            "name", getID(),
+            "scope", ""+getScopeDepth(),
+            "variableOffset", ""+variableOffset,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
     public String Add.getCode() {
