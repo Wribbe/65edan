@@ -317,46 +317,77 @@ aspect CodeGeneration {
 
     public String Add.getCode() {
 
-        NewlineStringBuilder sb = new NewlineStringBuilder();
         String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of Add to stack.");
         String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    addq (%rsp), %rax # Operation: stack Add %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Popping temp variable from stack.");
-        return sb.toString();
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                         # Pushing left variable of Add to stack.",
+            "${right}",
+            "addq (%rsp), %rax                  # Operation: stack + %rax -> %rax.",
+            "addq $${popSize}, %rsp             # Popping temp variable from stack.",
+        };
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "popSize", ""+range(1),
+        };
+
+        String addString = new AssemblyGobbler(variables, assembler).toString();
+        return addString;
 
     }
 
     public String Mul.getCode() {
 
-        NewlineStringBuilder sb = new NewlineStringBuilder();
         String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var of Mul to stack.");
         String right = getRight().getCode();
-        sb.append(right);
-        sb.append("    imulq (%rsp), %rax # Operation: stack Mul %rax.");
-        sb.append("    addq $"+range(1)+", %rsp # Popping temp variable from stack.");
-        return sb.toString();
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "popSize", ""+range(1),
+        };
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                         # Pushing left variable of Mul to stack.",
+            "${right}",
+            "imulq (%rsp), %rax                 # Operation: stack * %rax. -> %rax.",
+            "addq $${popSize}, %rsp             # Popping temp variable from stack.",
+        };
+
+        String mulString = new AssemblyGobbler(variables, assembler).toString();
+        return mulString;
 
     }
 
     public String Div.getCode() {
 
-        NewlineStringBuilder sb = new NewlineStringBuilder();
         String left = getLeft().getCode();
-        sb.append(left);
-        sb.append("    pushq %rax # Pushing left var (dividend) of Div to stack.");
         String right = getRight().getCode();
-        sb.append(right);
-        // Shuffle it around a bit.
-        sb.append("    pushq %rax # Pushing right var (divisor) of Div to stack.");
-        sb.append("    movq "+range(1)+"(%rsp), %rax # Writing first var pushed on stack (dividend) to %rax.");
-        sb.append("    idivq (%rsp) # Operation: Divide dividend (%rsa) with divisor (first in stack), result in %rsa.");
-        sb.append("    addq $"+range(2)+", %rsp # Pop two temp variables.");
-        return sb.toString();
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "popSize", ""+range(2),
+            "range1", ""+range(1),
+            "range2", ""+range(2),
+        };
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                             # Pushing left var (dividend) of Div to stack.",
+            "${right}",
+            "                                       # Shuffle the variables to the correct order.",
+            "pushq %rax                             # Pushing right var (divisor) of Div to stack.",
+            "movq ${range1} (%rsp), %rax            # Writing first var pushed on stack (dividend) to %rax.",
+            "idivq (%rsp)                           # Operation: Divide dividend (%rsa) with divisor (first in stack), result in %rsa.",
+            "addq $${range2}, %rsp                  # Pop two temp variables.",
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
 
     }
 
@@ -408,10 +439,11 @@ aspect CodeGeneration {
             // Make sure all text are split in lines.
             ArrayList<String> lineList = new ArrayList<String>();
             for (String text : rawAssembler) {
-                for (String line : text.split("[\n\r]")) {
+                for (String line : text.trim().split("[\n\r]")) {
                     lineList.add(line.trim());
                 }
             }
+
 
             int maxLength = varSubInSection(lineList.toArray(new String[lineList.size()]));
             formattedAssembler = reassembleSectionWithPadding(maxLength);
@@ -509,7 +541,8 @@ aspect CodeGeneration {
                 rowBuilder.append(varSub(word));
                 rowBuilder.append(" ");
             }
-            return rowBuilder.toString();
+            String resultingString = rowBuilder.toString();
+            return resultingString;
         }
 
         // Var-substitution for a section.
@@ -518,39 +551,53 @@ aspect CodeGeneration {
             // Maximum line length for assembler lines.
             int maxLineLength = 0;
 
+
+            String[] subarray = new String[1];
             // Cut of first element.
-            String[] subarray = removeFirst(assemblerSection);
+            if (assemblerSection[0].length() == 0) {
+                subarray = removeFirst(assemblerSection);
+            } else {
+                subarray = assemblerSection;
+            }
 
             // Iterate over all rows in subarray and substitute.
-            for (String row : subarray) {
+            for (String parRow : subarray) {
 
-                String subRow = varSubInRow(row).trim();
+                String subRow = varSubInRow(parRow.trim()).trim();
+                for (String row : subRow.split("[\n\r]")) { // Split since substitutions can be sections.
 
-                // Take care of comment-only lines.
-                String[] rowTokens = new String[1];
-                String assemblerRow = "";
-                if (subRow.matches("^\\s*#.*")) { // Only a comment.
-                    assemblerRow = subRow;
-                } else {
-                    rowTokens = subRow.split("#");
-                    assemblerRow = rowTokens[0].trim();
+                    row = row.trim();
+
+                    if (row.length() == 0) {
+                        continue;
+                    }
+
+                    // Take care of comment-only lines.
+                    String[] rowTokens = new String[1];
+                    String assemblerRow = "";
+                    if (row.matches("^\\s*#.*")) { // Only a comment.
+                        assemblerRow = row;
+                    } else {
+                        rowTokens = row.split("#");
+                        assemblerRow = rowTokens[0].trim();
+                    }
+
+                    // Add comment if present.
+                    String comment = "";
+                    if (rowTokens.length > 1) {
+                        comment = rowTokens[1].trim();
+                    }
+
+                    // Add comment to buffer.
+                    commentBuffer.add(comment);
+
+                    if (assemblerRow.length() > maxLineLength) {
+                        maxLineLength = assemblerRow.length();
+                    }
+
+                    // Add assembler to buffer.
+                    sectionBuffer.add(assemblerRow);
                 }
-
-                // Add comment if present.
-                String comment = "";
-                if (rowTokens.length > 1) {
-                    comment = rowTokens[1].trim();
-                }
-
-                // Add comment to buffer.
-                commentBuffer.add(varSubInRow(comment));
-
-                if (assemblerRow.length() > maxLineLength) {
-                    maxLineLength = assemblerRow.length();
-                }
-
-                // Add assembler to buffer.
-                sectionBuffer.add(assemblerRow);
             }
 
             // Return maximum assembler line length.
@@ -573,6 +620,7 @@ aspect CodeGeneration {
                 } else {
                     finalRowBuilder.append(padding+assemblyCode);
                 }
+
 
                 // Fetch comment.
                 String comment = commentBuffer.get(i);
@@ -616,7 +664,12 @@ aspect CodeGeneration {
                 sb.append(array[0]);
                 return sb.toString();
             } else if (array.length > 1) {
-                String[] subArray = Arrays.copyOfRange(array, 1, array.length);
+                String[] subArray = new String[1];
+                if (array[0].length() == 0) {
+                    subArray = Arrays.copyOfRange(array, 1, array.length);
+                } else {
+                    subArray = array;
+                }
                 for (String text : array) {
                     for (String string : text.split("[\n\r]")) {
                         sb.append(string.trim());
