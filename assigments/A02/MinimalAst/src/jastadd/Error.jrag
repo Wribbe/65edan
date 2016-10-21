@@ -69,6 +69,7 @@ aspect CallGraph {
 
     coll Set<String> FunctionDeclaration.calls() [new HashSet()] with add root FunctionDeclaration;
 
+    inh FunctionDeclaration Statement.enclosingFunction();
     inh FunctionDeclaration FunctionUse.enclosingFunction();
     eq FunctionDeclaration.getChild().enclosingFunction() = this;
 

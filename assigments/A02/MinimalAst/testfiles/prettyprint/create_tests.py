@@ -3,6 +3,7 @@
 import os
 import re
 import shutil
+import sys
 
 TEST_FILE = "tests.txt"
 
@@ -15,23 +16,25 @@ class SourceResult:
 
 def remove_all_tests():
 
-    test_extensions = ['.lang', '.out', '.expected']
+    avoid_extensions = ['.py', '.txt']
 
     def check_extension(filename):
-        for extension in test_extensions:
+        for extension in avoid_extensions:
             if filename.endswith(extension):
                 return True
         return False
 
     for filename in os.listdir('.'):
-        if check_extension(filename):
+        if not check_extension(filename):
             os.remove(filename)
             continue
 
 
-def main():
+def main(args):
 
     remove_all_tests()
+    if 'remove' in args:
+        return
 
     with open(TEST_FILE, 'r') as source_handle:
         lines = [line.strip('\n') for line in source_handle.readlines() if
@@ -89,4 +92,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = sys.argv[:1]
+    main(args)

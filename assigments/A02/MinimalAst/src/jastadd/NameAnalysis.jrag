@@ -36,7 +36,11 @@ aspect NameAnalysis {
 
     // Lookup equation for Return class in FunctionDeclaration.
     eq FunctionDeclaration.getReturn().lookup(String name) {
-        return checkScope(name);
+        IdDeclare id = checkScope(name);
+        if (id.getID().equals(name)) {
+            return id;
+        }
+        return lookup(name);
     }
 
     // Lookup equation for Block class in IF.
@@ -69,13 +73,12 @@ aspect NameAnalysis {
         return lookup(name);
     }
 
-    // Function use checks predefined functions before doing a lookup.
     eq FunctionUse.getIdUse().lookup(String name) {
-        for (FunctionDeclaration function : predefinedFunctions()) {
-            if (function.getIdDeclare().getID().equals(name)) {
-                return function.getIdDeclare();
-            }
-        }
+       // for (FunctionDeclaration function : predefinedFunctions()) {
+       //     if (function.getIdDeclare().getID().equals(name)) {
+       //         return function.getIdDeclare();
+       //     }
+       // }
         return lookup(name);
     }
 
@@ -430,9 +433,9 @@ aspect ProgramHelperMethods {
 
     // Check Program functionDeclarations.
     syn IdDeclare Program.checkFunctionDeclarations(String name) {
-        IdDeclare id = null;
-        for (int i=0; i<getNumFunctionDeclaration(); i++) {
-            id = getFunctionDeclaration(i).getIdDeclare();
+        for (FunctionDeclaration function : getFunctionDeclarationList()) {
+            IdDeclare id = function.getIdDeclare();
+
             if (id.getID().equals(name)) {
                 return id;
             }

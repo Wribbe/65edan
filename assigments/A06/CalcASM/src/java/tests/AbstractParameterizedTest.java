@@ -13,7 +13,7 @@ abstract public class AbstractParameterizedTest extends AbstractTestSuite {
 	/**
 	 * File extension for test input files. EDIT ME
 	 */
-	protected static final String IN_EXTENSION = ".lang";
+	protected static final String IN_EXTENSION = ".calc";
 	/**
 	 * Test output is written to a file with this extension
 	 */
@@ -33,25 +33,9 @@ abstract public class AbstractParameterizedTest extends AbstractTestSuite {
 	 */
 	public AbstractParameterizedTest(String testDirectory, String testFile) {
 		super(testDirectory);
-		inFile = getTestInputFile(testFile);
-		outFile = getTestOutputFile(testFile);
-		expectedFile = getTestExpectedOutputFile(testFile);
-	}
-
-	protected File getTestInputFile(String filename) {
-		return new File(testDirectory, filename);
-	}
-
-	protected File getTestOutputFile(String filename) {
-		String simpleName = filename.substring(0,
-			filename.length()-IN_EXTENSION.length());
-		return new File(testDirectory, simpleName+OUT_EXTENSION);
-	}
-
-	protected File getTestExpectedOutputFile(String filename) {
-		String simpleName = filename.substring(0,
-			filename.length()-IN_EXTENSION.length());
-		return new File(testDirectory, simpleName+EXPECTED_EXTENSION);
+		inFile = getTestFile(testFile);
+		outFile = getFileReplaceExtension(testFile, OUT_EXTENSION);
+		expectedFile = getFileReplaceExtension(testFile, EXPECTED_EXTENSION);
 	}
 
 	protected File getTestFile(String filename) {

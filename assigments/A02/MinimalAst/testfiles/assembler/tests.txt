@@ -1,0 +1,301 @@
+--simple-test
+int main() {
+  return 2;
+}
+==
+No input.
+// Empty file.
+!!!! Error: exited with status: 2.
+
+
+
+--function-call-no-parameters
+int f() {
+  print(22);
+  return 2;
+}
+
+int main() {
+  f();
+  return 1;
+}
+===
+No input.
+22
+!!!! Error: exited with status: 1.
+
+
+
+--constant-value-addition
+int main() {
+  return 2+2;
+}
+==
+No input
+!!!! Error: exited with status: 4.
+
+
+
+--constant-value-addition-and-mul
+int main() {
+  return 2+2*3;
+}
+==
+No input
+!!!! Error: exited with status: 8.
+
+
+
+--constant-value-division
+int main() {
+  return 4/2;
+}
+==
+No input
+!!!! Error: exited with status: 2.
+
+
+
+--constant-mixed-precendence
+int main() {
+  return 2*(3+1+3)/2;
+}
+==
+No input
+!!!! Error: exited with status: 7.
+
+
+
+--constant-subtraction
+int main() {
+  return 3-2-1;
+}
+==
+No input
+// No error.
+
+
+
+--logic-non-equal
+int main() {
+  if(3 != 4) {
+    return 1;
+  } else {
+    return 2;
+  }
+  return 4;
+}
+==
+No input
+!!!! Error: exited with status: 1.
+
+
+
+--logic-all-variants
+int main() {
+  if ( 3 != 1 ) {
+    print(1);
+  }
+  if ( 1 ==  1 ) {
+    print(2);
+  }
+  if ( 0 <= 1 ) {
+    print(3);
+  }
+  if ( 4 >= 2 ) {
+    print(4);
+  }
+  if ( 1 < 2 ) {
+    print(5);
+  }
+  if ( 2 > 1 ) {
+    print(6);
+  }
+  return 0;
+}
+==
+No input.
+1
+2
+3
+4
+5
+6
+
+
+
+--logic-all-variants-else
+int main() {
+  if ( 1 == 2 ) {
+    print(12);
+  } else {
+    print(1);
+  }
+  if ( 1 !=  1 ) {
+    print(11);
+  } else {
+    print(2);
+  }
+  if ( 4 <= 1 ) {
+    print(10);
+  } else {
+    print(3);
+  }
+  if ( 1 >= 2 ) {
+    print(9);
+  } else {
+    print(4);
+  }
+  if ( 5 < 2 ) {
+    print(8);
+  } else {
+    print(5);
+  }
+  if ( 1 > 1 ) {
+    print(7);
+  } else {
+    print(6);
+  }
+  return 0;
+}
+==
+No input.
+1
+2
+3
+4
+5
+6
+
+
+
+--logic-while-simple-test
+int main() {
+  while(1 < 2) {
+    return 1;
+  }
+  return 0;
+}
+==
+No input.
+!!!! Error: exited with status: 1.
+
+
+
+--formal-parameters-test
+int f(int a, int b, int c) {
+  print(a);
+  print(c);
+  print(a);
+  return 0;
+}
+int main() {
+  f(5, 10, 0);
+  return 0;
+}
+==
+No input.
+5
+0
+5
+
+
+
+--local-variable-shadowing
+int f(int a, int b) {
+  if (a == b) {
+    int a = 1;
+    int b = 2;
+    int c = 3;
+    int d = 4;
+    int e = 5;
+    print(a);
+    print(b);
+    print(c);
+    print(d);
+    print(e);
+  }
+  if (a == b) {
+    int a = 100;
+    print(a);
+  }
+  print(a);
+  return 0;
+}
+int main() {
+  f(99, 99);
+  int a = 10;
+  int b = 20;
+  int c = 30;
+  int d = 40;
+  int e = 50;
+  print(a);
+  print(b);
+  print(c);
+  print(d);
+  print(e);
+  return 0;
+}
+==
+No input.
+1
+2
+3
+4
+5
+100
+99
+10
+20
+30
+40
+50
+
+
+
+--main-with-input
+int main() {
+  int a;
+  a = read();
+  print(a);
+  return 0;
+}
+==
+3
+3
+
+
+
+--gcd-test
+int gcd1(int a, int b) {
+  while (a != b) {
+    if (a > b) {
+      a = a - b;
+    } else {
+      b = b - a;
+    }
+  }
+  return a;
+}
+int gcd2(int a, int b) {
+  if (b == 0) {
+    return a;
+  }
+  return gcd2(b, a % b);
+}
+int main() {
+  int a;
+  int b;
+  a = read();
+  b = read();
+  print(gcd1(a, b));
+  print(gcd2(a, b));
+  int diff = gcd1(a, b) - gcd2(a, b);
+  print(diff);
+  return 0;
+}
+==
+10 5
+5
+5
+0

@@ -1,0 +1,1008 @@
+import java.util.Arrays;
+
+aspect CodeGeneration {
+
+
+    /** Code generation functions for statements **/
+    /**-------------------------------------------*/
+
+
+    public String Program.getCode() {
+
+        // Get function declarations.
+        List functionDeclarations = getFunctionDeclarationList();
+        // Get code from list.
+        String[] declarationCode = GetCode.fromList(functionDeclarations);
+
+        String[] assembler = {"",
+            ".global _start",
+            ".data",
+            "buf: .skip 1024",
+            ".text",
+            "_start:",
+            "call main",
+            "movq $60, %rax # sys_exit",
+            "syscall",
+            GetString.fromArray(declarationCode),
+            getHelpers()};
+
+        String[] variables = {""};
+
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+
+    /** FunctionDeclaration, FunctionStatement and Return **/
+    /**----------------------------------------------------*/
+
+
+    public String FunctionDeclaration.getCode() {
+
+        List functionStements = getBlockList();
+        String[] statementCode = GetCode.fromList(functionStements);
+
+        String[] assembler = {"",
+            "# start of ${name} function.",
+            "${name}:                       # Function label.",
+            "# Num of locals: ${numLocals}.",
+            "pushq %rbp                     # Push base pointer onto the stack.",
+            "movq %rsp, %rbp                # Write current stack pointer address to base pointer.",
+            "subq $${localSpace}, %rsp      # Pushing space for ${numLocals} local variables on the stack.",
+            "# Function statements start.",
+            GetString.fromArray(statementCode),
+            "# Function statements end.",
+            "addq $${numLocals}, %rsp       # Popping ${numLocals} from the stack.",
+            getReturn().getCode(),
+        };
+
+        String[] variables = {"",
+            "name", name(),
+            "numLocals", ""+numLocals(),
+            "localSpace", ""+numLocals()*wordSize,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+
+    public String Return.getCode() {
+
+        String[] assembler = {"",
+            "                               # Evaluate return expression.",
+            getExpression().getCode(),
+            "                               # Start return statement.",
+            "movq %rax, %rdi                # Set return code to result.",
+            "movq %rbp, %rsp                # Restore stack pointer to base pointer.",
+            "popq %rbp                      # Pop old base pointer into %rbp.",
+            "ret                            # Return to calling function.",
+        };
+
+        String[] variables = {""};
+
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+
+    public String FunctionStatement.getCode() {
+        return getFunctionUse().getCode();
+    }
+
+    /** IF/ELSE/WHEN */
+    /*----------------*/
+
+    public String IF.getCode() {
+
+        // Set up labels.
+        String lableBase = uniqueLabel();
+        String ifLabel = lableBase+"_if_start";
+        String endLabel = lableBase+"_end_of_if";
+
+        // Set variables.
+        String variables[] = {"",
+            "ifLabel", ifLabel,
+            "endLabel", endLabel
+        };
+
+        // Get objects from statements.
+        List ifStatements = getBlockList();
+        List elseStatements = hasELSE() ? getELSE().getBlockList() : new List();
+
+        // Get assembler code from statement lists.
+        String[] ifCode = GetCode.fromList(ifStatements);
+        String[] elseCode = GetCode.fromList(elseStatements);
+
+        String[] elseAssembler = {"",
+            "# --- Start of else section.",
+            GetString.fromArray(elseCode)};
+
+        String[] assembler = {"",
+            "# --- Start of if statement.",
+            // Generate conditional jump code.
+            getLogic().generateConditionalJump(ifLabel),
+            "# End of conditional jump.",
+            // Add else section.
+            GetString.fromArray(elseAssembler),
+            "jmp ${endLabel}  # Unconditional jump to ${endLabel}, if 'else' traversed.",
+            "# If section.",
+            "${ifLabel}:",
+            // Add if section.
+            GetString.fromArray(ifCode),
+            "${endLabel}:"};
+
+        // Generate and return assembler code.
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+    public String WHILE.getCode() {
+
+        //Set up labels.
+        String labelBase = uniqueLabel();
+        String startLabel = "while_"+labelBase+"_start";
+        String continueLabel = "while_"+labelBase+"_continue";
+        String endLabel = "while_"+labelBase+"_end";
+
+        //Get statements and code.
+        List statements = getBlockList();
+        String[] statementCode = GetCode.fromList(statements);
+
+        // Set up variables.
+        String[] variables = {"",
+            "startLabel", startLabel,
+            "continueLabel", continueLabel,
+            "endLabel", endLabel,
+        };
+
+        String[] assembler = {"",
+            "# --- Start of while statement.",
+            "${startLabel}: # Label for starting while execution.",
+            // Add logic for continuing.
+            getLogic().generateConditionalJump(continueLabel),
+            "jmp ${endLabel} # Unconditional jump to end of while execution.",
+            "${continueLabel}: # Label marking continued execution of while.",
+            // Add statement code.
+            GetString.fromArray(statementCode),
+            "jmp ${startLabel} # Jump back to re-evaluate loop conditions",
+            // Set up end label.
+            "${endLabel}:",
+            "# --- End of while statement.",
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+    /** Declarations and assignments **/
+    /**-------------------------------*/
+
+    public String VarDeclare.getCode() {
+
+        // Get local index;
+        int localIndex = (localIndex()*-1-1)*wordSize; // Negative -> 'up'.
+        // Generate unique path name.
+        String variableName = getIdDeclare().getID();
+        String uniqueName = uniqueVariableName(variableName);
+        // Broadcast new index.
+        brodcastIndex(uniqueName, localIndex);
+
+        NewlineStringBuilder sb = new NewlineStringBuilder();
+        // Evaluate the expression if there is any.
+        if (hasExpression()) {
+            sb.append(getExpression().getCode());
+            // Store evaluation of expression at correct offset.
+            sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result of evaluation to correct index.");
+        }
+
+        String[] assembler = {"",
+            "# variable: ${variableName}",
+            "# declared as: ${uniqueName}",
+            "# with offset: ${localIndex}.",
+            sb.toString(),
+        };
+
+        String[] variables = {"",
+            "variableName", variableName,
+            "uniqueName", uniqueName,
+            "localIndex", ""+localIndex,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+
+    public String Assign.getCode() {
+
+        String[] assembler = {"",
+            "                                       # Assigning declared variable ${name}.",
+            "                                       # Adding code from expression.",
+            getExpression().getCode(),
+            "                                       # Expression done.",
+            "movq %rax, ${localIndex}(%rbp)         # Moving result to correct offset for: '${name}'.",
+        };
+
+        String name = getIdUse().getID();
+        int localIndex = getClosestDefinedVariableOffset(name, getScopeDepth());
+
+        String[] variables = {"",
+            "name", name,
+            "localIndex", ""+localIndex,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+
+    }
+
+
+    /** Code generation functions for expressions **/
+    /**-------------------------------------------*/
+
+
+    public String FunctionUse.getCode() {
+
+        // Get variables.
+        String functionName = getIdUse().getID();
+        int numArguments = getNumExpression();
+
+        // Pushing parameters in reversed order.
+        NewlineStringBuilder parameters = new NewlineStringBuilder();
+        for(int i=getNumExpression()-1; i>-1; i--) {
+            Expression expression = getExpression(i);
+            parameters.append(expression.getCode());
+            parameters.append("pushq %rax # Push parameter from %rax to stack.");
+        }
+
+        // Rest of assembler code.
+        String[] assembler = {"",
+            parameters.toString(),
+            "call ${functionName}",
+            "addq $${sizeArguments}, %rsp        # Pop local function variables off the stack.",
+        };
+
+        String[] variables = {"",
+            "functionName", functionName,
+            "sizeArguments", ""+range(numArguments),
+
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+
+    /** Boolean expressions */
+    /*----------------------*/
+
+
+    public String Expression.generateConditionalJump(String label) {
+        return "";
+    }
+
+    public class ConditionalSubset {
+
+        // Private internal classes.
+        private Expression exp;
+        private String type;
+
+        // Variable mappings.
+        private Map<String, String> variables;
+
+        // Raw Assembler code with variables.
+        String[] assembler = {"",
+            // cmp left, right ---> right >= left comparison.
+            // cmp right, left ---> left >= right comparison.
+            "# Conditional jump statement for (x ${sign} y).",
+            "${left}",
+            "pushq %rax                     # Pushing left var of ${type} to stack.",
+            "${right}",
+            "cmpq %rax, (%rsp)              # Compare left var on stack with %rax.",
+            "${jumpType} ${label}           # If true jump to ${label}.",
+            "addq $${range1}, %rsp          # Pop temp variables from stack.",
+            "# End of conditional jump statement."
+        };
+
+        // Final formatted assembler code.
+        String finalAssembler = "";
+
+        // Constructor.
+        public ConditionalSubset(BinaryExpression exp, String type, String label, String jumpType, String sign) {
+
+            this.exp = exp;
+
+            String[] variables = {"", // Is removed in code.
+                "type", type,
+                "left", exp.getLeft().getCode(),
+                "right", exp.getRight().getCode(),
+                "range1", ""+exp.range(1),
+                "range2", ""+exp.range(2),
+                "jumpType", jumpType,
+                "label", label,
+                "sign", sign};
+
+            finalAssembler = new AssemblyGobbler(variables, assembler).toString();
+        }
+
+        public String toString() {
+            return finalAssembler;
+        }
+
+    }
+
+    public String NOEQ.generateConditionalJump(String label) {
+        ConditionalSubset cs = new ConditionalSubset(this, "NOEQ", label, "jne", "!=");
+        return cs.toString();
+    }
+
+    public String EQ.generateConditionalJump(String label) {
+        ConditionalSubset cs = new ConditionalSubset(this, "EQ", label, "je", "==");
+        return cs.toString();
+    }
+
+    public String LTEQ.generateConditionalJump(String label) {
+        ConditionalSubset cs = new ConditionalSubset(this, "LTEQ", label, "jle", "<=");
+        return cs.toString();
+    }
+
+    public String GTEQ.generateConditionalJump(String label) {
+        ConditionalSubset cs = new ConditionalSubset(this, "GTEQ", label, "jge", ">=");
+        return cs.toString();
+    }
+
+    public String LT.generateConditionalJump(String label) {
+        ConditionalSubset cs = new ConditionalSubset(this, "LT", label, "jl", "<");
+        return cs.toString();
+    }
+
+    public String GT.generateConditionalJump(String label) {
+        ConditionalSubset cs = new ConditionalSubset(this, "GT", label, "jg", ">");
+        return cs.toString();
+    }
+
+
+    /** Arithmetic expressions **/
+    /**-------------------------*/
+
+    public String Add.getCode() {
+
+        String left = getLeft().getCode();
+        String right = getRight().getCode();
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                         # Pushing left variable of Add to stack.",
+            "${right}",
+            "addq (%rsp), %rax                  # Operation: stack + %rax -> %rax.",
+            "addq $${popSize}, %rsp             # Popping temp variable from stack.",
+        };
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "popSize", ""+range(1),
+        };
+
+        String addString = new AssemblyGobbler(variables, assembler).toString();
+        return addString;
+
+    }
+
+    public String Mul.getCode() {
+
+        String left = getLeft().getCode();
+        String right = getRight().getCode();
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "popSize", ""+range(1),
+        };
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                         # Pushing left variable of Mul to stack.",
+            "${right}",
+            "imulq (%rsp), %rax                 # Operation: stack * %rax. -> %rax.",
+            "addq $${popSize}, %rsp             # Popping temp variable from stack.",
+        };
+
+        String mulString = new AssemblyGobbler(variables, assembler).toString();
+        return mulString;
+
+    }
+
+    public String Div.getCode() {
+
+        String left = getLeft().getCode();
+        String right = getRight().getCode();
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "range1", ""+range(1),
+            "range2", ""+range(2),
+        };
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                             # Pushing left var (dividend) of Div to stack.",
+            "${right}",
+            "                                       # Shuffle the variables to the correct order.",
+            "pushq %rax                             # Pushing right var (divisor) of Div to stack.",
+            "movq ${range1} (%rsp), %rax            # Writing first var pushed on stack (dividend) to %rax.",
+            "idivq (%rsp)                           # Operation: Divide dividend (%rsa) with divisor (first in stack), result in %rsa.",
+            "addq $${range2}, %rsp                  # Pop two temp variables.",
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+
+    }
+
+    public String Minus.getCode() {
+
+        String left = getLeft().getCode();
+        String right = getRight().getCode();
+
+        String[] variables = {"",
+            "left", left,
+            "right", right,
+            "range1", ""+range(1),
+            "range2", ""+range(2),
+        };
+
+        String[] assembler = {"",
+            "${left}",
+            "pushq %rax                             # Pushing left positive var of Minus to stack.",
+            "${right}",
+            "                                       # Shuffle the variables to the correct order.",
+            "pushq %rax                             # Pushing right negative var of Minus to stack.",
+            "movq ${range1}(%rsp), %rax             # Writing second/negative var from stack+${range1} to %rax.",
+            "subq (%rsp), %rax                      # Operation: stack Minus %rax -> %rax.",
+            "addq $${range2}, %rsp                  # Pop two temp variables.",
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+
+    }
+
+
+    /** Evaluation of types **/
+    /**----------------------*/
+
+
+    public String IdUse.getCode() {
+
+        int variableOffset = getClosestDefinedVariableOffset(getID(), getScopeDepth());
+
+        String[] assembler = {"",
+            "movq ${variableOffset}(%rbp), %rax         # Copying variable ${name} at scope: ${scope} to %rax.",
+        };
+
+        String[] variables = {"",
+            "name", getID(),
+            "scope", ""+getScopeDepth(),
+            "variableOffset", ""+variableOffset,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
+    }
+
+
+    public String Numeral.getCode() {
+        return "    movq $"+getNUMERAL()+", %rax # Store literal number "+getNUMERAL()+" in %rax.";
+    }
+
+
+    public String IdDeclare.getCode() {
+        return getID();
+    }
+
+
+    /** Aspect functions and utility functions **/
+    /**-----------------------------------------*/
+
+    /** Label generation **/
+    /**-------------------*/
+
+    // All statements inherit uniqueLabel().
+    inh String Statement.uniqueLabel();
+
+    // Program keeps track of all jump labels.
+    private HashMap<String, Integer> Program.labelMap = new HashMap<String, Integer>();
+
+    // Implementation of uniqueLabel().
+    eq Program.getFunctionDeclaration(int index).uniqueLabel() {
+        FunctionDeclaration declaration = getFunctionDeclaration(index);
+        String functionName = declaration.name();
+        // Initialize if value not present.
+        if (labelMap.get(functionName) == null) {
+            labelMap.put(functionName, 0);
+        }
+        // Return label and increase the number.
+        int currentIteration = labelMap.get(functionName);
+        labelMap.put(functionName, currentIteration+1);
+        return functionName+"_"+currentIteration;
+    }
+
+
+    /** Code generation triggers **/
+    /**--------------------------**/
+
+    public String ASTNode.getCode() { return ""; }
+
+    public void ASTNode.genCode(PrintStream out) {
+        out.println(getCode());
+    }
+
+    /** Number and range functions **/
+    /**----------------------------**/
+
+    public int ASTNode.range(int numArguments) {
+        return wordSize*numArguments;
+    }
+
+    public int ASTNode.wordSize = 8;
+
+
+    /** Scope depth calculation for shadowing **/
+    /**---------------------------------------**/
+
+    inh int ASTNode.getScopeDepth();
+
+    eq FunctionDeclaration.getChild().getScopeDepth() {
+        return  1;
+    }
+
+    eq IF.getBlock().getScopeDepth() {
+        return getScopeDepth() + 1;
+    }
+
+    eq WHILE.getBlock().getScopeDepth() {
+        return getScopeDepth() + 1;
+    }
+
+    eq ELSE.getBlock().getScopeDepth() {
+        return getScopeDepth() + 1;
+    }
+
+    public String ASTNode.uniqueVariableName(String name) {
+        return getScopeDepth()+name;
+    }
+
+    inh String VarDeclare.brodcastIndex(String name, Integer index);
+
+    eq FunctionDeclaration.getChild().brodcastIndex(String name, Integer index) {
+        localDeclarationsIndex.put(name, index);
+        return "";
+    }
+
+    /** FunctionDeclaration stores all variable variants **/
+    /**--------------------------------------------------**/
+
+    inh int ASTNode.getClosestDefinedVariableOffset(String name, Integer depth);
+
+    public Map<String, Integer> FunctionDeclaration.localDeclarationsIndex = new HashMap<String, Integer>();
+
+    eq FunctionDeclaration.getChild().getClosestDefinedVariableOffset(String name, Integer depth) {
+        Integer index = 0;
+        for(int level=depth; level>0; level--) {
+            String variableName = level+name;
+            index = localDeclarationsIndex.get(variableName);
+            if (index != null) {
+                return index;
+            }
+        }
+        int offset = range(2); // Initial offset for return address and old base pointer.
+        // Iterate over all parameters.
+        for (int current=0; current<getNumFunctionParameters(); current++) {
+            if (getFunctionParameters(current).getID().equals(name)) {
+                return offset;
+            }
+            // Increase offset down into the stack.
+            offset += wordSize;
+        }
+        // Nothing found.
+        return 0;
+    }
+
+
+    /** Variable counting and enumeration **/
+    /**-----------------------------------**/
+
+    inh boolean IdDeclare.varDeclare();
+    eq VarDeclare.getIdDeclare().varDeclare() = true;
+    eq FunctionDeclaration.getChild().varDeclare() = false;
+
+    syn int ASTNode.localIndex() = prevNode().localIndex();
+    eq FunctionDeclaration.localIndex() = 0;
+    eq IdDeclare.localIndex() = varDeclare() ? prevNode().localIndex() + 1 : prevNode().localIndex();
+
+    inh ASTNode ASTNode.prevNode();
+    eq ASTNode.getChild(int i).prevNode() = prevNode(i);
+    syn ASTNode ASTNode.lastNode() = prevNode(getNumChild());
+    syn ASTNode ASTNode.prevNode(int i) = i>0 ? getChild(i-1).lastNode() : this;
+    syn int ASTNode.numLocals() = lastNode().localIndex() - localIndex();
+
+}
+
+aspect CodeGenUtils {
+
+    public class NewlineStringBuilder {
+
+        private StringBuilder sb;
+
+        public NewlineStringBuilder() {
+            sb = new StringBuilder();
+        }
+
+        public void newline() {
+            sb.append('\n');
+        }
+
+        public void append(String string) {
+            sb.append(string);
+            newline();
+        }
+
+        public boolean isEmpty() {
+            return sb.length() == 0;
+        }
+
+        public String toString() {
+            if (!isEmpty()) {
+                sb.deleteCharAt(sb.length()-1);
+            }
+            return sb.toString();
+        }
+    }
+
+    public class AssemblyGobbler {
+
+        // String buffers.
+        private ArrayList<String> sectionBuffer;
+        private ArrayList<String> commentBuffer;
+
+        // Variable mappings.
+        private Map<String, String> variables;
+
+        // Final string.
+        String formattedAssembler = "";
+
+
+        // Public constructor.
+        public AssemblyGobbler(String[] variablesArray, String[] rawAssembler) {
+
+            this.variables = createMappings(variablesArray);
+
+            sectionBuffer = new ArrayList<String>();
+            commentBuffer = new ArrayList<String>();
+
+            // Make sure all text are split in lines.
+            ArrayList<String> lineList = new ArrayList<String>();
+            for (String text : rawAssembler) {
+                for (String line : text.trim().split("[\n\r]")) {
+                    lineList.add(line.trim());
+                }
+            }
+
+
+            int maxLength = varSubInSection(lineList.toArray(new String[lineList.size()]));
+            formattedAssembler = reassembleSectionWithPadding(maxLength);
+        }
+
+        public String toString() {
+            return formattedAssembler;
+        }
+
+
+        // Remove first element in an array.
+        private String[] removeFirst(String[] array) {
+            return Arrays.copyOfRange(array, 1, array.length);
+        }
+
+
+        // Var-substitution for a single word.
+        private String varSub(String word) {
+            if (word.contains("${")) {
+                ArrayList<String> varSubTokens = varExtraction(word);
+                for (String key : varSubTokens) {
+                    String varSubMask = "${"+key+"}";
+                    String value = variables.get(key);
+                    if (value == null) {
+                        value = key+" == NULL";
+                    }
+                    word = word.replace(varSubMask, value);
+                }
+            }
+            return word;
+        }
+
+        // Create variable mappings from String array.
+        private Map<String, String> createMappings(String[] mappings) {
+
+            // Remove first element.
+            mappings = removeFirst(mappings);
+
+            Map<String,String> variableMap = new HashMap<String, String>();
+
+            for (int i=0; i<mappings.length; i+=2) {
+                String key = mappings[i];
+                String value = mappings[i+1];
+                variableMap.put(key, value);
+            }
+            return variableMap;
+        }
+
+        // Extract the variable name from the word.
+        private ArrayList<String> varExtraction(String word) {
+
+            ArrayList<String> allVariables = new ArrayList<String>();
+
+            StringBuilder buffer = new StringBuilder();
+            StringBuilder var = new StringBuilder();
+
+            boolean inVar = false;
+
+            String start = "${";
+            String stop = "}";
+            String window = "";
+
+            int windowSize = start.length();
+
+            int bufferSize = 0;
+            for (int current=0; current<word.length(); current++) {
+                char currentChar = word.charAt(current);
+                buffer.append(currentChar);
+                bufferSize++;
+                if (bufferSize < windowSize) {
+                    continue; // Need be at least windowSize.
+                }
+                window = buffer.substring(bufferSize-windowSize, bufferSize);
+                if (window.equals(start)) {
+                    inVar = true;
+                    continue; // Don't append the '{'.
+                } else if (window.endsWith(stop) && inVar) {
+                    inVar = false;
+                    allVariables.add(var.toString());
+                    var = new StringBuilder();
+                }
+                if (inVar) {
+                    var.append(currentChar);
+                }
+            }
+            return allVariables;
+        }
+
+        // Var-substitution for a row.
+        private String varSubInRow(String assemblerRow) {
+
+            StringBuilder rowBuilder = new StringBuilder();
+            // Iterate over all words in assemblerRow and substitute.
+            for (String word : assemblerRow.split(" ")) {
+                rowBuilder.append(varSub(word));
+                rowBuilder.append(" ");
+            }
+            String resultingString = rowBuilder.toString();
+            return resultingString;
+        }
+
+        // Var-substitution for a section.
+        private int varSubInSection(String[] assemblerSection) {
+
+            // Maximum line length for assembler lines.
+            int maxLineLength = 0;
+
+
+            String[] subarray = new String[1];
+            // Cut of first element.
+            if (assemblerSection[0].length() == 0) {
+                subarray = removeFirst(assemblerSection);
+            } else {
+                subarray = assemblerSection;
+            }
+
+            // Iterate over all rows in subarray and substitute.
+            for (String parRow : subarray) {
+
+                String subRow = varSubInRow(parRow.trim()).trim();
+                for (String row : subRow.split("[\n\r]")) { // Split since substitutions can be sections.
+
+                    row = row.trim();
+
+                    if (row.length() == 0) {
+                        continue;
+                    }
+
+                    // Take care of comment-only lines.
+                    String[] rowTokens = new String[1];
+                    String assemblerRow = "";
+                    if (row.matches("^\\s*#.*")) { // Only a comment.
+                        assemblerRow = row;
+                    } else {
+                        rowTokens = row.split("#");
+                        assemblerRow = rowTokens[0].trim();
+                    }
+
+                    // Add comment if present.
+                    String comment = "";
+                    if (rowTokens.length > 1) {
+                        comment = rowTokens[1].trim();
+                    }
+
+                    // Add comment to buffer.
+                    commentBuffer.add(comment);
+
+                    if (assemblerRow.length() > maxLineLength) {
+                        maxLineLength = assemblerRow.length();
+                    }
+
+                    // Add assembler to buffer.
+                    sectionBuffer.add(assemblerRow);
+                }
+            }
+
+            // Return maximum assembler line length.
+            return maxLineLength;
+        }
+
+        //  Section reassembling with comment alignment.
+        private String reassembleSectionWithPadding(int maxLineLength) {
+
+            NewlineStringBuilder finalSectionBuilder = new NewlineStringBuilder();
+
+            String padding = "    ";
+
+            for (int i=0; i<sectionBuffer.size(); i++) {
+                StringBuilder finalRowBuilder = new StringBuilder();
+                // Append substituted assembler code.
+                String assemblyCode = sectionBuffer.get(i);
+                if (assemblyCode.trim().endsWith(":")) { // Label definition, no padding in front.
+                    finalRowBuilder.append(assemblyCode+padding);
+                } else {
+                    finalRowBuilder.append(padding+assemblyCode);
+                }
+
+
+                // Fetch comment.
+                String comment = commentBuffer.get(i);
+
+                // Is there a comment?.
+                if (comment.replace(" ","").length() != 0) {
+                    int padTo = maxLineLength-assemblyCode.length()+padding.length();
+                    // Append appropriate whitespace.
+                    for (int j=0; j<padTo; j++) {
+                        finalRowBuilder.append(" ");
+                    }
+                    // Append comment.
+                    finalRowBuilder.append("# "+comment);
+                }
+                finalSectionBuilder.append(finalRowBuilder.toString());
+            }
+
+            return finalSectionBuilder.toString();
+        }
+    }
+
+    // Class for static functions for getting code.
+    public class GetCode {
+
+        // Iterate over a list of expression and return evaluated strings.
+        public static String[] fromList(List<ASTNode> list) {
+            String[] array = new String[list.getNumChild()];
+            int i = 0;
+            for (ASTNode node : list) {
+                array[i++] = node.getCode();
+            }
+            return array;
+        }
+    }
+
+    // Class for static array methods.
+    class GetString {
+        public static String fromArray(String[] array) {
+            NewlineStringBuilder sb = new NewlineStringBuilder();
+            if (array.length == 1) {
+                sb.append(array[0]);
+                return sb.toString();
+            } else if (array.length > 1) {
+                String[] subArray = new String[1];
+                if (array[0].length() == 0) {
+                    subArray = Arrays.copyOfRange(array, 1, array.length);
+                } else {
+                    subArray = array;
+                }
+                for (String text : array) {
+                    for (String string : text.split("[\n\r]")) {
+                        sb.append(string.trim());
+                    }
+                }
+            }
+            return sb.toString();
+        }
+    }
+
+    public String Program.getHelpers() {
+        return "######################################\n"
+        +"####### Helper Methods ###############\n"
+        +"######################################\n"
+        +"# Procedure to print number to stdout\n"
+        +"# C signature: void print(long int)\n"
+        +"print:\n"
+           +"    pushq %rbp\n"
+           +"    movq %rsp, %rbp\n"
+           +"    ### convert integer to string\n"
+           +"    movq 16(%rbp), %rax\n"
+           +"    # parameter\n"
+           +"    movq $(buf+1023), %rsi # write ptr (start from end of buf)\n"
+           +"    movb $0x0a, (%rsi)\n"
+           +"    # insert newline\n"
+           +"    movq $1, %rcx\n"
+           +"    # string length\n"
+        +"itoa_loop:\n"
+           +"    # do.. while (at least one iteration)\n"
+           +"    movq $10, %rbx\n"
+           +"    movq $0, %rdx\n"
+           +"    idivq %rbx\n"
+           +"    # divide rdx:rax by 10\n"
+           +"    addb $0x30, %dl\n"
+           +"    # remainder + ’0’\n"
+           +"    decq %rsi\n"
+           +"    # move string pointer\n"
+           +"    movb %dl, (%rsi)\n"
+           +"    incq %rcx\n"
+           +"    # increment string length\n"
+           +"    cmpq $0, %rax\n"
+           +"    jg itoa_loop\n"
+           +"    # produce more digits\n"
+        +"itoa_done:\n"
+           +"    movq $1, %rdi\n"
+           +"    movq %rcx, %rdx\n"
+           +"    movq $1, %rax\n"
+           +"    syscall\n"
+           +"    popq %rbp\n"
+           +"    ret\n"
+        +"# Procedure to read number from stdin\n"
+        +"# C signature: long int read(void)\n"
+        +"read:\n"
+           +"    pushq %rbp\n"
+           +"    movq %rsp, %rbp\n"
+           +"    movq $0, %rdi\n"
+           +"    movq $buf, %rsi\n"
+           +"    movq $1024, %rdx\n"
+           +"    movq $0, %rax\n"
+           +"    syscall\n"
+           +"    # %rax = sys_read(0, buf, 1024)\n"
+           +"    ### convert string to integer:\n"
+           +"    ### %rax contains nchar\n"
+           +"    ### %rsi contains ptr\n"
+           +"    movq $0, %rdx\n"
+           +"    # sum = 0\n"
+        +"atoi_loop:\n"
+           +"    cmpq $0, %rax\n"
+           +"    # while (nchar > 0)\n"
+           +"    jle atoi_done\n"
+           +"    # leave loop if nchar <= 0\n"
+           +"    movzbq (%rsi), %rbx\n"
+           +"    # move byte, and sign extend to qword\n"
+           +"    cmpq $0x30, %rbx\n"
+           +"    # test if < ’0’\n"
+           +"    jl atoi_done\n"
+           +"    # character is not numeric\n"
+           +"    cmpq $0x39, %rbx\n"
+           +"    # test if > ’9’\n"
+           +"    jg atoi_done\n"
+           +"    # character is not numeric\n"
+           +"    imulq $10, %rdx\n"
+           +"    # multiply sum by 10\n"
+           +"    subq $0x30, %rbx\n"
+           +"    # value of character\n"
+           +"    addq %rbx, %rdx\n"
+           +"    # add to sum\n"
+           +"    incq %rsi\n"
+           +"    # step to next char\n"
+           +"    decq %rax\n"
+           +"    # nchar--\n"
+           +"    jmp atoi_loop\n"
+           +"    # loop back\n"
+        +"atoi_done:\n"
+           +"    movq %rdx, %rax\n"
+           +"    # return value in RAX\n"
+           +"    popq %rbp\n"
+           +"    ret\n";
+    }
+}

@@ -3,16 +3,23 @@
 TEST_DIR_PRETTY="testfiles/prettyprint"
 TEST_DIR_NAME="testfiles/nameanalysis"
 TEST_DIR_INTERPRETER="testfiles/interpreter"
+TEST_DIR_ASSEMBLER="testfiles/assembler"
 CURRENT_DIR=`pwd`
 
 ./generate_java.py
 cd $TEST_DIR_PRETTY
-./create_tests.py
+./create_tests.py remove
 cd $CURRENT_DIR
 cd $TEST_DIR_NAME
-./create_tests.py
+./create_tests.py remove
 cd $CURRENT_DIR
 cd $TEST_DIR_INTERPRETER
+./create_tests.py remove
+cd $CURRENT_DIR
+cd $TEST_DIR_ASSEMBLER
 ./create_tests.py
 cd $CURRENT_DIR
 ant test
+cd $TEST_DIR_ASSEMBLER
+./restructure.py
+cd $CURRENT_DIR
