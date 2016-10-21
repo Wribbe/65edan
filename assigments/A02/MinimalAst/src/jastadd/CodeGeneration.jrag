@@ -237,22 +237,37 @@ aspect CodeGeneration {
     public Map<String, Integer> FunctionDeclaration.localDeclarationsIndex = new HashMap<String, Integer>();
 
     public String VarDeclare.getCode() {
-        NewlineStringBuilder sb = new NewlineStringBuilder();
+
         // Get local index;
         int localIndex = (localIndex()*-1-1)*wordSize; // Negative -> 'up'.
-        // Set index in FunctionDeclaration map.
-        String variableName = getIdDeclare().getID();
         // Generate unique path name.
+        String variableName = getIdDeclare().getID();
         String uniqueName = uniqueVariableName(variableName);
+        // Broadcast new index.
         brodcastIndex(uniqueName, localIndex);
+
+        NewlineStringBuilder sb = new NewlineStringBuilder();
         // Evaluate the expression if there is any.
-        sb.append("# variable: '"+variableName+"' declared as: '"+uniqueName+" with offset: "+localIndex+".");
         if (hasExpression()) {
             sb.append(getExpression().getCode());
             // Store evaluation of expression at correct offset.
             sb.append("movq %rax, "+localIndex+"(%rbp) # Moving result of evaluation to correct index.");
         }
-        return sb.toString();
+
+        String[] assembler = {"",
+            "# variable: ${variableName}",
+            "# declared as: ${uniqueName}",
+            "# with offset: ${localIndex}.",
+            sb.toString(),
+        };
+
+        String[] variables = {"",
+            "variableName", variableName,
+            "uniqueName", uniqueName,
+            "localIndex", ""+localIndex,
+        };
+
+        return new AssemblyGobbler(variables, assembler).toString();
     }
 
 
